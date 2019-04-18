@@ -15,31 +15,31 @@ import java.util.List;
 
 import vinhlong.ditagis.com.capnhatdongho.R;
 
-public class MauKiemNghiemApdapter extends ArrayAdapter<MauKiemNghiemApdapter.MauKiemNghiem> {
+public class VatTuApdapter extends ArrayAdapter<VatTuApdapter.VatTu> {
     private Context context;
-    private List<MauKiemNghiemApdapter.MauKiemNghiem> mauKiemNghiems;
+    private List<VatTu> vatTus;
 
-    public MauKiemNghiemApdapter(Context context, List<MauKiemNghiemApdapter.MauKiemNghiem> mauKiemNghiems) {
-        super(context, 0, mauKiemNghiems);
+    public VatTuApdapter(Context context, List<VatTu> vatTus) {
+        super(context, 0, vatTus);
         this.context = context;
-        this.mauKiemNghiems = mauKiemNghiems;
+        this.vatTus = vatTus;
     }
 
-    public List<MauKiemNghiemApdapter.MauKiemNghiem> getMauKiemNghiems() {
-        return mauKiemNghiems;
+    public List<VatTu> getVatTus() {
+        return vatTus;
     }
 
-    public void setMauKiemNghiems(List<MauKiemNghiemApdapter.MauKiemNghiem> mauKiemNghiems) {
-        this.mauKiemNghiems = mauKiemNghiems;
+    public void setVatTus(List<VatTu> vatTus) {
+        this.vatTus = vatTus;
     }
 
     public void clear() {
-        mauKiemNghiems.clear();
+        vatTus.clear();
     }
 
     @Override
     public int getCount() {
-        return mauKiemNghiems.size();
+        return vatTus.size();
     }
 
     @Override
@@ -54,25 +54,25 @@ public class MauKiemNghiemApdapter extends ArrayAdapter<MauKiemNghiemApdapter.Ma
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.item_text_text_image, null);
         }
-        MauKiemNghiem mauKiemNghiem = mauKiemNghiems.get(position);
+        VatTu vatTu = vatTus.get(position);
         TextView textViewItem1 = (TextView) convertView.findViewById(R.id.txtItem1);
         TextView textViewItem2 = (TextView) convertView.findViewById(R.id.txtItem2);
         ImageView imageView = (ImageView) convertView.findViewById(R.id.img_Item);
-        textViewItem1.setText(mauKiemNghiem.getIdMauKiemNghiem());
-        textViewItem2.setText(mauKiemNghiem.getTenMau());
-        if (mauKiemNghiem.isView) {
+        textViewItem1.setText(vatTu.getdBDongHoNuoc());
+        textViewItem2.setText(vatTu.getTenMau());
+        if (vatTu.isView) {
             imageView.setVisibility(View.VISIBLE);
         } else imageView.setVisibility(View.GONE);
         return convertView;
     }
 
-    public static class MauKiemNghiem {
+    public static class VatTu {
         private String OBJECTID;
-        private String idMauKiemNghiem;
+        private String dBDongHoNuoc;
         private String tenMau;
         private Boolean isView;
 
-        public MauKiemNghiem() {
+        public VatTu() {
         }
 
         public Boolean isView() {
@@ -91,12 +91,12 @@ public class MauKiemNghiemApdapter extends ArrayAdapter<MauKiemNghiemApdapter.Ma
             this.OBJECTID = OBJECTID;
         }
 
-        public String getIdMauKiemNghiem() {
-            return idMauKiemNghiem;
+        public String getdBDongHoNuoc() {
+            return dBDongHoNuoc;
         }
 
-        public void setIdMauKiemNghiem(String idMauKiemNghiem) {
-            this.idMauKiemNghiem = idMauKiemNghiem;
+        public void setdBDongHoNuoc(String dBDongHoNuoc) {
+            this.dBDongHoNuoc = dBDongHoNuoc;
         }
 
         public String getTenMau() {

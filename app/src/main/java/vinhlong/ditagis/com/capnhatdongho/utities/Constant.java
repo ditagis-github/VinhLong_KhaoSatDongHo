@@ -31,6 +31,13 @@ public class Constant {
         public static final String MaKhachHang = "IDMaDoiTuong";
         public static final String DBDongHoNuoc = "DBDongHoNuoc";
         public static final String TenThueBao = "TenThueBao";
+        public static final String GhiChu = "GhiChu";
+    }
+    public static class VatTuFields{
+        public static final String DBDongHo = "DBDongHo";
+        public static final String MaKhachHang = "MaKhachHang";
+        public static final String MaVatTu = "MaVatTu";
+        public static final String SoLuong = "SoLuong";
     }
     public static final int idDongHoKhachHang = 5;
 
@@ -39,6 +46,7 @@ public class Constant {
         public static final String CHUYENDE = "CHUYENDE";
         public static final String DHKHLYR = "dhkhLYR";
         public static final String VATTUDONGHOTBL = "vattudonghoTBL";
+        public static final String DMVATTUTBL = "vattuTBL";
 
     }
 

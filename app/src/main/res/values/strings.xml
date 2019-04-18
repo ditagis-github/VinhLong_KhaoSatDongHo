@@ -10,7 +10,7 @@
     <string name="btn_Delete">Xóa</string>
     <string name="btn_Cancel">Hủy</string>
     <string name="btn_Esc">THOÁT</string>
-    <string name="title_layer">Điểm đánh giá nước</string>
+    <string name="title_layer">Đồng hồ khách hàng</string>
     <string name="title_add">Thêm</string>
     <string name="people_info_title">Thông tin liên hệ</string>
     <string name="hoten_field">Họ và tên</string>
@@ -40,10 +40,10 @@
     <!--Attribute end-->
     <string name="DIACHI">DiaChi</string>
 
-    <!--Attribute MauKiemNghiem Begin-->TenMau
+    <!--Attribute VatTu Begin-->TenMau
     <string name="IDMAUKIEMNGHIEM">IDMauKiemNghiem</string>
     <string name="TENMAU">TenMau</string>
-    <!--Attribute MauKiemNghiem End-->
+    <!--Attribute VatTu End-->
 
     <string name="title_danhsachcacdiemdanhgia">Danh sách các mẫu đánh giá</string>
     <string name="title_danhsachmaukiemnghiem">Danh sách mẫu kiểm nghiệm</string>
@@ -112,7 +112,7 @@
     <string name="find_khachhHang_message">Đang lấy thông tin khách hàng…</string>
     <string name="connect_message">Đang kết nối đến máy chủ…</string>
     <string name="login_message">Đang kiểm tra thông tin đăng nhập…</string>
-
+    <string name="async_dang_tai_du_lieu">Đang tải dữ liệu…</string>
 
     <string name="preparing">Đang khởi tạo bản đồ…</string>
     <!--sql column login begin-->

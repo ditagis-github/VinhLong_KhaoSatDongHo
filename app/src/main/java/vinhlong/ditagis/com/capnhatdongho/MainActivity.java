@@ -6,9 +6,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -16,9 +13,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -39,7 +34,6 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -67,13 +61,10 @@ import com.esri.arcgisruntime.mapping.view.LocationDisplay;
 import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.util.ListenableList;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import vinhlong.ditagis.com.capnhatdongho.Editing.EditingVatTu;
 import vinhlong.ditagis.com.capnhatdongho.adapter.DanhSachDongHoKHAdapter;
 import vinhlong.ditagis.com.capnhatdongho.async.PreparingAsycn;
 import vinhlong.ditagis.com.capnhatdongho.entities.DApplication;
@@ -84,7 +75,6 @@ import vinhlong.ditagis.com.capnhatdongho.libs.FeatureLayerDTG;
 import vinhlong.ditagis.com.capnhatdongho.tools.TraCuu;
 import vinhlong.ditagis.com.capnhatdongho.utities.CheckConnectInternet;
 import vinhlong.ditagis.com.capnhatdongho.utities.Constant;
-import vinhlong.ditagis.com.capnhatdongho.utities.ImageFile;
 import vinhlong.ditagis.com.capnhatdongho.utities.LocationHelper;
 import vinhlong.ditagis.com.capnhatdongho.utities.MapViewHandler;
 import vinhlong.ditagis.com.capnhatdongho.utities.MySnackBar;
@@ -93,15 +83,15 @@ import vinhlong.ditagis.com.capnhatdongho.utities.Popup;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
 
     private Uri mUri;
-    private Popup popupInfos;
+    private Popup popup;
     private MapView mMapView;
     private ArcGISMap mMap;
     private Callout mCallout;
     private List<FeatureLayerDTG> mFeatureLayerDTGS;
     private MapViewHandler mMapViewHandler;
-    private static double LATITUDE = 10.10299;
-    private static double LONGTITUDE = 105.9295304;
-    private static int LEVEL_OF_DETAIL = 12;
+    private static double LATITUDE = 10.205155129125103;//10.10299;
+    private static double LONGTITUDE = 105.94397118543621;//105.9295304;
+    private static int LEVEL_OF_DETAIL = 16;
     private SearchView mTxtSearch;
     private ListView mListViewSearch;
     private DanhSachDongHoKHAdapter danhSachDongHoKHAdapter;
@@ -133,10 +123,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mApplication = (DApplication) getApplication();
         setUp();
         initListViewSearch();
-
         initLayerListView();
-
-
         setOnClickListener();
         startGPS();
         startSignIn();
@@ -156,7 +143,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onLocationChanged(Location location) {
                 mLocation = location;
-                mApplication.setmLocation(mLocation);
             }
 
             @Override
@@ -230,19 +216,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         StrictMode.setVmPolicy(builder.build());
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         requestPermisson();
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
-
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void initMapView() {
         mMapView = findViewById(R.id.mapView);
         mMap = new ArcGISMap(Basemap.Type.OPEN_STREET_MAP, LATITUDE, LONGTITUDE, LEVEL_OF_DETAIL);
@@ -268,10 +251,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 return super.onSingleTapConfirmed(e);
             }
 
+            @SuppressLint("SetTextI18n")
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
                 if (mMapViewHandler != null) {
-                    double[] location = mMapViewHandler.onScroll(e1, e2, distanceX, distanceY);
+                    double[] location = mMapViewHandler.onScroll();
                     edit_longtitude.setText(location[0] + "");
                     edit_latitude.setText(location[1] + "");
                 }
@@ -285,6 +269,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
         changeStatusOfLocationDataSource();
         mLocationDisplay.addLocationChangedListener(new LocationDisplay.LocationChangedListener() {
+            @SuppressLint("SetTextI18n")
             @Override
             public void onLocationChanged(LocationDisplay.LocationChangedEvent locationChangedEvent) {
                 Point position = locationChangedEvent.getLocation().getPosition();
@@ -299,6 +284,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void initLayerListView() {
+        mLinnearDisplayLayerTaiSan = findViewById(R.id.linnearDisplayLayerTaiSan);
+        mLinnearDisplayLayerBaseMap = findViewById(R.id.linnearDisplayLayerBaseMap);
         findViewById(R.id.layout_layer_open_street_map).setOnClickListener(this);
         findViewById(R.id.layout_layer_street_map).setOnClickListener(this);
         findViewById(R.id.layout_layer_topo).setOnClickListener(this);
@@ -333,9 +320,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void setFeatureService() {
-        if(ListObjectDB.getInstance().getLstFeatureLayerDTG().size() == 0) return;
+        if (ListObjectDB.getInstance().getLstFeatureLayerDTG().size() == 0) return;
         mFeatureLayerDTGS = new ArrayList<>();
-        for (final LayerInfoDTG layerInfoDTG : ListObjectDB.getInstance().getLstFeatureLayerDTG()) {
+        popup = new Popup(MainActivity.this, mMapView, mCallout);
+        mMapViewHandler = new MapViewHandler(mMapView, this, popup);
+        EditingVatTu editingVatTu = new EditingVatTu(this);
+        mApplication.setEditingVatTu(editingVatTu);
+        traCuu = new TraCuu(this,popup);
+        for (LayerInfoDTG layerInfoDTG : ListObjectDB.getInstance().getLstFeatureLayerDTG()) {
+            if (!layerInfoDTG.isView()) continue;
             String url = layerInfoDTG.getUrl();
             if (layerInfoDTG.getId().toUpperCase().equals(Constant.IDLayer.BASEMAP)) {
                 hanhChinhImageLayers = new ArcGISMapImageLayer(url);
@@ -350,9 +343,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
                 });
                 hanhChinhImageLayers.loadAsync();
-            }
-            else if (layerInfoDTG.getId().toUpperCase().equals(Constant.IDLayer.CHUYENDE) && layerInfoDTG.isView()) {
-                taiSanImageLayers = new ArcGISMapImageLayer(url.replaceFirst("FeatureServer(.*)", "MapServer"));
+            } else if (layerInfoDTG.getId().toUpperCase().equals(Constant.IDLayer.CHUYENDE) && layerInfoDTG.isView()) {
+                taiSanImageLayers = new ArcGISMapImageLayer(url);
                 taiSanImageLayers.setName(layerInfoDTG.getTitleLayer());
                 taiSanImageLayers.setId(layerInfoDTG.getId());
                 mMapView.getMap().getOperationalLayers().add(taiSanImageLayers);
@@ -360,79 +352,67 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     if (taiSanImageLayers.getLoadStatus() == LoadStatus.LOADED) {
                         ListenableList<ArcGISSublayer> sublayerList = taiSanImageLayers.getSublayers();
                         for (ArcGISSublayer sublayer : sublayerList) {
-                            if(sublayer.getId() != Constant.idDongHoKhachHang) {
+                            if (sublayer.getId() != Constant.idDongHoKhachHang) {
                                 addCheckBox_SubLayer((ArcGISMapImageSublayer) sublayer, mLinnearDisplayLayerTaiSan);
                             }
                         }
                     }
                 });
                 taiSanImageLayers.loadAsync();
-            }
-            ServiceFeatureTable serviceFeatureTable = new ServiceFeatureTable(url);
-            FeatureLayer featureLayer = new FeatureLayer(serviceFeatureTable);
-            featureLayer.setName(layerInfoDTG.getTitleLayer());
-            featureLayer.setId(layerInfoDTG.getId());
-            Action action = new Action(layerInfoDTG.isView(), layerInfoDTG.isCreate(), layerInfoDTG.isEdit(), layerInfoDTG.isDelete());
-            FeatureLayerDTG featureLayerDTG = new FeatureLayerDTG(featureLayer, layerInfoDTG.getTitleLayer(), action);
-            featureLayerDTG.setOutFields(getFieldsDTG(layerInfoDTG.getOutField()));
-            featureLayerDTG.setQueryFields(getFieldsDTG(layerInfoDTG.getOutField()));
-            featureLayerDTG.setUpdateFields(getFieldsDTG(layerInfoDTG.getOutField()));
-            if (layerInfoDTG.getId() != null && layerInfoDTG.getId().equals(Constant.IDLayer.DHKHLYR)) {
-                featureLayer.setPopupEnabled(true);
-                mMapViewHandler = new MapViewHandler(featureLayerDTG, mMapView, MainActivity.this);
-                traCuu = new TraCuu(featureLayerDTG, MainActivity.this);
-                mFeatureLayerDTGS.add(featureLayerDTG);
+            } else {
+                ServiceFeatureTable serviceFeatureTable = new ServiceFeatureTable(url);
+                FeatureLayer featureLayer = new FeatureLayer(serviceFeatureTable);
+                featureLayer.setName(layerInfoDTG.getTitleLayer());
+                featureLayer.setId(layerInfoDTG.getId());
+                Action action = new Action(layerInfoDTG.isView(), layerInfoDTG.isCreate(), layerInfoDTG.isEdit(), layerInfoDTG.isDelete());
+                FeatureLayerDTG featureLayerDTG = new FeatureLayerDTG(featureLayer, layerInfoDTG.getTitleLayer(), action);
+                featureLayerDTG.setOutFields(getFieldsDTG(layerInfoDTG.getOutField()));
+                featureLayerDTG.setQueryFields(getFieldsDTG(layerInfoDTG.getOutField()));
+                featureLayerDTG.setUpdateFields(getFieldsDTG(layerInfoDTG.getOutField()));
+                if (layerInfoDTG.getId() != null && layerInfoDTG.getId().equals(Constant.IDLayer.DHKHLYR)) {
+                    popup.setDongHoKHDTG(featureLayerDTG);
+                    featureLayer.addDoneLoadingListener(() -> {
+                        addCheckBox_LayerDHKH(featureLayer);
+                    });
+                    mApplication.setDongHoKHDTG(featureLayerDTG);
+                    mMapViewHandler.setHongHoKHSFT(serviceFeatureTable);
+                    mApplication.getEditingVatTu().setDongHoKHSFT(serviceFeatureTable);
+                }
+                if (layerInfoDTG.getId() != null && layerInfoDTG.getId().equals(Constant.IDLayer.VATTUDONGHOTBL)) {
+                    mApplication.getEditingVatTu().setVatTuDTG(featureLayerDTG);
+                }
+                if (layerInfoDTG.getId() != null && layerInfoDTG.getId().equals(Constant.IDLayer.DMVATTUTBL)) {
+                    featureLayer.addDoneLoadingListener(() -> {
+                        if(featureLayer.getLoadStatus().equals(LoadStatus.LOADED)){
+                            mApplication.getEditingVatTu().setDmVatTu(serviceFeatureTable);
+                        }
+                    });
+                }
                 mMap.getOperationalLayers().add(featureLayer);
-            }
-            if (layerInfoDTG.getId() != null && layerInfoDTG.getId().equals(Constant.IDLayer.VATTUDONGHOTBL)) {
-                mFeatureLayerDTGS.add(featureLayerDTG);
             }
         }
         if (mFeatureLayerDTGS.size() == 0) {
             MySnackBar.make(mMapView, getString(R.string.no_access_permissions), true);
-            return;
+//            return;
         }
-        popupInfos = new Popup(MainActivity.this, mMapView, mFeatureLayerDTGS, mCallout);
-
-        mMapViewHandler.setPopupInfos(popupInfos);
-        traCuu.setPopupInfos(popupInfos);
-        mMap.addDoneLoadingListener(() -> {
-            mLinnearDisplayLayerTaiSan = findViewById(R.id.linnearDisplayLayerTaiSan);
-            mLinnearDisplayLayerBaseMap = findViewById(R.id.linnearDisplayLayerBaseMap);
-            LinearLayout linnearDisplayLayer = (LinearLayout) findViewById(R.id.linnearDisplayLayer);
-            int states[][] = {{android.R.attr.state_checked}, {}};
-            int colors[] = {R.color.colorTextColor_1, R.color.colorTextColor_1};
-            for (final FeatureLayerDTG layer : mFeatureLayerDTGS) {
-                if (layer.getFeatureLayer().getId() != null && layer.getFeatureLayer().getId().equals(Constant.IDLayer.DHKHLYR)) {
-                    CheckBox checkBox = new CheckBox(linnearDisplayLayer.getContext());
-                    checkBox.setText(layer.getTitleLayer());
-                    checkBox.setChecked(true);
-                    CompoundButtonCompat.setButtonTintList(checkBox, new ColorStateList(states, colors));
-                    linnearDisplayLayer.addView(checkBox);
-                    checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                        @Override
-                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                            if (buttonView.isChecked()) {
-                                layer.getFeatureLayer().setVisible(true);
-                            } else {
-                                layer.getFeatureLayer().setVisible(false);
-                            }
-
-                        }
-                    });
-                }
-            }
-            for (int i = 0; i < linnearDisplayLayer.getChildCount(); i++) {
-                View v = linnearDisplayLayer.getChildAt(i);
-                if (v instanceof CheckBox) {
-                    if (((CheckBox) v).getText().equals(getString(R.string.alias_donghokhachhang)))
-                        ((CheckBox) v).setChecked(true);
-                    else ((CheckBox) v).setChecked(false);
-                }
+    }
+    private void addCheckBox_LayerDHKH(FeatureLayer featureLayer) {
+        LinearLayout linearLayout = findViewById(R.id.linnearDisplayLayer);
+        final CheckBox checkBox = new CheckBox(linearLayout.getContext());
+        checkBox.setText(featureLayer.getName());
+        checkBox.setChecked(true);
+        CompoundButtonCompat.setButtonTintList(checkBox, new ColorStateList(states, colors));
+        checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (checkBox.isChecked()) {
+                if (buttonView.getText().equals(featureLayer.getName()))
+                    featureLayer.setVisible(true);
+            } else {
+                if (checkBox.getText().equals(featureLayer.getName()))
+                    featureLayer.setVisible(false);
             }
         });
+        linearLayout.addView(checkBox);
     }
-
     private void addCheckBox_SubLayer(final ArcGISMapImageSublayer layer, LinearLayout linearLayout) {
         final CheckBox checkBox = new CheckBox(linearLayout.getContext());
         checkBox.setText(layer.getName());
@@ -610,23 +590,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 break;
             case R.id.btn_layer_close:
-                ((LinearLayout) findViewById(R.id.layout_layer)).setVisibility(View.INVISIBLE);
-                ((FloatingActionButton) findViewById(R.id.floatBtnLayer)).setVisibility(View.VISIBLE);
+                findViewById(R.id.layout_layer).setVisibility(View.INVISIBLE);
+                findViewById(R.id.floatBtnLayer).setVisibility(View.VISIBLE);
                 break;
             case R.id.img_layvitri:
                 mMapViewHandler.addFeature();
                 break;
             case R.id.floatBtnAdd:
-                ((LinearLayout) findViewById(R.id.linear_addfeature)).setVisibility(View.VISIBLE);
-                ((ImageView) findViewById(R.id.img_map_pin)).setVisibility(View.VISIBLE);
-                ((FloatingActionButton) findViewById(R.id.floatBtnAdd)).setVisibility(View.GONE);
-                mMapViewHandler.setClickBtnAdd(true);
+                findViewById(R.id.linear_addfeature).setVisibility(View.VISIBLE);
+                findViewById(R.id.img_map_pin).setVisibility(View.VISIBLE);
+                findViewById(R.id.floatBtnAdd).setVisibility(View.GONE);
                 break;
             case R.id.btn_add_feature_close:
-                ((LinearLayout) findViewById(R.id.linear_addfeature)).setVisibility(View.GONE);
-                ((ImageView) findViewById(R.id.img_map_pin)).setVisibility(View.GONE);
-                ((FloatingActionButton) findViewById(R.id.floatBtnAdd)).setVisibility(View.VISIBLE);
-                mMapViewHandler.setClickBtnAdd(false);
+                addFeatureClose();
                 break;
             case R.id.floatBtnLocation:
                 if (!mLocationDisplay.isStarted()) mLocationDisplay.startAsync();
@@ -637,6 +613,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
         }
     }
+    public void addFeatureClose(){
+        findViewById(R.id.linear_addfeature).setVisibility(View.GONE);
+        findViewById(R.id.img_map_pin).setVisibility(View.GONE);
+        findViewById(R.id.floatBtnAdd).setVisibility(View.VISIBLE);
+    }
+
     @SuppressLint("ResourceAsColor")
     private void handlingColorBackgroundLayerSelected(int id) {
         switch (id) {

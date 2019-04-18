@@ -4,21 +4,27 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 
+import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.data.ArcGISFeature;
 import com.esri.arcgisruntime.data.CodedValue;
 import com.esri.arcgisruntime.data.CodedValueDomain;
 import com.esri.arcgisruntime.data.Domain;
+import com.esri.arcgisruntime.data.FeatureEditResult;
 import com.esri.arcgisruntime.data.FeatureType;
 import com.esri.arcgisruntime.data.ServiceFeatureTable;
+import com.esri.arcgisruntime.mapping.view.MapView;
 
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
+import vinhlong.ditagis.com.capnhatdongho.MainActivity;
 import vinhlong.ditagis.com.capnhatdongho.R;
 import vinhlong.ditagis.com.capnhatdongho.adapter.FeatureViewMoreInfoAdapter;
 import vinhlong.ditagis.com.capnhatdongho.utities.Constant;
+import vinhlong.ditagis.com.capnhatdongho.utities.MySnackBar;
 
 /**
  * Created by ThanLe on 4/16/2018.
@@ -26,21 +32,23 @@ import vinhlong.ditagis.com.capnhatdongho.utities.Constant;
 
 public class EditAsync extends AsyncTask<FeatureViewMoreInfoAdapter, Void, Void> {
     private ProgressDialog dialog;
-    private Context mContext;
+    private MainActivity mainActivity;
     private ServiceFeatureTable mServiceFeatureTable;
     private ArcGISFeature mSelectedArcGISFeature = null;
+    private MapView mapView;
 
-    public EditAsync(Context context, ServiceFeatureTable serviceFeatureTable, ArcGISFeature selectedArcGISFeature) {
-        mContext = context;
+    public EditAsync(MapView mapView, MainActivity mainActivity, ServiceFeatureTable serviceFeatureTable, ArcGISFeature selectedArcGISFeature) {
+        this.mainActivity = mainActivity;
         mServiceFeatureTable = serviceFeatureTable;
         mSelectedArcGISFeature = selectedArcGISFeature;
-        dialog = new ProgressDialog(context, android.R.style.Theme_Material_Dialog_Alert);
+        dialog = new ProgressDialog(mainActivity, android.R.style.Theme_Material_Dialog_Alert);
+        this.mapView = mapView;
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        dialog.setMessage(mContext.getString(R.string.async_dang_xu_ly));
+        dialog.setMessage(mainActivity.getString(R.string.async_dang_xu_ly));
         dialog.setCancelable(false);
 
         dialog.show();
@@ -91,33 +99,37 @@ public class EditAsync extends AsyncTask<FeatureViewMoreInfoAdapter, Void, Void>
         }
         Calendar currentTime = Calendar.getInstance();
         mSelectedArcGISFeature.getAttributes().put("NgayCapNhat", currentTime);
-        mServiceFeatureTable.loadAsync();
-        mServiceFeatureTable.addDoneLoadingListener(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    // update feature in the feature table
-                    mServiceFeatureTable.updateFeatureAsync(mSelectedArcGISFeature).addDoneListener(new Runnable() {
-                        @Override
-                        public void run() {
-                            mServiceFeatureTable.applyEditsAsync().addDoneListener(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (dialog != null && dialog.isShowing()) {
-                                        dialog.dismiss();
-                                    }
-                                }
-                            });
+        ListenableFuture<Void> voidListenableFuture = mServiceFeatureTable.updateFeatureAsync(mSelectedArcGISFeature);
+        voidListenableFuture.addDoneListener(() -> {
+            try {
+                voidListenableFuture.get();
+                ListenableFuture<List<FeatureEditResult>> listListenableFuture = mServiceFeatureTable.applyEditsAsync();
+                listListenableFuture.addDoneListener(() -> {
+                    try {
+                        listListenableFuture.get();
+                        if (dialog != null && dialog.isShowing()) {
+                            dialog.dismiss();
                         }
-                    });
+                    } catch (InterruptedException | ExecutionException e) {
+                        notifyError();
+                        e.printStackTrace();
+                    }
 
-                } catch (Exception e) {
-                }
+                });
+            } catch (InterruptedException | ExecutionException e) {
+                notifyError();
+                e.printStackTrace();
             }
         });
         return null;
     }
+    private void notifyError() {
+        MySnackBar.make(mapView, "Đã xảy ra lỗi", false);
+        if (dialog != null && dialog.isShowing()) {
+            dialog.dismiss();
+        }
 
+    }
     private Object getIdFeatureTypes(List<FeatureType> featureTypes, String value) {
         Object code = null;
         for (FeatureType featureType : featureTypes) {

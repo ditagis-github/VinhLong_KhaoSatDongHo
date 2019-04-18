@@ -42,9 +42,9 @@ import java.util.concurrent.ExecutionException;
 import vinhlong.ditagis.com.capnhatdongho.MainActivity;
 import vinhlong.ditagis.com.capnhatdongho.R;
 import vinhlong.ditagis.com.capnhatdongho.adapter.ChiTietMauKiemNghiemAdapter;
-import vinhlong.ditagis.com.capnhatdongho.adapter.MauKiemNghiemApdapter;
-import vinhlong.ditagis.com.capnhatdongho.async.NotifyChiTietMauKiemNghiemAdapterChangeAsync;
-import vinhlong.ditagis.com.capnhatdongho.async.RefreshTableMauKiemNghiemAsync;
+import vinhlong.ditagis.com.capnhatdongho.adapter.VatTuApdapter;
+import vinhlong.ditagis.com.capnhatdongho.async.NotifyVatTuDongHoAdapterChangeAsync;
+import vinhlong.ditagis.com.capnhatdongho.async.RefreshVatTuAsync;
 import vinhlong.ditagis.com.capnhatdongho.libs.FeatureLayerDTG;
 import vinhlong.ditagis.com.capnhatdongho.utities.Constant;
 
@@ -52,33 +52,42 @@ import vinhlong.ditagis.com.capnhatdongho.utities.Constant;
  * Created by NGUYEN HONG on 5/7/2018.
  */
 
-public class EditingMauKiemNghiem implements RefreshTableMauKiemNghiemAsync.AsyncResponse {
+public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
     private MainActivity mainActivity;
-    private ServiceFeatureTable table_maudanhgia;
-    private FeatureLayerDTG featureLayerDTG_MauDanhGia;
-    private MauKiemNghiemApdapter mauKiemNghiemApdapter;
+    private ServiceFeatureTable vatTuSFT;
+    private FeatureLayerDTG vatTuDTG;
+    private VatTuApdapter vatTuApdapter;
     private List<Feature> table_feature;
-    private ArcGISFeature mSelectedArcGISFeature;
-    private ServiceFeatureTable mServiceFeatureTable;
+    private ArcGISFeature featureDHKH;
+    private ServiceFeatureTable dongHoKHSFT;
+    private ServiceFeatureTable dmVatTu;
 
-
-    public EditingMauKiemNghiem(MainActivity mainActivity, FeatureLayerDTG featureLayerDTG_MauDanhGia, ServiceFeatureTable mServiceFeatureTable) {
+    public EditingVatTu(MainActivity mainActivity) {
         this.mainActivity = mainActivity;
-        this.featureLayerDTG_MauDanhGia = featureLayerDTG_MauDanhGia;
-        table_maudanhgia = (ServiceFeatureTable) featureLayerDTG_MauDanhGia.getFeatureLayer().getFeatureTable();
-        this.mServiceFeatureTable = mServiceFeatureTable;
     }
 
+    public void setVatTuDTG(FeatureLayerDTG vatTuDTG) {
+        this.vatTuDTG = vatTuDTG;
+        this.vatTuSFT = (ServiceFeatureTable) vatTuDTG.getFeatureLayer().getFeatureTable();
+    }
 
-    public void deleteDanhSachMauDanhGia(final ArcGISFeature mSelectedArcGISFeature) {
-        this.mSelectedArcGISFeature = mSelectedArcGISFeature;
-        final Map<String, Object> attributes = mSelectedArcGISFeature.getAttributes();
+    public void setDmVatTu(ServiceFeatureTable dmVatTu) {
+        this.dmVatTu = dmVatTu;
+    }
+
+    public void setDongHoKHSFT(ServiceFeatureTable dongHoKHSFT) {
+        this.dongHoKHSFT = dongHoKHSFT;
+    }
+
+    public void deleteDanhSachMauDanhGia(ArcGISFeature featureDHKH) {
+        this.featureDHKH = featureDHKH;
+        final Map<String, Object> attributes = featureDHKH.getAttributes();
         final String idDiemDanhGia = attributes.get(mainActivity.getString(R.string.IDDIEMDANHGIA)).toString();
         if (idDiemDanhGia != null) {
-            List<MauKiemNghiemApdapter.MauKiemNghiem> mauKiemNghiems = new ArrayList<>();
-            mauKiemNghiemApdapter = new MauKiemNghiemApdapter(mainActivity, mauKiemNghiems);
-            getRefreshTableThoiGianCLNAsync();
-            if(table_feature != null && table_feature.size() > 0){
+            List<VatTuApdapter.VatTu> vatTus = new ArrayList<>();
+            vatTuApdapter = new VatTuApdapter(mainActivity, vatTus);
+            getRefreshTableVatTuAsync();
+            if (table_feature != null && table_feature.size() > 0) {
                 for (Feature feature : table_feature) {
                     deleteFeature(feature);
                 }
@@ -86,64 +95,56 @@ public class EditingMauKiemNghiem implements RefreshTableMauKiemNghiemAsync.Asyn
         }
     }
 
-    public void showDanhSachMauDanhGia(final ArcGISFeature mSelectedArcGISFeature) {
-        this.mSelectedArcGISFeature = mSelectedArcGISFeature;
-        final Map<String, Object> attributes = mSelectedArcGISFeature.getAttributes();
-        final String idDiemDanhGia = attributes.get(mainActivity.getString(R.string.IDDIEMDANHGIA)).toString();
-        if (idDiemDanhGia != null) {
+    public void showDanhSachVatTu(ArcGISFeature featureDHKH) {
+        this.featureDHKH = featureDHKH;
+        final Map<String, Object> attributes = featureDHKH.getAttributes();
+        final String dBDongHoNuoc = attributes.get(Constant.DongHoKhachHangFields.DBDongHoNuoc).toString();
+        if (dBDongHoNuoc != null) {
             final AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity, android.R.style.Theme_Holo_Light_NoActionBar_Fullscreen);
-            final View layout_table_maudanhgia = mainActivity.getLayoutInflater().inflate(R.layout.layout_title_listview_button, null);
-            ListView listView = (ListView) layout_table_maudanhgia.findViewById(R.id.listview);
+            final View layout_table_vattu = mainActivity.getLayoutInflater().inflate(R.layout.layout_title_listview_button, null);
+            ListView listView = layout_table_vattu.findViewById(R.id.listview);
 
-            ((TextView) layout_table_maudanhgia.findViewById(R.id.txtTitlePopup)).setText(mainActivity.getString(R.string.title_danhsachmaukiemnghiem));
-            Button btnAdd = (Button) layout_table_maudanhgia.findViewById(R.id.btnAdd);
-            if (this.featureLayerDTG_MauDanhGia.getAction().isCreate() == false) {
+            ((TextView) layout_table_vattu.findViewById(R.id.txtTitlePopup)).setText(mainActivity.getString(R.string.title_danhsachmaukiemnghiem));
+            Button btnAdd = layout_table_vattu.findViewById(R.id.btnAdd);
+            if (this.vatTuDTG.getAction().isCreate() == false) {
                 btnAdd.setVisibility(View.INVISIBLE);
             }
             btnAdd.setText("Thêm dữ liệu");
-            btnAdd.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    addTableLayerMauDanhGia();
-                }
-            });
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, final long id) {
-                    if (featureLayerDTG_MauDanhGia.getAction().isView()) {
-                        final MauKiemNghiemApdapter.MauKiemNghiem itemAtPosition = mauKiemNghiemApdapter.getMauKiemNghiems().get(position);
-                        String objectid = itemAtPosition.getOBJECTID();
-                        QueryParameters queryParameters = new QueryParameters();
-                        String queryClause = mainActivity.getString(R.string.OBJECTID) + " = " + objectid;
-                        queryParameters.setWhereClause(queryClause);
-                        final ListenableFuture<FeatureQueryResult> queryResultListenableFuture = table_maudanhgia.queryFeaturesAsync(queryParameters, ServiceFeatureTable.QueryFeatureFields.LOAD_ALL);
-                        queryResultListenableFuture.addDoneListener(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    FeatureQueryResult result = queryResultListenableFuture.get();
-                                    Iterator iterator = result.iterator();
+            btnAdd.setOnClickListener(v -> addTableVatTu());
+            listView.setOnItemClickListener((parent, view, position, id) -> {
+                if (vatTuDTG.getAction().isView()) {
+                    final VatTuApdapter.VatTu itemAtPosition = vatTuApdapter.getVatTus().get(position);
+                    String objectid = itemAtPosition.getOBJECTID();
+                    QueryParameters queryParameters = new QueryParameters();
+                    String queryClause = mainActivity.getString(R.string.OBJECTID) + " = " + objectid;
+                    queryParameters.setWhereClause(queryClause);
+                    final ListenableFuture<FeatureQueryResult> queryResultListenableFuture = vatTuSFT.queryFeaturesAsync(queryParameters, ServiceFeatureTable.QueryFeatureFields.LOAD_ALL);
+                    queryResultListenableFuture.addDoneListener(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                FeatureQueryResult result = queryResultListenableFuture.get();
+                                Iterator iterator = result.iterator();
 
-                                    if (iterator.hasNext()) {
-                                        Feature feature = (Feature) iterator.next();
-                                        showInfosSelectedItem(feature);
-                                    }
-
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                } catch (ExecutionException e) {
-                                    e.printStackTrace();
+                                if (iterator.hasNext()) {
+                                    Feature feature = (Feature) iterator.next();
+                                    showInfosSelectedItem(feature);
                                 }
+
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            } catch (ExecutionException e) {
+                                e.printStackTrace();
                             }
-                        });
-                    }
+                        }
+                    });
                 }
             });
-            List<MauKiemNghiemApdapter.MauKiemNghiem> mauKiemNghiems = new ArrayList<>();
-            mauKiemNghiemApdapter = new MauKiemNghiemApdapter(mainActivity, mauKiemNghiems);
-            listView.setAdapter(mauKiemNghiemApdapter);
-            getRefreshTableThoiGianCLNAsync();
-            builder.setView(layout_table_maudanhgia);
+            List<VatTuApdapter.VatTu> vatTus = new ArrayList<>();
+            vatTuApdapter = new VatTuApdapter(mainActivity, vatTus);
+            listView.setAdapter(vatTuApdapter);
+            getRefreshTableVatTuAsync();
+            builder.setView(layout_table_vattu);
             AlertDialog dialog = builder.create();
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
             dialog.show();
@@ -154,12 +155,12 @@ public class EditingMauKiemNghiem implements RefreshTableMauKiemNghiemAsync.Asyn
         Map<String, Object> attributes = feature.getAttributes();
         View layout_chitiet_maudanhgia = mainActivity.getLayoutInflater().inflate(R.layout.layout_title_listview, null);
         ListView listview_chitiet_maudanhgia = (ListView) layout_chitiet_maudanhgia.findViewById(R.id.listview);
-        if (attributes.get("IDMauKiemNghiem") != null) {
-            ((TextView) layout_chitiet_maudanhgia.findViewById(R.id.txtTongItem)).setText(attributes.get("IDMauKiemNghiem").toString());
+        if (attributes.get(Constant.VatTuFields.DBDongHo) != null) {
+            ((TextView) layout_chitiet_maudanhgia.findViewById(R.id.txtTongItem)).setText(attributes.get(Constant.VatTuFields.DBDongHo).toString());
         }
         final List<ChiTietMauKiemNghiemAdapter.Item> items = new ArrayList<>();
-        List<Field> fields = table_maudanhgia.getFields();
-        final String[] updateFields = featureLayerDTG_MauDanhGia.getUpdateFields();
+        List<Field> fields = vatTuSFT.getFields();
+        final String[] updateFields = vatTuDTG.getUpdateFields();
         String[] unedit_Fields = mainActivity.getResources().getStringArray(R.array.unedit_Fields);
         for (Field field : fields) {
             ChiTietMauKiemNghiemAdapter.Item item = new ChiTietMauKiemNghiemAdapter.Item();
@@ -181,7 +182,7 @@ public class EditingMauKiemNghiem implements RefreshTableMauKiemNghiemAsync.Asyn
                             item.setValue(attributes.get(field.getName()).toString());
                 }
             }
-            if (this.featureLayerDTG_MauDanhGia.getAction().isEdit()) {
+            if (this.vatTuDTG.getAction().isEdit()) {
                 if (updateFields.length > 0) {
                     if (updateFields[0].equals("*") || updateFields[0].equals("")) {
                         item.setEdit(true);
@@ -207,17 +208,17 @@ public class EditingMauKiemNghiem implements RefreshTableMauKiemNghiemAsync.Asyn
         if (items != null) listview_chitiet_maudanhgia.setAdapter(chiTietMauKiemNghiemAdapter);
         AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity, android.R.style.Theme_Holo_Light_NoActionBar_Fullscreen);
         builder.setView(layout_chitiet_maudanhgia);
-        if (this.featureLayerDTG_MauDanhGia.getAction().isEdit()) {
+        if (this.vatTuDTG.getAction().isEdit()) {
             builder.setPositiveButton(mainActivity.getString(R.string.btn_Accept), null);
         }
-        if (this.featureLayerDTG_MauDanhGia.getAction().isDelete()) {
+        if (this.vatTuDTG.getAction().isDelete()) {
             builder.setNegativeButton(mainActivity.getString(R.string.btn_Delete), null);
         }
         builder.setNeutralButton(mainActivity.getString(R.string.btn_Esc), null);
         listview_chitiet_maudanhgia.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (featureLayerDTG_MauDanhGia.getAction().isEdit()) {
+                if (vatTuDTG.getAction().isEdit()) {
                     editValueAttribute(parent, view, position, id);
                 }
             }
@@ -231,7 +232,7 @@ public class EditingMauKiemNghiem implements RefreshTableMauKiemNghiemAsync.Asyn
             public void onClick(View v) {
                 Feature selectedFeature = getSelectedFeature(items.get(0).getValue());
                 for (ChiTietMauKiemNghiemAdapter.Item item : items) {
-                    Domain domain = table_maudanhgia.getField(item.getFieldName()).getDomain();
+                    Domain domain = vatTuSFT.getField(item.getFieldName()).getDomain();
                     Object codeDomain = null;
                     if (item.getFieldName().equals("NgayCapNhat")) {
                         Calendar currentTime = Calendar.getInstance();
@@ -271,61 +272,21 @@ public class EditingMauKiemNghiem implements RefreshTableMauKiemNghiemAsync.Asyn
             }
         });
         // Xóa
-        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Feature selectedFeature = getSelectedFeature(items.get(0).getValue());
-                deleteFeature(selectedFeature);
-                dialog.dismiss();
-            }
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(v -> {
+            Feature selectedFeature = getSelectedFeature(items.get(0).getValue());
+            deleteFeature(selectedFeature);
+            dialog.dismiss();
         });
         // Thoát
-        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> dialog.dismiss());
     }
 
-    private void getRefreshTableThoiGianCLNAsync() {
-        final Map<String, Object> attributes = this.mSelectedArcGISFeature.getAttributes();
-        final String idDiemDanhGia = attributes.get(mainActivity.getString(R.string.IDDIEMDANHGIA)).toString();
-        new RefreshTableMauKiemNghiemAsync(mainActivity, table_maudanhgia,
-                mauKiemNghiemApdapter, this.featureLayerDTG_MauDanhGia.getAction(),
-                (features, mauKiemNghiems) -> {
-                    table_feature = features;
-                    kiemtraDanhSachVuotChiTieu();
-                }).execute(idDiemDanhGia);
-    }
-
-    private void kiemtraDanhSachVuotChiTieu() {
-        boolean vuotChiTieu = false;
-        for (Feature feature : table_feature) {
-            vuotChiTieu = kiemtraVuotChiTieu(feature);
-            if (vuotChiTieu) break;
-        }
-        updateSelectedArcGISFeature(vuotChiTieu);
-    }
-
-    private boolean kiemtraVuotChiTieu(final Feature table_maudanhgiaFeature) {
-        boolean isOver = false;
-        Object doDuc = table_maudanhgiaFeature.getAttributes().get("DoDuc");
-        Object PH = table_maudanhgiaFeature.getAttributes().get("PH");
-        Object CloDu = table_maudanhgiaFeature.getAttributes().get("CloDu");
-        if (doDuc != null) {
-            double doduc = Double.parseDouble(doDuc.toString());
-            if (doduc > 2) isOver = true;
-        }
-        if (PH != null) {
-            double ph = Double.parseDouble(PH.toString());
-            if (ph < 6.5 || ph > 8.5) isOver = true;
-        }
-        if (CloDu != null) {
-            double clodu = Double.parseDouble(CloDu.toString());
-            if (clodu < 0.3 || clodu > 0.5) isOver = true;
-        }
-        return isOver;
+    private void getRefreshTableVatTuAsync() {
+        final Map<String, Object> attributes = this.featureDHKH.getAttributes();
+        final String dBDongHoNuoc = attributes.get(Constant.DongHoKhachHangFields.DBDongHoNuoc).toString();
+        new RefreshVatTuAsync(mainActivity, vatTuSFT, vatTuApdapter, this.vatTuDTG.getAction(), features -> {
+            table_feature = features;
+        }).execute(dBDongHoNuoc);
     }
 
     private Feature getSelectedFeature(String OBJECTID) {
@@ -337,12 +298,6 @@ public class EditingMauKiemNghiem implements RefreshTableMauKiemNghiemAsync.Asyn
             }
         }
         return rt_feature;
-    }
-
-    private String getValueAttributes(Feature feature, String fieldName) {
-        if (feature.getAttributes().get(fieldName) != null)
-            return feature.getAttributes().get(fieldName).toString();
-        return null;
     }
 
     private Object getValueDomain(List<CodedValue> codedValues, String code) {
@@ -357,28 +312,23 @@ public class EditingMauKiemNghiem implements RefreshTableMauKiemNghiemAsync.Asyn
         return value;
     }
 
-    private void addTableLayerMauDanhGia() {
-        final Map<String, Object> attributes = this.mSelectedArcGISFeature.getAttributes();
-        final String idDiemDanhGia = attributes.get(mainActivity.getString(R.string.IDDIEMDANHGIA)).toString();
-        final Feature table_maudanhgiaFeature = table_maudanhgia.createFeature();
+    private void addTableVatTu() {
+        final Map<String, Object> attributes = this.featureDHKH.getAttributes();
+        final String dBDongHo = attributes.get(Constant.DongHoKhachHangFields.DBDongHoNuoc).toString();
+        final Feature vatTuFeature = vatTuSFT.createFeature();
         final AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity, android.R.style.Theme_Holo_Light_NoActionBar_Fullscreen);
-        View layout_add_maudanhgia = mainActivity.getLayoutInflater().inflate(R.layout.layout_title_listview_button, null);
-        ListView listView = (ListView) layout_add_maudanhgia.findViewById(R.id.listview);
+        View layout_add_vatu = mainActivity.getLayoutInflater().inflate(R.layout.layout_title_listview_button, null);
+        ListView listView = layout_add_vatu.findViewById(R.id.listview);
         final List<ChiTietMauKiemNghiemAdapter.Item> items = new ArrayList<>();
         final ChiTietMauKiemNghiemAdapter chiTietMauKiemNghiemAdapter = new ChiTietMauKiemNghiemAdapter(mainActivity, items);
         if (items != null) listView.setAdapter(chiTietMauKiemNghiemAdapter);
-        builder.setView(layout_add_maudanhgia);
+        builder.setView(layout_add_vatu);
         final AlertDialog dialog = builder.create();
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.show();
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                editValueAttribute(parent, view, position, id);
-            }
-        });
-        List<Field> fields = table_maudanhgia.getFields();
-        String[] updateFields = featureLayerDTG_MauDanhGia.getUpdateFields();
+        listView.setOnItemClickListener((parent, view, position, id) -> editValueAttribute(parent, view, position, id));
+        List<Field> fields = vatTuSFT.getFields();
+        String[] updateFields = vatTuDTG.getUpdateFields();
         String[] unedit_Fields = mainActivity.getResources().getStringArray(R.array.unedit_Fields);
         for (Field field : fields) {
             if (!field.getName().equals(Constant.OBJECTID)) {
@@ -404,64 +354,53 @@ public class EditingMauKiemNghiem implements RefreshTableMauKiemNghiemAsync.Asyn
                         break;
                     }
                 }
-                if (field.getName().equals(mainActivity.getString(R.string.IDDIEMDANHGIA))) {
-                    item.setValue(idDiemDanhGia);
+                if (field.getName().equals(Constant.VatTuFields.DBDongHo)) {
+                    item.setValue(dBDongHo);
                 }
-                if (field.getName().equals(mainActivity.getString(R.string.IDMAUKIEMNGHIEM))) {
-                    if (table_feature.size() < 9) {
-                        item.setValue("0" + (table_feature.size() + 1) + "_" + idDiemDanhGia);
-                    } else item.setValue((table_feature.size() + 1) + "_" + idDiemDanhGia);
-                }
-                if (field.getName().equals(mainActivity.getString(R.string.NGAY_CAP_NHAT))) {
-                    item.setValue(Constant.DATE_FORMAT.format(Calendar.getInstance().getTime()));
-                    item.setCalendar(Calendar.getInstance());
+                if (field.getName().equals(Constant.VatTuFields.MaKhachHang)) {
+                    item.setValue(dBDongHo);
                 }
                 items.add(item);
             }
         }
 
-        table_maudanhgiaFeature.getAttributes().put(Constant.DBDONG_HO_NUOC, attributes.get(Constant.DBDONG_HO_NUOC).toString());
-        Button btnAdd = (Button) layout_add_maudanhgia.findViewById(R.id.btnAdd);
+        vatTuFeature.getAttributes().put(Constant.VatTuFields.DBDongHo, dBDongHo);
+        Button btnAdd = layout_add_vatu.findViewById(R.id.btnAdd);
         btnAdd.setText(mainActivity.getString(R.string.title_add));
-        btnAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-                for (ChiTietMauKiemNghiemAdapter.Item item : items) {
-                    Domain domain = table_maudanhgia.getField(item.getFieldName()).getDomain();
-                    Object codeDomain = null;
-                    if (domain != null) {
-                        List<CodedValue> codedValues = ((CodedValueDomain) domain).getCodedValues();
-                        codeDomain = getCodeDomain(codedValues, item.getValue());
-                        table_maudanhgiaFeature.getAttributes().put(item.getFieldName(), item.getValue());
-
-                    }
-                    switch (item.getFieldType()) {
-                        case DATE:
-                            if (item.getCalendar() != null)
-                                table_maudanhgiaFeature.getAttributes().put(item.getFieldName(), item.getCalendar());
-                            break;
-                        case DOUBLE:
-                            if (item.getValue() != null)
-                                table_maudanhgiaFeature.getAttributes().put(item.getFieldName(), Double.parseDouble(item.getValue()));
-                            break;
-                        case SHORT:
-                            if (codeDomain != null) {
-                                table_maudanhgiaFeature.getAttributes().put(item.getFieldName(), Short.parseShort(codeDomain.toString()));
-                            } else if (item.getValue() != null)
-                                table_maudanhgiaFeature.getAttributes().put(item.getFieldName(), Short.parseShort(item.getValue()));
-                            break;
-                        case TEXT:
-                            if (codeDomain != null) {
-                                table_maudanhgiaFeature.getAttributes().put(item.getFieldName(), codeDomain.toString());
-                            } else if (item.getValue() != null)
-                                table_maudanhgiaFeature.getAttributes().put(item.getFieldName(), item.getValue());
-                            break;
-                    }
+        btnAdd.setOnClickListener(v -> {
+            dialog.dismiss();
+            for (ChiTietMauKiemNghiemAdapter.Item item : items) {
+                Domain domain = vatTuSFT.getField(item.getFieldName()).getDomain();
+                Object codeDomain = null;
+                if (domain != null) {
+                    List<CodedValue> codedValues = ((CodedValueDomain) domain).getCodedValues();
+                    codeDomain = getCodeDomain(codedValues, item.getValue());
+                    vatTuFeature.getAttributes().put(item.getFieldName(), item.getValue());
                 }
-
-                addFeature(table_maudanhgiaFeature);
+                switch (item.getFieldType()) {
+                    case DATE:
+                        if (item.getCalendar() != null)
+                            vatTuFeature.getAttributes().put(item.getFieldName(), item.getCalendar());
+                        break;
+                    case DOUBLE:
+                        if (item.getValue() != null)
+                            vatTuFeature.getAttributes().put(item.getFieldName(), Double.parseDouble(item.getValue()));
+                        break;
+                    case SHORT:
+                        if (codeDomain != null) {
+                            vatTuFeature.getAttributes().put(item.getFieldName(), Short.parseShort(codeDomain.toString()));
+                        } else if (item.getValue() != null)
+                            vatTuFeature.getAttributes().put(item.getFieldName(), Short.parseShort(item.getValue()));
+                        break;
+                    case TEXT:
+                        if (codeDomain != null) {
+                            vatTuFeature.getAttributes().put(item.getFieldName(), codeDomain.toString());
+                        } else if (item.getValue() != null)
+                            vatTuFeature.getAttributes().put(item.getFieldName(), item.getValue());
+                        break;
+                }
             }
+            addFeature(vatTuFeature);
         });
     }
 
@@ -477,66 +416,37 @@ public class EditingMauKiemNghiem implements RefreshTableMauKiemNghiemAsync.Asyn
         return code;
     }
 
-    /**
-     * @param canhBaoVuotNguong của mẫu đánh giá
-     */
-    private void updateSelectedArcGISFeature(boolean canhBaoVuotNguong) {
-        Calendar currentTime = Calendar.getInstance();
-        mSelectedArcGISFeature.getAttributes().put("NgayCapNhat", currentTime);
-        if (canhBaoVuotNguong)
-            mSelectedArcGISFeature.getAttributes().put(Constant.FIELD_DIEM_DANH_GIA.CANH_BAO_VUOT_NGUONG, Constant.VALUE_CANH_BAO_VUOT_NGUONG.VUOT);
-        else
-            mSelectedArcGISFeature.getAttributes().put(Constant.FIELD_DIEM_DANH_GIA.CANH_BAO_VUOT_NGUONG, Constant.VALUE_CANH_BAO_VUOT_NGUONG.KHONG_VUOT);
 
-        mServiceFeatureTable.updateFeatureAsync(mSelectedArcGISFeature).addDoneListener(new Runnable() {
-            @Override
-            public void run() {
-                mServiceFeatureTable.applyEditsAsync().addDoneListener(new Runnable() {
-                    @Override
-                    public void run() {
-
+    private void addFeature(final Feature feature) {
+        ListenableFuture<Void> mapViewResult = vatTuSFT.addFeatureAsync(feature);
+        mapViewResult.addDoneListener(() -> {
+            final ListenableFuture<List<FeatureEditResult>> listListenableEditAsync = vatTuSFT.applyEditsAsync();
+            listListenableEditAsync.addDoneListener(() -> {
+                try {
+                    List<FeatureEditResult> featureEditResults = listListenableEditAsync.get();
+                    if (featureEditResults.size() > 0) {
+                        Toast.makeText(mainActivity.getApplicationContext(), mainActivity.getString(R.string.DATA_SUCCESSFULLY_INSERTED), Toast.LENGTH_SHORT).show();
+                        getRefreshTableVatTuAsync();
+                    } else {
+                        Toast.makeText(mainActivity.getApplicationContext(), mainActivity.getString(R.string.FAILED_TO_INSERT_DATA), Toast.LENGTH_SHORT).show();
                     }
-                });
-            }
-        });
-    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
 
-    private void addFeature(final Feature table_maudanhgiaFeature) {
-        ListenableFuture<Void> mapViewResult = table_maudanhgia.addFeatureAsync(table_maudanhgiaFeature);
-        mapViewResult.addDoneListener(new Runnable() {
-            @Override
-            public void run() {
-                final ListenableFuture<List<FeatureEditResult>> listListenableEditAsync = table_maudanhgia.applyEditsAsync();
-                listListenableEditAsync.addDoneListener(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            List<FeatureEditResult> featureEditResults = listListenableEditAsync.get();
-                            if (featureEditResults.size() > 0) {
-                                Toast.makeText(mainActivity.getApplicationContext(), mainActivity.getString(R.string.DATA_SUCCESSFULLY_INSERTED), Toast.LENGTH_SHORT).show();
-                                getRefreshTableThoiGianCLNAsync();
-                            } else {
-                                Toast.makeText(mainActivity.getApplicationContext(), mainActivity.getString(R.string.FAILED_TO_INSERT_DATA), Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        } catch (ExecutionException e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-                });
-            }
+            });
         });
     }
 
 
     private void deleteFeature(Feature table_maudanhgiaFeature) {
-        final ListenableFuture<Void> mapViewResult = table_maudanhgia.deleteFeatureAsync(table_maudanhgiaFeature);
+        final ListenableFuture<Void> mapViewResult = vatTuSFT.deleteFeatureAsync(table_maudanhgiaFeature);
         mapViewResult.addDoneListener(new Runnable() {
             @Override
             public void run() {
-                final ListenableFuture<List<FeatureEditResult>> listListenableEditAsync = table_maudanhgia.applyEditsAsync();
+                final ListenableFuture<List<FeatureEditResult>> listListenableEditAsync = vatTuSFT.applyEditsAsync();
                 listListenableEditAsync.addDoneListener(new Runnable() {
                     @Override
                     public void run() {
@@ -544,7 +454,7 @@ public class EditingMauKiemNghiem implements RefreshTableMauKiemNghiemAsync.Asyn
                             List<FeatureEditResult> featureEditResults = listListenableEditAsync.get();
                             if (featureEditResults.size() > 0) {
                                 Toast.makeText(mainActivity.getApplicationContext(), mainActivity.getString(R.string.DATA_SUCCESSFULLY_DELETED), Toast.LENGTH_SHORT).show();
-                                getRefreshTableThoiGianCLNAsync();
+                                getRefreshTableVatTuAsync();
                             } else {
                                 Toast.makeText(mainActivity.getApplicationContext(), mainActivity.getString(R.string.FAILED_TO_DELETE_DATA), Toast.LENGTH_SHORT).show();
                             }
@@ -561,11 +471,11 @@ public class EditingMauKiemNghiem implements RefreshTableMauKiemNghiemAsync.Asyn
     }
 
     private void updateFeature(final Feature table_maudanhgiaFeature) {
-        final ListenableFuture<Void> mapViewResult = table_maudanhgia.updateFeatureAsync(table_maudanhgiaFeature);
+        final ListenableFuture<Void> mapViewResult = vatTuSFT.updateFeatureAsync(table_maudanhgiaFeature);
         mapViewResult.addDoneListener(new Runnable() {
             @Override
             public void run() {
-                final ListenableFuture<List<FeatureEditResult>> listListenableEditAsync = table_maudanhgia.applyEditsAsync();
+                final ListenableFuture<List<FeatureEditResult>> listListenableEditAsync = vatTuSFT.applyEditsAsync();
                 listListenableEditAsync.addDoneListener(new Runnable() {
                     @Override
                     public void run() {
@@ -573,7 +483,7 @@ public class EditingMauKiemNghiem implements RefreshTableMauKiemNghiemAsync.Asyn
                             List<FeatureEditResult> featureEditResults = listListenableEditAsync.get();
                             if (featureEditResults.size() > 0) {
                                 Toast.makeText(mainActivity.getApplicationContext(), mainActivity.getString(R.string.DATA_SUCCESSFULLY_UPDATED), Toast.LENGTH_SHORT).show();
-                                getRefreshTableThoiGianCLNAsync();
+                                getRefreshTableVatTuAsync();
                             } else {
                                 Toast.makeText(mainActivity.getApplicationContext(), mainActivity.getString(R.string.FAILED_TO_UPDATE_DATA), Toast.LENGTH_SHORT).show();
                             }
@@ -613,7 +523,7 @@ public class EditingMauKiemNghiem implements RefreshTableMauKiemNghiemAsync.Asyn
             final LinearLayout layoutSpin = layout.findViewById(R.id.layout_edit_viewmoreinfo_Spinner);
             final Spinner spin = layout.findViewById(R.id.spin_edit_viewmoreinfo);
 
-            final Domain domain = table_maudanhgia.getField(item.getFieldName()).getDomain();
+            final Domain domain = vatTuSFT.getField(item.getFieldName()).getDomain();
             if (domain != null) {
                 layoutSpin.setVisibility(View.VISIBLE);
                 List<CodedValue> codedValues = ((CodedValueDomain) domain).getCodedValues();
@@ -700,7 +610,7 @@ public class EditingMauKiemNghiem implements RefreshTableMauKiemNghiemAsync.Asyn
                         }
                     }
                     ChiTietMauKiemNghiemAdapter adapter = (ChiTietMauKiemNghiemAdapter) parent.getAdapter();
-                    new NotifyChiTietMauKiemNghiemAdapterChangeAsync(mainActivity).execute(adapter);
+                    new NotifyVatTuDongHoAdapterChangeAsync(mainActivity).execute(adapter);
 //                    dialog.dismiss();
                 }
             });
@@ -711,9 +621,8 @@ public class EditingMauKiemNghiem implements RefreshTableMauKiemNghiemAsync.Asyn
 
         }
     }
-
     @Override
-    public void processFinish(List<Feature> features, List<MauKiemNghiemApdapter.MauKiemNghiem> mauKiemNghiems) {
+    public void processFinish(List<Feature> features) {
 
     }
 }

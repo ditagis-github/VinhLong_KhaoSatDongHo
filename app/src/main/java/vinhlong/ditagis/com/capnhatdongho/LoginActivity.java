@@ -37,6 +37,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 //        mTxtPassword.setText("ditagis@123");
         mTxtValidation = findViewById(R.id.txt_login_validation);
         create();
+        login();
     }
 
     private void create() {

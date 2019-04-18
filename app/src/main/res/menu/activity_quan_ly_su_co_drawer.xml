@@ -29,10 +29,12 @@
                     
                     android:id="@+id/nav_thongke"
                     android:icon="@drawable/ic_thongke"
+                    android:visible="false"
                     android:title="@string/nav_thong_ke" />
                 <item
                     android:id="@+id/nav_tracuu"
                     android:icon="@drawable/ic_search"
+                    android:visible="false"
                     android:title="@string/nav_tra_cuu" />
             </group>
         </menu>

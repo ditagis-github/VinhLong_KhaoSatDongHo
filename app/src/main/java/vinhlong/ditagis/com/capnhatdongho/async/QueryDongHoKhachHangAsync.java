@@ -28,14 +28,14 @@ import vinhlong.ditagis.com.capnhatdongho.utities.Constant;
  * Created by ThanLe on 4/16/2018.
  */
 
-public class QueryDiemDanhGiaAsync extends AsyncTask<String, List<DanhSachDongHoKHAdapter.Item>, Void> {
+public class QueryDongHoKhachHangAsync extends AsyncTask<String, List<DanhSachDongHoKHAdapter.Item>, Void> {
     private ProgressDialog dialog;
     private Context mContext;
     private ServiceFeatureTable serviceFeatureTable;
     private DanhSachDongHoKHAdapter danhSachDongHoKHAdapter;
     private TextView txtTongItem;
 
-    public QueryDiemDanhGiaAsync(ThongKeActivity thongKeActivity, ServiceFeatureTable serviceFeatureTable, TextView txtTongItem, DanhSachDongHoKHAdapter adapter, AsyncResponse asyncResponse) {
+    public QueryDongHoKhachHangAsync(ThongKeActivity thongKeActivity, ServiceFeatureTable serviceFeatureTable, TextView txtTongItem, DanhSachDongHoKHAdapter adapter, AsyncResponse asyncResponse) {
         this.delegate = asyncResponse;
         mContext = thongKeActivity;
         this.serviceFeatureTable = serviceFeatureTable;
@@ -44,7 +44,7 @@ public class QueryDiemDanhGiaAsync extends AsyncTask<String, List<DanhSachDongHo
         dialog = new ProgressDialog(thongKeActivity, android.R.style.Theme_Material_Dialog_Alert);
     }
 
-    public QueryDiemDanhGiaAsync(MainActivity mainActivity, ServiceFeatureTable serviceFeatureTable, TextView txtTongItem, DanhSachDongHoKHAdapter adapter, AsyncResponse asyncResponse) {
+    public QueryDongHoKhachHangAsync(MainActivity mainActivity, ServiceFeatureTable serviceFeatureTable, TextView txtTongItem, DanhSachDongHoKHAdapter adapter, AsyncResponse asyncResponse) {
         this.delegate = asyncResponse;
         mContext = mainActivity;
         this.serviceFeatureTable = serviceFeatureTable;
@@ -120,13 +120,6 @@ public class QueryDiemDanhGiaAsync extends AsyncTask<String, List<DanhSachDongHo
         super.onProgressUpdate(values);
 
     }
-
-    private String getValueAttributes(Feature feature, String fieldName) {
-        if (feature.getAttributes().get(fieldName) != null)
-            return feature.getAttributes().get(fieldName).toString();
-        return null;
-    }
-
     @Override
     protected void onPostExecute(Void result) {
         if (dialog != null || dialog.isShowing()) dialog.dismiss();

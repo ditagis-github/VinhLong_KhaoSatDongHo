@@ -39,7 +39,8 @@ import vinhlong.ditagis.com.capnhatdongho.R;
 import vinhlong.ditagis.com.capnhatdongho.adapter.DanhSachDongHoKHAdapter;
 import vinhlong.ditagis.com.capnhatdongho.adapter.TraCuuChiTietDiemDanhGiaAdapter;
 import vinhlong.ditagis.com.capnhatdongho.async.NotifyTraCuuAdapterValueChangeAsync;
-import vinhlong.ditagis.com.capnhatdongho.async.QueryDiemDanhGiaAsync;
+import vinhlong.ditagis.com.capnhatdongho.async.QueryDongHoKhachHangAsync;
+import vinhlong.ditagis.com.capnhatdongho.entities.DApplication;
 import vinhlong.ditagis.com.capnhatdongho.libs.FeatureLayerDTG;
 import vinhlong.ditagis.com.capnhatdongho.utities.Popup;
 
@@ -48,25 +49,25 @@ import vinhlong.ditagis.com.capnhatdongho.utities.Popup;
  */
 
 public class TraCuu {
-    private ServiceFeatureTable serviceFeatureTable;
+    private ServiceFeatureTable donghoKHSFT;
     private MainActivity mainActivity;
-    private FeatureLayerDTG featureLayerDTG;
+    private FeatureLayerDTG dongHoKHDTG;
     private TraCuuChiTietDiemDanhGiaAdapter traCuuChiTietDiemDanhGiaAdapter;
     private List<Feature> table_feature;
-    private Popup popupInfos;
+    private Popup popup;
+    private DApplication dApplication;
 
-
-    public TraCuu(FeatureLayerDTG featureLayerDTG, MainActivity mainActivity) {
-        this.featureLayerDTG = featureLayerDTG;
-        serviceFeatureTable = (ServiceFeatureTable) featureLayerDTG.getFeatureLayer().getFeatureTable();
+    public TraCuu(MainActivity mainActivity,Popup popup){
         this.mainActivity = mainActivity;
+        this.popup = popup;
+        this.dApplication = (DApplication) mainActivity.getApplication();
     }
-
-    public void setPopupInfos(Popup popupInfos) {
-        this.popupInfos = popupInfos;
+    private void initLayer(){
+        this.dongHoKHDTG = this.dApplication.getDongHoKHDTG();
+        this.donghoKHSFT = (ServiceFeatureTable) dongHoKHDTG.getFeatureLayer().getFeatureTable();
     }
-
     public void start() {
+        initLayer();
         final AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity, android.R.style.Theme_Holo_Light_NoActionBar_Fullscreen);
         final View layout_table_tracuu = mainActivity.getLayoutInflater().inflate(R.layout.layout_title_listview_button, null);
         ListView listView = (ListView) layout_table_tracuu.findViewById(R.id.listview);
@@ -94,17 +95,14 @@ public class TraCuu {
                 query();
             }
         });
-
-
     }
-
     private void query() {
         List<String> params = new ArrayList<>();
         List<TraCuuChiTietDiemDanhGiaAdapter.Item> items = traCuuChiTietDiemDanhGiaAdapter.getItems();
         for (TraCuuChiTietDiemDanhGiaAdapter.Item item : items) {
             if (item.getValue() != null) {
                 String whereClause = null;
-                Domain domain = serviceFeatureTable.getField(item.getFieldName()).getDomain();
+                Domain domain = donghoKHSFT.getField(item.getFieldName()).getDomain();
                 Object codeDomain = null;
                 if (domain != null) {
                     List<CodedValue> codedValues = ((CodedValueDomain) domain).getCodedValues();
@@ -185,13 +183,12 @@ public class TraCuu {
                 Feature selectedFeature = getSelectedFeature(item.getObjectID());
                 if (selectedFeature != null) {
                     dialog.dismiss();
-                    popupInfos.setFeatureLayerDTG(featureLayerDTG);
-                    popupInfos.showPopup((ArcGISFeature) selectedFeature);
+                    popup.showPopup((ArcGISFeature) selectedFeature);
                 }
             }
         });
         TextView txtTongItem = (TextView) layout_table_tracuu.findViewById(R.id.txtTongItem);
-        new QueryDiemDanhGiaAsync(mainActivity, serviceFeatureTable,txtTongItem, adapter, new QueryDiemDanhGiaAsync.AsyncResponse() {
+        new QueryDongHoKhachHangAsync(mainActivity, donghoKHSFT,txtTongItem, adapter, new QueryDongHoKhachHangAsync.AsyncResponse() {
             public void processFinish(List<Feature> features) {
                 table_feature = features;
             }
@@ -246,7 +243,7 @@ public class TraCuu {
         final LinearLayout layoutSpin = layout.findViewById(R.id.layout_edit_viewmoreinfo_Spinner);
         final Spinner spin = layout.findViewById(R.id.spin_edit_viewmoreinfo);
 
-        final Domain domain = serviceFeatureTable.getField(item.getFieldName()).getDomain();
+        final Domain domain = donghoKHSFT.getField(item.getFieldName()).getDomain();
         if (domain != null) {
             layoutSpin.setVisibility(View.VISIBLE);
             List<CodedValue> codedValues = ((CodedValueDomain) domain).getCodedValues();
@@ -371,8 +368,8 @@ public class TraCuu {
 
     private void insertQueryField() {
         List<TraCuuChiTietDiemDanhGiaAdapter.Item> items = new ArrayList<>();
-        String[] queryFields = featureLayerDTG.getQueryFields();
-        List<Field> fields = serviceFeatureTable.getFields();
+        String[] queryFields = dongHoKHDTG.getQueryFields();
+        List<Field> fields = donghoKHSFT.getFields();
         for (String queryField : queryFields) {
             for (Field field : fields) {
                 if (field.getName().equals(queryField)) {

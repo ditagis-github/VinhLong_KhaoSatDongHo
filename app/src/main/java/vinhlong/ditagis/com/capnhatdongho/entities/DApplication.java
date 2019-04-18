@@ -5,69 +5,44 @@ import android.location.Location;
 
 import com.esri.arcgisruntime.data.ArcGISFeature;
 import com.esri.arcgisruntime.geometry.Geometry;
+import com.esri.arcgisruntime.layers.FeatureLayer;
 
 
 import java.net.URISyntaxException;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
+import vinhlong.ditagis.com.capnhatdongho.Editing.EditingVatTu;
 import vinhlong.ditagis.com.capnhatdongho.entities.entitiesDB.User;
+import vinhlong.ditagis.com.capnhatdongho.libs.FeatureLayerDTG;
 import vinhlong.ditagis.com.capnhatdongho.utities.Constant;
 
 public class DApplication extends Application {
+    private FeatureLayerDTG dongHoKHDTG;
+    private FeatureLayerDTG vatTuDHDTG;
+    private EditingVatTu editingVatTu;
 
-
-
-    private User userDangNhap;
-
-    public User getUserDangNhap() {
-        return userDangNhap;
+    public FeatureLayerDTG getDongHoKHDTG() {
+        return dongHoKHDTG;
     }
 
-    public void setUserDangNhap(User userDangNhap) {
-        this.userDangNhap = userDangNhap;
+    public void setDongHoKHDTG(FeatureLayerDTG dongHoKHDTG) {
+        this.dongHoKHDTG = dongHoKHDTG;
     }
 
-
-    private short loaiVatTu;
-
-    public short getLoaiVatTu() {
-        return loaiVatTu;
+    public FeatureLayerDTG getVatTuDHDTG() {
+        return vatTuDHDTG;
     }
 
-    public void setLoaiVatTu(short loaiVatTu) {
-        this.loaiVatTu = loaiVatTu;
+    public void setVatTuDHDTG(FeatureLayerDTG vatTuDHDTG) {
+        this.vatTuDHDTG = vatTuDHDTG;
     }
 
-
-    private Geometry geometry;
-
-    public Geometry getGeometry() {
-        return geometry;
+    public EditingVatTu getEditingVatTu() {
+        return editingVatTu;
     }
 
-    public void setGeometry(Geometry geometry) {
-        this.geometry = geometry;
-    }
-
-    private ArcGISFeature arcGISFeature;
-
-    public ArcGISFeature getArcGISFeature() {
-        return arcGISFeature;
-    }
-
-    public void setArcGISFeature(ArcGISFeature arcGISFeature) {
-        this.arcGISFeature = arcGISFeature;
-    }
-
-
-    private Location mLocation;
-
-    public Location getmLocation() {
-        return mLocation;
-    }
-
-    public void setmLocation(Location mLocation) {
-        this.mLocation = mLocation;
+    public void setEditingVatTu(EditingVatTu editingVatTu) {
+        this.editingVatTu = editingVatTu;
     }
 }

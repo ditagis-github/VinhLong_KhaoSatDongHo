@@ -12,12 +12,12 @@ import vinhlong.ditagis.com.capnhatdongho.adapter.ChiTietMauKiemNghiemAdapter;
  * Created by ThanLe on 4/16/2018.
  */
 
-public class NotifyChiTietMauKiemNghiemAdapterChangeAsync extends AsyncTask<ChiTietMauKiemNghiemAdapter, Void, Void> {
+public class NotifyVatTuDongHoAdapterChangeAsync extends AsyncTask<ChiTietMauKiemNghiemAdapter, Void, Void> {
     private ProgressDialog dialog;
     private Context mContext;
     private Activity mActivity;
 
-    public NotifyChiTietMauKiemNghiemAdapterChangeAsync(Activity activity) {
+    public NotifyVatTuDongHoAdapterChangeAsync(Activity activity) {
         mActivity =activity;
         dialog = new ProgressDialog(mActivity, android.R.style.Theme_Material_Dialog_Alert);
     }

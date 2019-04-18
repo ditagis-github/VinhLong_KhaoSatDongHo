@@ -29,7 +29,7 @@ import java.util.TimeZone;
 
 import vinhlong.ditagis.com.capnhatdongho.adapter.DanhSachDongHoKHAdapter;
 import vinhlong.ditagis.com.capnhatdongho.adapter.ThongKeAdapter;
-import vinhlong.ditagis.com.capnhatdongho.async.QueryDiemDanhGiaAsync;
+import vinhlong.ditagis.com.capnhatdongho.async.QueryDongHoKhachHangAsync;
 import vinhlong.ditagis.com.capnhatdongho.entities.entitiesDB.LayerInfoDTG;
 import vinhlong.ditagis.com.capnhatdongho.entities.entitiesDB.ListObjectDB;
 import vinhlong.ditagis.com.capnhatdongho.utities.Constant;
@@ -222,9 +222,8 @@ public class ThongKeActivity extends AppCompatActivity {
             }
         });
         if (serviceFeatureTable != null)
-            new QueryDiemDanhGiaAsync(this, serviceFeatureTable, txtTongItem, adapter, new QueryDiemDanhGiaAsync.AsyncResponse() {
-                public void processFinish(List<Feature> features) {
-                }
+            new QueryDongHoKhachHangAsync(this, serviceFeatureTable, txtTongItem, adapter, features -> {
+
             }).execute(whereClause);
     }
 
