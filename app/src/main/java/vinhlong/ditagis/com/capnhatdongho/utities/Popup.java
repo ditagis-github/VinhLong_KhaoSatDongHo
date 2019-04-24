@@ -1,7 +1,10 @@
 package vinhlong.ditagis.com.capnhatdongho.utities;
 
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
@@ -38,6 +41,7 @@ import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.view.Callout;
 import com.esri.arcgisruntime.mapping.view.MapView;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -45,12 +49,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import vinhlong.ditagis.com.capnhatdongho.Editing.EditingVatTu;
 import vinhlong.ditagis.com.capnhatdongho.MainActivity;
 import vinhlong.ditagis.com.capnhatdongho.R;
 import vinhlong.ditagis.com.capnhatdongho.adapter.FeatureViewMoreInfoAdapter;
 import vinhlong.ditagis.com.capnhatdongho.async.EditAsync;
 import vinhlong.ditagis.com.capnhatdongho.async.NotifyDataSetChangeAsync;
+import vinhlong.ditagis.com.capnhatdongho.async.ViewAttachmentAsync;
 import vinhlong.ditagis.com.capnhatdongho.entities.DApplication;
 import vinhlong.ditagis.com.capnhatdongho.libs.FeatureLayerDTG;
 
@@ -130,12 +134,7 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
         if (dongHoKHDTG.getAction().isEdit()) {
             ImageButton imgBtn_ViewMoreInfo = (ImageButton) linearLayout.findViewById(R.id.imgBtn_ViewMoreInfo);
             imgBtn_ViewMoreInfo.setVisibility(View.VISIBLE);
-            imgBtn_ViewMoreInfo.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    viewMoreInfo();
-                }
-            });
+            imgBtn_ViewMoreInfo.setOnClickListener(v -> viewMoreInfo());
 
             ImageButton imgBtn_viewtablethoigian = (ImageButton) linearLayout.findViewById(R.id.imgBtn_viewtablethoigian);
             imgBtn_viewtablethoigian.setVisibility(View.VISIBLE);
@@ -154,13 +153,23 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
                 }
             });
         }
+        if (dongHoKHDTG.getAction().isEdit() && featureDHKH.canEditAttachments()) {
+            ImageButton imgBtn_takePics = (ImageButton) linearLayout.findViewById(R.id.imgBtn_takePics);
+            imgBtn_takePics.setVisibility(View.VISIBLE);
+            imgBtn_takePics.setOnClickListener(v -> updateAttachment(featureDHKH));
+        }
+        if (this.featureDHKH.canEditAttachments()) {
+            ImageButton imgBtn_view_attachment = (ImageButton) linearLayout.findViewById(R.id.imgBtn_view_attachment);
+            imgBtn_view_attachment.setVisibility(View.VISIBLE);
+            imgBtn_view_attachment.setOnClickListener(v -> viewAttachment(featureDHKH));
+        }
         linearLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         Envelope envelope = featureDHKH.getGeometry().getExtent();
         double scale = mMapView.getMapScale();
         double minScale = dongHoKHDTG.getFeatureLayer().getMinScale();
         if (scale > minScale) scale = minScale;
         mMapView.setViewpointGeometryAsync(envelope, 0);
-        mMapView.setViewpointScaleAsync(scale);
+//        mMapView.setViewpointScaleAsync(scale);
         mCallout.setLocation(envelope.getCenter());
         mCallout.setContent(linearLayout);
         this.runOnUiThread(() -> {
@@ -168,6 +177,20 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
             mCallout.show();
         });
         return linearLayout;
+    }
+    public void updateAttachment(ArcGISFeature featureDHKH) {
+        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        File photo = ImageFile.getFile(mainActivity);
+        Uri uri = Uri.fromFile(photo);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+        dApplication.setSelectedFeature(featureDHKH);
+        dApplication.setUri(uri);
+        mainActivity.startActivityForResult(cameraIntent, Constant.REQUEST.ID_UPDATE_ATTACHMENT);
+    }
+
+    private void viewAttachment(ArcGISFeature featureDHKH) {
+        ViewAttachmentAsync viewAttachmentAsync = new ViewAttachmentAsync(mainActivity, featureDHKH);
+        viewAttachmentAsync.execute();
     }
 
     private void viewMoreInfo() {
@@ -179,6 +202,7 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
         lstView.setAdapter(adapter);
         lstView.setOnItemClickListener((parent, view, position, id) -> edit(parent, view, position, id));
         String[] updateFields = dongHoKHDTG.getUpdateFields();
+        String[] unedit_Fields = mainActivity.getResources().getStringArray(R.array.unedit_DHKH_Fields);
         String typeIdField = featureDHKH.getFeatureTable().getTypeIdField();
         for (Field field : this.featureDHKH.getFeatureTable().getFields()) {
             Object value = attr.get(field.getName());
@@ -220,6 +244,12 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
                     }
                 }
             }
+            for (String unedit_Field : unedit_Fields) {
+                if (unedit_Field.toUpperCase().equals(item.getFieldName().toUpperCase())) {
+                    item.setEdit(false);
+                    break;
+                }
+            }
             item.setFieldType(field.getFieldType());
             adapter.add(item);
             adapter.notifyDataSetChanged();
@@ -239,6 +269,7 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
             try {
                 editAsync.execute(adapter).get();
                 refressPopup();
+                dialog.dismiss();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {

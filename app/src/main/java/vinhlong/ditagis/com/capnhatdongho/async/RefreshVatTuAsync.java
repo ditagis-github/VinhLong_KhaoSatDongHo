@@ -13,6 +13,7 @@ import com.esri.arcgisruntime.data.ServiceFeatureTable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import vinhlong.ditagis.com.capnhatdongho.R;
@@ -30,6 +31,7 @@ public class RefreshVatTuAsync extends AsyncTask<String, List<VatTuApdapter.VatT
     private ServiceFeatureTable vatTuTable;
     private VatTuApdapter vatTuApdapter;
     private Action action;
+    private ArrayList<Feature> dmVatTuFeatures;
 
     public interface AsyncResponse {
         void processFinish(List<Feature> features);
@@ -37,13 +39,14 @@ public class RefreshVatTuAsync extends AsyncTask<String, List<VatTuApdapter.VatT
 
     private AsyncResponse delegate;
 
-    public RefreshVatTuAsync(Context context, ServiceFeatureTable vatTuTable, VatTuApdapter vatTuApdapter, Action action, AsyncResponse asyncResponse) {
+    public RefreshVatTuAsync(Context context, ServiceFeatureTable vatTuTable, ArrayList<Feature> features, VatTuApdapter vatTuApdapter, Action action, AsyncResponse asyncResponse) {
         this.delegate = asyncResponse;
         mContext = context;
         this.vatTuTable = vatTuTable;
         this.vatTuApdapter = vatTuApdapter;
         dialog = new ProgressDialog(context, android.R.style.Theme_Material_Dialog_Alert);
         this.action = action;
+        this.dmVatTuFeatures = features;
     }
 
     @Override
@@ -70,14 +73,31 @@ public class RefreshVatTuAsync extends AsyncTask<String, List<VatTuApdapter.VatT
 
                 while (iterator.hasNext()) {
                     Feature feature = (Feature) iterator.next();
-                    features.add(feature);
-                    feature.getAttributes().get("OBJECTID");
                     VatTuApdapter.VatTu vatTu = new VatTuApdapter.VatTu();
-                    vatTu.setOBJECTID(feature.getAttributes().get("OBJECTID").toString());
-                    vatTu.setdBDongHoNuoc(getValueAttributes(feature, Constant.VatTuFields.DBDongHo));
-                    vatTu.setTenMau(getValueAttributes(feature, Constant.VatTuFields.MaKhachHang));
+                    Object maVatTu = feature.getAttributes().get(Constant.VatTuFields.MaVatTu);
+                    Object soLuong = feature.getAttributes().get(Constant.VatTuFields.SoLuong);
+                    Object objectID = feature.getAttributes().get(Constant.LayerFields.OBJECTID);
+                    vatTu.setObjectID(objectID.toString());
+                    if (soLuong != null) {
+                        vatTu.setSoLuongVatTu(soLuong.toString());
+                    }
+                    if (maVatTu != null) {
+                        Feature loaiVatTu = getLoaiVatTu(maVatTu.toString());
+                        if (loaiVatTu != null) {
+                            Object donViTinh = loaiVatTu.getAttributes().get(Constant.LoaiVatTuFields.DonViTinh);
+                            Object giaVatTu = loaiVatTu.getAttributes().get(Constant.LoaiVatTuFields.GiaVatTu);
+                            Object tenVatTu = loaiVatTu.getAttributes().get(Constant.LoaiVatTuFields.TenVatTu);
+                            if (donViTinh != null)
+                                vatTu.setDonViTinh(donViTinh.toString());
+                            if (giaVatTu != null)
+                                vatTu.setDonGiaVatTu(giaVatTu.toString());
+                            if (tenVatTu != null)
+                                vatTu.setTenVatTu(tenVatTu.toString());
+                        }
+                    }
                     vatTu.setView(action.isView());
                     vatTus.add(vatTu);
+                    features.add(feature);
                 }
                 delegate.processFinish(features);
                 publishProgress(vatTus);
@@ -88,6 +108,19 @@ public class RefreshVatTuAsync extends AsyncTask<String, List<VatTuApdapter.VatT
                 e.printStackTrace();
             }
         });
+        return null;
+    }
+
+    private Feature getLoaiVatTu(String maVatTu) {
+        if (maVatTu != null) {
+            for (Feature feature : this.dmVatTuFeatures) {
+                Map<String, Object> attributes = feature.getAttributes();
+                Object maVT = attributes.get(Constant.VatTuFields.MaVatTu);
+                if (maVT != null && maVT.toString().equals(maVatTu)) {
+                    return feature;
+                }
+            }
+        }
         return null;
     }
 

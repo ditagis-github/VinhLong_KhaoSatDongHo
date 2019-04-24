@@ -6,6 +6,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -14,6 +17,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -61,12 +65,17 @@ import com.esri.arcgisruntime.mapping.view.LocationDisplay;
 import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.util.ListenableList;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import vinhlong.ditagis.com.capnhatdongho.Editing.EditingVatTu;
 import vinhlong.ditagis.com.capnhatdongho.adapter.DanhSachDongHoKHAdapter;
 import vinhlong.ditagis.com.capnhatdongho.async.PreparingAsycn;
+import vinhlong.ditagis.com.capnhatdongho.async.UpdateAttachmentAsync;
 import vinhlong.ditagis.com.capnhatdongho.entities.DApplication;
 import vinhlong.ditagis.com.capnhatdongho.entities.entitiesDB.LayerInfoDTG;
 import vinhlong.ditagis.com.capnhatdongho.entities.entitiesDB.ListObjectDB;
@@ -87,7 +96,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MapView mMapView;
     private ArcGISMap mMap;
     private Callout mCallout;
-    private List<FeatureLayerDTG> mFeatureLayerDTGS;
     private MapViewHandler mMapViewHandler;
     private static double LATITUDE = 10.205155129125103;//10.10299;
     private static double LONGTITUDE = 105.94397118543621;//105.9295304;
@@ -127,6 +135,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setOnClickListener();
         startGPS();
         startSignIn();
+        mApplication.setMainActivity(this);
     }
 
     private void startGPS() {
@@ -321,10 +330,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void setFeatureService() {
         if (ListObjectDB.getInstance().getLstFeatureLayerDTG().size() == 0) return;
-        mFeatureLayerDTGS = new ArrayList<>();
         popup = new Popup(MainActivity.this, mMapView, mCallout);
         mMapViewHandler = new MapViewHandler(mMapView, this, popup);
-        EditingVatTu editingVatTu = new EditingVatTu(this);
+        EditingVatTu editingVatTu = new EditingVatTu(this,mMapView);
         mApplication.setEditingVatTu(editingVatTu);
         traCuu = new TraCuu(this,popup);
         for (LayerInfoDTG layerInfoDTG : ListObjectDB.getInstance().getLstFeatureLayerDTG()) {
@@ -370,6 +378,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 featureLayerDTG.setQueryFields(getFieldsDTG(layerInfoDTG.getOutField()));
                 featureLayerDTG.setUpdateFields(getFieldsDTG(layerInfoDTG.getOutField()));
                 if (layerInfoDTG.getId() != null && layerInfoDTG.getId().equals(Constant.IDLayer.DHKHLYR)) {
+
                     popup.setDongHoKHDTG(featureLayerDTG);
                     featureLayer.addDoneLoadingListener(() -> {
                         addCheckBox_LayerDHKH(featureLayer);
@@ -384,16 +393,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if (layerInfoDTG.getId() != null && layerInfoDTG.getId().equals(Constant.IDLayer.DMVATTUTBL)) {
                     featureLayer.addDoneLoadingListener(() -> {
                         if(featureLayer.getLoadStatus().equals(LoadStatus.LOADED)){
-                            mApplication.getEditingVatTu().setDmVatTu(serviceFeatureTable);
+                            mApplication.getEditingVatTu().setDmVatTuSFT(serviceFeatureTable);
                         }
                     });
                 }
                 mMap.getOperationalLayers().add(featureLayer);
             }
-        }
-        if (mFeatureLayerDTGS.size() == 0) {
-            MySnackBar.make(mMapView, getString(R.string.no_access_permissions), true);
-//            return;
         }
     }
     private void addCheckBox_LayerDHKH(FeatureLayer featureLayer) {
@@ -648,7 +653,58 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
         }
     }
+    @Nullable
+    private Bitmap getBitmap(String path) {
 
+        Uri uri = Uri.fromFile(new File(path));
+        InputStream in;
+        try {
+            final int IMAGE_MAX_SIZE = 1200000; // 1.2MP
+            in = getContentResolver().openInputStream(uri);
+
+            // Decode image size
+            BitmapFactory.Options o = new BitmapFactory.Options();
+            o.inJustDecodeBounds = true;
+            BitmapFactory.decodeStream(in, null, o);
+            assert in != null;
+            in.close();
+
+
+            int scale = 1;
+            while ((o.outWidth * o.outHeight) * (1 / Math.pow(scale, 2)) > IMAGE_MAX_SIZE) {
+                scale++;
+            }
+            Bitmap bitmap;
+            in = getContentResolver().openInputStream(uri);
+            if (scale > 1) {
+                scale--;
+                // scale to max possible inSampleSize that still yields an image
+                // larger than target
+                o = new BitmapFactory.Options();
+                o.inSampleSize = scale;
+                bitmap = BitmapFactory.decodeStream(in, null, o);
+                // resize to desired dimensions
+                int height = bitmap.getHeight();
+                int width = bitmap.getWidth();
+                double y = Math.sqrt(IMAGE_MAX_SIZE / (((double) width) / height));
+                double x = (y / height) * width;
+
+                Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, (int) x, (int) y, true);
+                bitmap.recycle();
+                bitmap = scaledBitmap;
+
+                System.gc();
+            } else {
+                bitmap = BitmapFactory.decodeStream(in);
+            }
+            assert in != null;
+            in.close();
+            return bitmap;
+        } catch (IOException e) {
+            Log.e("", e.getMessage(), e);
+            return null;
+        }
+    }
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         try {
             String returnedResult = data.getExtras().get(getString(R.string.ket_qua_objectid)).toString();
@@ -659,6 +715,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         switch (requestCode) {
+            case Constant.REQUEST.ID_UPDATE_ATTACHMENT:
+                if (resultCode == RESULT_OK) {
+                    Uri uri = mApplication.getUri();
+                    if (uri != null) {
+                        Bitmap bitmap = getBitmap(uri.getPath());
+                        try {
+                            if (bitmap != null) {
+                                Matrix matrix = new Matrix();
+                                Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                                rotatedBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+                                byte[] image = outputStream.toByteArray();
+                                outputStream.close();
+                                Toast.makeText(this, "Đã lưu ảnh", Toast.LENGTH_SHORT).show();
+                                UpdateAttachmentAsync updateAttachmentAsync = new UpdateAttachmentAsync(this, mApplication.getSelectedFeature(), image);
+                                updateAttachmentAsync.execute();
+                            }
+                        } catch (Exception ignored) {
+                        }
+                    }
+                } else if (resultCode == RESULT_CANCELED) {
+                    MySnackBar.make(mMapView, "Hủy chụp ảnh", false);
+                } else {
+                    MySnackBar.make(mMapView, "Lỗi khi chụp ảnh", false);
+                }
+                break;
             case Constant.REQUEST_LOGIN:
                 if (Activity.RESULT_OK != resultCode) {
                     finish();

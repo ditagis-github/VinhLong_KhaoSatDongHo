@@ -77,33 +77,29 @@ public class QueryDongHoKhachHangAsync extends AsyncTask<String, List<DanhSachDo
         String queryClause = params[0];
         queryParameters.setWhereClause(queryClause);
         final ListenableFuture<FeatureQueryResult> queryResultListenableFuture = serviceFeatureTable.queryFeaturesAsync(queryParameters, ServiceFeatureTable.QueryFeatureFields.LOAD_ALL);
-        queryResultListenableFuture.addDoneListener(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    FeatureQueryResult result = queryResultListenableFuture.get();
-                    Iterator iterator = result.iterator();
-
-                    while (iterator.hasNext()) {
-                        Feature feature = (Feature) iterator.next();
-                        DanhSachDongHoKHAdapter.Item item = new DanhSachDongHoKHAdapter.Item();
-                        Map<String, Object> attributes = feature.getAttributes();
-                        item.setObjectID(attributes.get(mContext.getString(R.string.OBJECTID)).toString());
-                        item.setDbDongHoNuoc(attributes.get(mContext.getString(R.string.IDDIEMDANHGIA)).toString());
-                        String format_date = Constant.DATE_FORMAT.format(((Calendar) attributes.get(Constant.NGAY_CAP_NHAT)).getTime());
-                        item.setMaKhachHang(format_date);
-                        item.setTenThueBao(attributes.get(mContext.getString(R.string.DIACHI)).toString());
-                        items.add(item);
-                        features.add(feature);
-                    }
-                    delegate.processFinish(features);
-                    publishProgress(items);
-
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
+        queryResultListenableFuture.addDoneListener(() -> {
+            try {
+                FeatureQueryResult result = queryResultListenableFuture.get();
+                Iterator iterator = result.iterator();
+                while (iterator.hasNext()) {
+                    Feature feature = (Feature) iterator.next();
+                    DanhSachDongHoKHAdapter.Item item = new DanhSachDongHoKHAdapter.Item();
+                    Map<String, Object> attributes = feature.getAttributes();
+                    item.setObjectID(Constant.LayerFields.OBJECTID);
+                    item.setDbDongHoNuoc(attributes.get(mContext.getString(R.string.IDDIEMDANHGIA)).toString());
+                    String format_date = Constant.DATE_FORMAT.format(((Calendar) attributes.get(Constant.NGAY_CAP_NHAT)).getTime());
+                    item.setMaKhachHang(format_date);
+                    item.setTenThueBao(attributes.get(mContext.getString(R.string.DIACHI)).toString());
+                    items.add(item);
+                    features.add(feature);
                 }
+                delegate.processFinish(features);
+                publishProgress(items);
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
             }
         });
         return null;

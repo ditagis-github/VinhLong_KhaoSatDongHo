@@ -1,21 +1,14 @@
 package vinhlong.ditagis.com.capnhatdongho.entities;
 
 import android.app.Application;
-import android.location.Location;
+import android.net.Uri;
 
 import com.esri.arcgisruntime.data.ArcGISFeature;
-import com.esri.arcgisruntime.geometry.Geometry;
-import com.esri.arcgisruntime.layers.FeatureLayer;
 
-
-import java.net.URISyntaxException;
-
-import io.socket.client.IO;
-import io.socket.client.Socket;
 import vinhlong.ditagis.com.capnhatdongho.Editing.EditingVatTu;
+import vinhlong.ditagis.com.capnhatdongho.MainActivity;
 import vinhlong.ditagis.com.capnhatdongho.entities.entitiesDB.User;
 import vinhlong.ditagis.com.capnhatdongho.libs.FeatureLayerDTG;
-import vinhlong.ditagis.com.capnhatdongho.utities.Constant;
 
 public class DApplication extends Application {
     private FeatureLayerDTG dongHoKHDTG;
@@ -44,5 +37,46 @@ public class DApplication extends Application {
 
     public void setEditingVatTu(EditingVatTu editingVatTu) {
         this.editingVatTu = editingVatTu;
+    }
+
+    // user
+    private User user;
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    private MainActivity mainActivity;
+
+    public MainActivity getMainActivity() {
+        return mainActivity;
+    }
+
+    public void setMainActivity(MainActivity mainActivity) {
+        this.mainActivity = mainActivity;
+    }
+
+    // URI
+    private Uri uri;
+    private ArcGISFeature selectedFeature;
+
+    public Uri getUri() {
+        return uri;
+    }
+
+    public void setUri(Uri uri) {
+        this.uri = uri;
+    }
+
+    public ArcGISFeature getSelectedFeature() {
+        return selectedFeature;
+    }
+
+    public void setSelectedFeature(ArcGISFeature selectedFeature) {
+        this.selectedFeature = selectedFeature;
     }
 }

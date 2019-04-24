@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
+import com.esri.arcgisruntime.data.ArcGISFeature;
 import com.esri.arcgisruntime.data.Feature;
 import com.esri.arcgisruntime.data.FeatureEditResult;
 import com.esri.arcgisruntime.data.ServiceFeatureTable;
@@ -13,32 +14,44 @@ import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.tasks.geocode.GeocodeResult;
 import com.esri.arcgisruntime.tasks.geocode.LocatorTask;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import vinhlong.ditagis.com.capnhatdongho.MainActivity;
+import vinhlong.ditagis.com.capnhatdongho.R;
+import vinhlong.ditagis.com.capnhatdongho.entities.DApplication;
 import vinhlong.ditagis.com.capnhatdongho.utities.Constant;
 import vinhlong.ditagis.com.capnhatdongho.utities.MySnackBar;
 
-public class SingleTapAdddFeatureAsync extends AsyncTask<Point, Void, Void> {
+public class SingleTapAdddFeatureAsync extends AsyncTask<Point, ArcGISFeature, Void> {
     private ProgressDialog mDialog;
     private ServiceFeatureTable dongHoKHSFT;
     private MapView mapView;
     private LocatorTask locatorTask = new LocatorTask("http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer");
+    private DApplication dApplication;
+    private SingleTapAdddFeatureAsync.AsyncResponse delegate;
+    private MainActivity mainActivity;
 
+    public interface AsyncResponse {
+        void processFinish(ArcGISFeature features);
+    }
 
-    public SingleTapAdddFeatureAsync(MainActivity mainActivity, MapView mapView, ServiceFeatureTable hongHoKHSFT) {
+    public SingleTapAdddFeatureAsync(MainActivity mainActivity, MapView mapView, ServiceFeatureTable hongHoKHSFT, SingleTapAdddFeatureAsync.AsyncResponse asyncResponse) {
         mDialog = new ProgressDialog(mainActivity, android.R.style.Theme_Material_Dialog_Alert);
         this.dongHoKHSFT = hongHoKHSFT;
         this.mapView = mapView;
+        this.dApplication = (DApplication) mainActivity.getApplication();
+        this.delegate = asyncResponse;
+        this.mainActivity = mainActivity;
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        mDialog.setMessage("Đang xử lý...");
+        mDialog.setMessage(mainActivity.getString(R.string.PROCESSING));
         mDialog.setCancelable(false);
         mDialog.show();
     }
@@ -71,14 +84,15 @@ public class SingleTapAdddFeatureAsync extends AsyncTask<Point, Void, Void> {
     }
 
     private void notifyError() {
-        MySnackBar.make(mapView, "Đã xảy ra lỗi", false);
-        if (mDialog != null && mDialog.isShowing()) {
-            mDialog.dismiss();
-        }
-
+        publishProgress();
+        MySnackBar.make(mapView,mainActivity.getString(R.string.ERROR_OCCURRED) , false);
     }
 
     private void addFeatureAsync(Feature feature) {
+        Calendar currentTime = Calendar.getInstance();
+        feature.getAttributes().put(Constant.DongHoKhachHangFields.NgayCapNhat, currentTime);
+        feature.getAttributes().put(Constant.DongHoKhachHangFields.NguoiCapNhat, this.dApplication.getUser().getUserName());
+
         ListenableFuture<Void> voidListenableFuture = this.dongHoKHSFT.addFeatureAsync(feature);
         voidListenableFuture.addDoneListener(() -> {
             try {
@@ -88,10 +102,9 @@ public class SingleTapAdddFeatureAsync extends AsyncTask<Point, Void, Void> {
                     try {
                         List<FeatureEditResult> featureEditResults = listListenableEditAsync.get();
                         if (featureEditResults.size() > 0) {
-                            if (mDialog != null && mDialog.isShowing()) {
-                                mDialog.dismiss();
-                            }
-                        }
+                            publishProgress((ArcGISFeature) feature);
+                            delegate.processFinish((ArcGISFeature) feature);
+                        } else publishProgress();
                     } catch (InterruptedException | ExecutionException e) {
                         notifyError();
                         e.printStackTrace();
@@ -101,12 +114,15 @@ public class SingleTapAdddFeatureAsync extends AsyncTask<Point, Void, Void> {
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
-
         });
     }
 
     @Override
-    protected void onProgressUpdate(Void... values) {
+    protected void onProgressUpdate(ArcGISFeature... values) {
+        if (mDialog != null && mDialog.isShowing()) {
+            mDialog.dismiss();
+        }
+        mainActivity.addFeatureClose();
         super.onProgressUpdate(values);
 
     }

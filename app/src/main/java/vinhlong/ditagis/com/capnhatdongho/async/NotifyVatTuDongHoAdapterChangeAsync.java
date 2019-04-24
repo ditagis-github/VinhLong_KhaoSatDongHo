@@ -6,13 +6,13 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import vinhlong.ditagis.com.capnhatdongho.R;
-import vinhlong.ditagis.com.capnhatdongho.adapter.ChiTietMauKiemNghiemAdapter;
+import vinhlong.ditagis.com.capnhatdongho.adapter.ChiTietVatTuAdapter;
 
 /**
  * Created by ThanLe on 4/16/2018.
  */
 
-public class NotifyVatTuDongHoAdapterChangeAsync extends AsyncTask<ChiTietMauKiemNghiemAdapter, Void, Void> {
+public class NotifyVatTuDongHoAdapterChangeAsync extends AsyncTask<ChiTietVatTuAdapter, Void, Void> {
     private ProgressDialog dialog;
     private Context mContext;
     private Activity mActivity;
@@ -33,8 +33,8 @@ public class NotifyVatTuDongHoAdapterChangeAsync extends AsyncTask<ChiTietMauKie
     }
 
     @Override
-    protected Void doInBackground(ChiTietMauKiemNghiemAdapter... params) {
-        final ChiTietMauKiemNghiemAdapter adapter = params[0];
+    protected Void doInBackground(ChiTietVatTuAdapter... params) {
+        final ChiTietVatTuAdapter adapter = params[0];
         try {
             Thread.sleep(500);
             mActivity.runOnUiThread(new Runnable() {

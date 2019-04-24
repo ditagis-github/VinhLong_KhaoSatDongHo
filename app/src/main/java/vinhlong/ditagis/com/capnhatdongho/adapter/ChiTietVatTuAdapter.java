@@ -18,22 +18,22 @@ import java.util.List;
 import vinhlong.ditagis.com.capnhatdongho.R;
 
 
-public class ChiTietMauKiemNghiemAdapter extends ArrayAdapter<ChiTietMauKiemNghiemAdapter.Item> {
+public class ChiTietVatTuAdapter extends ArrayAdapter<ChiTietVatTuAdapter.Item> {
     private Context context;
-    private List<ChiTietMauKiemNghiemAdapter.Item> items;
+    private List<ChiTietVatTuAdapter.Item> items;
 
 
-    public ChiTietMauKiemNghiemAdapter(Context context, List<ChiTietMauKiemNghiemAdapter.Item> items) {
+    public ChiTietVatTuAdapter(Context context, List<ChiTietVatTuAdapter.Item> items) {
         super(context, 0, items);
         this.context = context;
         this.items = items;
     }
 
-    public List<ChiTietMauKiemNghiemAdapter.Item> getItems() {
+    public List<ChiTietVatTuAdapter.Item> getItems() {
         return items;
     }
 
-    public void setItems(List<ChiTietMauKiemNghiemAdapter.Item> items) {
+    public void setItems(List<ChiTietVatTuAdapter.Item> items) {
         this.items = items;
     }
 
@@ -58,9 +58,9 @@ public class ChiTietMauKiemNghiemAdapter extends ArrayAdapter<ChiTietMauKiemNghi
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.item_text_text_image, null);
         }
-        ChiTietMauKiemNghiemAdapter.Item item = items.get(position);
-        TextView textViewItem1 = (TextView) convertView.findViewById(R.id.txtItem1);
-        TextView textViewItem2 = (TextView) convertView.findViewById(R.id.txtItem2);
+        ChiTietVatTuAdapter.Item item = items.get(position);
+        TextView textViewItem1 = (TextView) convertView.findViewById(R.id.txtTenVatTu);
+        TextView textViewItem2 = (TextView) convertView.findViewById(R.id.txtSoLuongVatTu);
         ImageView imageView = (ImageView) convertView.findViewById(R.id.img_Item);
         textViewItem1.setText(item.getAlias());
         textViewItem2.setText(item.getValue());

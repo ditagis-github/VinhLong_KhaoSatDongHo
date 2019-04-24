@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -20,13 +21,14 @@
 
 
     </LinearLayout>
+
     <FrameLayout
 
         android:id="@+id/layout_edit_viewmoreinfo_TextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/txt_edit_viewmoreinfo"
@@ -36,6 +38,7 @@
             android:paddingLeft="20dp"
             android:text="ádfdasf"
             android:textAppearance="?android:attr/textAppearanceMedium" />
+
         <ImageView
             android:id="@+id/img_selectTime"
             android:layout_width="50dp"
@@ -44,6 +47,7 @@
             android:layout_marginRight="20dp"
             android:src="@drawable/ic_calendar" />
     </FrameLayout>
+
     <LinearLayout
         android:id="@+id/layout_edit_queryDateTime"
         android:layout_width="match_parent"
@@ -54,8 +58,9 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="15dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingBottom="15dp">
+
             <TextView
                 android:id="@+id/txt_edit_viewmoreinfoBegin"
                 android:layout_width="wrap_content"
@@ -103,6 +108,20 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/layout_edit_viewmoreinfo_AutoComplete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+        <AutoCompleteTextView
+            android:id="@+id/autoCompleteTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:text="" />
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/layout_edit_viewmoreinfo_Spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -116,7 +135,7 @@
             android:layout_margin="20dp"
             android:gravity="right"
             android:paddingLeft="20dp"
-            android:text="ádfdasf"
+            android:text=""
             android:textAppearance="?android:attr/textAppearanceMedium" />
     </LinearLayout>
 

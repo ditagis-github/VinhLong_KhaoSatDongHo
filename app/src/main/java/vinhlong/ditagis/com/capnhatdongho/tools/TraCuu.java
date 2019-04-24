@@ -42,6 +42,7 @@ import vinhlong.ditagis.com.capnhatdongho.async.NotifyTraCuuAdapterValueChangeAs
 import vinhlong.ditagis.com.capnhatdongho.async.QueryDongHoKhachHangAsync;
 import vinhlong.ditagis.com.capnhatdongho.entities.DApplication;
 import vinhlong.ditagis.com.capnhatdongho.libs.FeatureLayerDTG;
+import vinhlong.ditagis.com.capnhatdongho.utities.Constant;
 import vinhlong.ditagis.com.capnhatdongho.utities.Popup;
 
 /**
@@ -199,7 +200,7 @@ public class TraCuu {
     private Feature getSelectedFeature(String OBJECTID) {
         Feature rt_feature = null;
         for (Feature feature : table_feature) {
-            Object objectID = feature.getAttributes().get(mainActivity.getString(R.string.OBJECTID));
+            Object objectID = feature.getAttributes().get(Constant.LayerFields.OBJECTID);
             if (objectID != null && objectID.toString().equals(OBJECTID)) {
                 rt_feature = feature;
             }

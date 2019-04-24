@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_update"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="@dimen/field_horizontal_margin">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="5dp"
+                android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/txtTenVatTu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Co sắt tráng kẽm 49"
+                    android:textSize="@dimen/font_size_textview"
+                    android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/txtSoLuongVatTu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="3 (cái)"
+                    android:gravity="right"
+                    android:textSize="@dimen/font_size_textview" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="5dp"
+                android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/txtDonGiaVatTu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="6,819 (đồng)"
+                    android:textSize="@dimen/font_size_textview"/>
+
+                <TextView
+                    android:id="@+id/txtTongTien"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="20,457 (đồng)"
+                    android:gravity="right"
+                    android:textSize="@dimen/font_size_textview"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+        </LinearLayout>
+        <ImageView
+            android:id="@+id/img_Item"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_gravity="end|center"
+            android:src="@drawable/ic_right" />
+
+    </LinearLayout>
+
+
+</LinearLayout>

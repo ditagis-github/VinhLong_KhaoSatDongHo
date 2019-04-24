@@ -11,11 +11,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.prefs.PreferencesFactory;
 
 import vinhlong.ditagis.com.capnhatdongho.R;
 import vinhlong.ditagis.com.capnhatdongho.entities.DApplication;
@@ -70,11 +71,16 @@ public class NewLoginAsycn extends AsyncTask<String, Void, User> {
                 conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
                 conn.setRequestProperty("Accept", "application/json");
                 conn.setUseCaches(false);
-                OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+                OutputStream outputStream = conn.getOutputStream();
+                OutputStreamWriter wr = new OutputStreamWriter(outputStream);
                 wr.write(cred.toString());
                 wr.flush();
+                wr.close();
+                outputStream.close();
                 conn.connect();
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                InputStream inputStream = conn.getInputStream();
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
                 StringBuilder stringBuilder = new StringBuilder();
                 String line;
                 while ((line = bufferedReader.readLine()) != null) {
@@ -82,6 +88,8 @@ public class NewLoginAsycn extends AsyncTask<String, Void, User> {
                     break;
                 }
                 bufferedReader.close();
+                inputStreamReader.close();
+                inputStream.close();
                 String token = stringBuilder.toString().replace("\"", "");
                 Preference.getInstance().savePreferences(mContext.getString(R.string.preference_login_api),token);
                 if (checkAccess()) {

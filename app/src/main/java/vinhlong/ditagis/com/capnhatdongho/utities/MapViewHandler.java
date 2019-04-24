@@ -1,8 +1,6 @@
 package vinhlong.ditagis.com.capnhatdongho.utities;
 
 import android.app.Activity;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.view.MotionEvent;
 
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
@@ -19,17 +17,15 @@ import com.esri.arcgisruntime.geometry.SpatialReferences;
 import com.esri.arcgisruntime.mapping.Viewpoint;
 import com.esri.arcgisruntime.mapping.view.MapView;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.concurrent.ExecutionException;
 
 import vinhlong.ditagis.com.capnhatdongho.MainActivity;
 import vinhlong.ditagis.com.capnhatdongho.adapter.DanhSachDongHoKHAdapter;
 import vinhlong.ditagis.com.capnhatdongho.async.SingleTapAdddFeatureAsync;
 import vinhlong.ditagis.com.capnhatdongho.async.SingleTapMapViewAsync;
+import vinhlong.ditagis.com.capnhatdongho.entities.DApplication;
 
 
 /**
@@ -41,11 +37,13 @@ public class MapViewHandler extends Activity {
     private ServiceFeatureTable hongHoKHSFT;
     private Popup popup;
     private MainActivity mainActivity;
+    private DApplication dApplication;
 
     public MapViewHandler(MapView mapView, MainActivity mainActivity, Popup popup) {
         this.mapView = mapView;
         this.mainActivity = mainActivity;
         this.popup = popup;
+        this.dApplication = (DApplication) mainActivity.getApplication();
     }
 
     public void setHongHoKHSFT(ServiceFeatureTable hongHoKHSFT) {
@@ -53,9 +51,14 @@ public class MapViewHandler extends Activity {
     }
 
     public void addFeature() {
-        SingleTapAdddFeatureAsync singleTapAdddFeatureAsync = new SingleTapAdddFeatureAsync(mainActivity, mapView, this.hongHoKHSFT);
         Point add_point = mapView.getCurrentViewpoint(Viewpoint.Type.CENTER_AND_SCALE).getTargetGeometry().getExtent().getCenter();
-        singleTapAdddFeatureAsync.execute(add_point);
+        new SingleTapAdddFeatureAsync(mainActivity, mapView, this.hongHoKHSFT, feature -> {
+//            this.dApplication.getMainActivity().addFeatureClose();
+            if (feature != null) {
+                this.popup.showPopup(feature);
+            } else this.popup.dimissCallout();
+        }).execute(add_point);
+        ;
     }
 
 
@@ -67,11 +70,10 @@ public class MapViewHandler extends Activity {
 
     public void onSingleTapMapView(MotionEvent e) {
         android.graphics.Point point = new android.graphics.Point((int) e.getX(), (int) e.getY());
-        new SingleTapMapViewAsync(mainActivity, mapView, popup, feature -> {
-            if(feature != null){
+        new SingleTapMapViewAsync(mainActivity, mapView, feature -> {
+            if (feature != null) {
                 this.popup.showPopup(feature);
-            }
-            else this.popup.dimissCallout();
+            } else this.popup.dimissCallout();
         }).execute(point);
 
     }
@@ -149,7 +151,7 @@ public class MapViewHandler extends Activity {
                     Feature item = (Feature) iterator.next();
                     Map<String, Object> attributes = item.getAttributes();
                     DanhSachDongHoKHAdapter.Item dongHoKH = new DanhSachDongHoKHAdapter.Item();
-                    dongHoKH.setObjectID(attributes.get(Constant.OBJECTID).toString());
+                    dongHoKH.setObjectID(attributes.get(Constant.LayerFields.OBJECTID).toString());
                     Object danhboDongHo = attributes.get(Constant.DongHoKhachHangFields.DBDongHoNuoc);
                     Object tenThueBao = attributes.get(Constant.DongHoKhachHangFields.TenThueBao);
                     Object maKhachHang = attributes.get(Constant.DongHoKhachHangFields.MaKhachHang);

@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import vinhlong.ditagis.com.capnhatdongho.async.NewLoginAsycn;
+import vinhlong.ditagis.com.capnhatdongho.entities.DApplication;
 import vinhlong.ditagis.com.capnhatdongho.entities.entitiesDB.User;
 import vinhlong.ditagis.com.capnhatdongho.utities.CheckConnectInternet;
 import vinhlong.ditagis.com.capnhatdongho.utities.Preference;
@@ -19,12 +20,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private TextView mTxtPassword;
     private boolean isLastLogin;
     private TextView mTxtValidation;
+    private DApplication dApplication;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
+        dApplication = (DApplication) getApplication();
         Button btnLogin = (findViewById(R.id.btnLogin));
         btnLogin.setOnClickListener(this);
         findViewById(R.id.txt_login_changeAccount).setOnClickListener(this);
@@ -82,8 +84,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 //        handleLoginSuccess(userName,passWord);
         final String finalUserName = userName;
         NewLoginAsycn loginAsycn = new NewLoginAsycn(this, output -> {
-            if (output != null)
+            if (output != null) {
                 handleLoginSuccess(output);
+                dApplication.setUser(output);
+            }
             else
                 handleLoginFail();
         });
@@ -101,8 +105,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void handleLoginSuccess(User user) {
-
-
         Preference.getInstance().savePreferences(getString(R.string.preference_username),user.getUserName());
         Preference.getInstance().savePreferences(getString(R.string.preference_password), user.getPassWord());
         Preference.getInstance().savePreferences(getString(R.string.preference_displayname), user.getDisplayName());

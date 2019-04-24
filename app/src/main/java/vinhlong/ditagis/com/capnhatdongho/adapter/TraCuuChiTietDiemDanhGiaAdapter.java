@@ -68,8 +68,8 @@ public class TraCuuChiTietDiemDanhGiaAdapter extends ArrayAdapter<TraCuuChiTietD
             convertView = inflater.inflate(R.layout.item_text_text_image, null);
         }
         Item item = items.get(position);
-        TextView textViewItem1 = (TextView) convertView.findViewById(R.id.txtItem1);
-        TextView textViewItem2 = (TextView) convertView.findViewById(R.id.txtItem2);
+        TextView textViewItem1 = (TextView) convertView.findViewById(R.id.txtTenVatTu);
+        TextView textViewItem2 = (TextView) convertView.findViewById(R.id.txtSoLuongVatTu);
         textViewItem1.setText(item.getAlias());
         textViewItem2.setText(item.getValue());
         return convertView;

@@ -23,6 +23,7 @@ import java.util.concurrent.ExecutionException;
 import vinhlong.ditagis.com.capnhatdongho.MainActivity;
 import vinhlong.ditagis.com.capnhatdongho.R;
 import vinhlong.ditagis.com.capnhatdongho.adapter.FeatureViewMoreInfoAdapter;
+import vinhlong.ditagis.com.capnhatdongho.entities.DApplication;
 import vinhlong.ditagis.com.capnhatdongho.utities.Constant;
 import vinhlong.ditagis.com.capnhatdongho.utities.MySnackBar;
 
@@ -36,6 +37,7 @@ public class EditAsync extends AsyncTask<FeatureViewMoreInfoAdapter, Void, Void>
     private ServiceFeatureTable mServiceFeatureTable;
     private ArcGISFeature mSelectedArcGISFeature = null;
     private MapView mapView;
+    private DApplication dApplication;
 
     public EditAsync(MapView mapView, MainActivity mainActivity, ServiceFeatureTable serviceFeatureTable, ArcGISFeature selectedArcGISFeature) {
         this.mainActivity = mainActivity;
@@ -43,6 +45,7 @@ public class EditAsync extends AsyncTask<FeatureViewMoreInfoAdapter, Void, Void>
         mSelectedArcGISFeature = selectedArcGISFeature;
         dialog = new ProgressDialog(mainActivity, android.R.style.Theme_Material_Dialog_Alert);
         this.mapView = mapView;
+        this.dApplication = (DApplication) mainActivity.getApplication();
     }
 
     @Override
@@ -98,7 +101,8 @@ public class EditAsync extends AsyncTask<FeatureViewMoreInfoAdapter, Void, Void>
             }
         }
         Calendar currentTime = Calendar.getInstance();
-        mSelectedArcGISFeature.getAttributes().put("NgayCapNhat", currentTime);
+        mSelectedArcGISFeature.getAttributes().put(Constant.DongHoKhachHangFields.NgayCapNhat, currentTime);
+        mSelectedArcGISFeature.getAttributes().put(Constant.DongHoKhachHangFields.NguoiCapNhat, this.dApplication.getUser().getUserName());
         ListenableFuture<Void> voidListenableFuture = mServiceFeatureTable.updateFeatureAsync(mSelectedArcGISFeature);
         voidListenableFuture.addDoneListener(() -> {
             try {
