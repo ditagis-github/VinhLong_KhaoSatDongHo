@@ -2,7 +2,6 @@
 <resources>
     <string-array name="unedit_VT_Fields">
         <item>OBJECTID</item>
-        <item>DBDongHo</item>
         <item>MaKhachHang</item>
         <item>NgayCapNhat</item>
     </string-array>
@@ -10,5 +9,19 @@
         <item>OBJECTID</item>
         <item>NgayCapNhat</item>
         <item>NguoiCapNhat</item>
+        <item>MaXa</item>
+        <item>MaHuyen</item>
+    </string-array>
+    <string-array name="hiddenFields">
+        <item>GLOBALID</item>
+        <item>GlobalID</item>
+        <item>TOADO_X</item>
+        <item>TOADO_Y</item>
+        <item>Shape.STArea()</item>
+        <item>Shape.STLength()</item>
+        <item>created_user</item>
+        <item>created_date</item>
+        <item>last_edited_user</item>
+        <item>last_edited_date</item>
     </string-array>
 </resources>

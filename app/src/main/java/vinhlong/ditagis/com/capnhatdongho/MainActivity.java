@@ -97,9 +97,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ArcGISMap mMap;
     private Callout mCallout;
     private MapViewHandler mMapViewHandler;
-    private static double LATITUDE = 10.205155129125103;//10.10299;
-    private static double LONGTITUDE = 105.94397118543621;//105.9295304;
-    private static int LEVEL_OF_DETAIL = 16;
+    private static double LATITUDE = 10.2500783;//10.205155129125103;//;
+    private static double LONGTITUDE = 105.9431823;//105.94397118543621;//;
+    private static int LEVEL_OF_DETAIL = 14;
     private SearchView mTxtSearch;
     private ListView mListViewSearch;
     private DanhSachDongHoKHAdapter danhSachDongHoKHAdapter;
@@ -117,7 +117,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     String[] reqPermissions = new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
 
     private LocationHelper mLocationHelper;
-    private ServiceFeatureTable table_thoigiancln;
     private Location mLocation;
     private DApplication mApplication;
 
@@ -137,7 +136,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         startSignIn();
         mApplication.setMainActivity(this);
     }
-
+    private void setLoginInfos() {
+        DApplication application = (DApplication) getApplication();
+        String displayName = application.getUser().getDisplayName();
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        View headerLayout = navigationView.getHeaderView(0);
+        TextView namenv = headerLayout.findViewById(R.id.namenv);
+        namenv.setText(displayName);
+    }
     private void startGPS() {
 
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -230,8 +237,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -348,6 +353,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         for (ArcGISSublayer sublayer : sublayerList) {
                             addCheckBox_SubLayer((ArcGISMapImageSublayer) sublayer, mLinnearDisplayLayerBaseMap);
                         }
+                        String url_HanhChinh = url + "/5";
+                        ServiceFeatureTable serviceFeatureTable = new ServiceFeatureTable(url_HanhChinh);
+                        popup.setmSFTHanhChinh(serviceFeatureTable);
                     }
                 });
                 hanhChinhImageLayers.loadAsync();
@@ -744,6 +752,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case Constant.REQUEST_LOGIN:
                 if (Activity.RESULT_OK != resultCode) {
                     finish();
+                    setLoginInfos();
                     return;
                 } else {
                     initMapView();

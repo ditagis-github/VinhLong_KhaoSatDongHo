@@ -20,7 +20,7 @@
             android:textSize="20sp" />
 
         <ImageButton
-            android:id="@+id/imgbtn_popup_diem_danh_gia_nuoc_cancel"
+            android:id="@+id/imgbtn_close_popup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -37,38 +37,10 @@
         android:orientation="vertical"
         android:padding="@dimen/margin_field_name">
         <!--ID sự cố-->
-        <LinearLayout
+        <ListView
+            android:id="@+id/lstview_thongtinsuco"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:text="Mã danh bộ: "
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/txt_danhbodongho"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <!--vị trí sự cố-->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Khách hàng: "
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/txt_tenkhachhang"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
+            android:layout_height="250dp"></ListView>
     </LinearLayout>
 
     <LinearLayout

@@ -31,6 +31,7 @@ import com.esri.arcgisruntime.data.ArcGISFeature;
 import com.esri.arcgisruntime.data.CodedValue;
 import com.esri.arcgisruntime.data.CodedValueDomain;
 import com.esri.arcgisruntime.data.Domain;
+import com.esri.arcgisruntime.data.Feature;
 import com.esri.arcgisruntime.data.FeatureEditResult;
 import com.esri.arcgisruntime.data.FeatureType;
 import com.esri.arcgisruntime.data.Field;
@@ -51,9 +52,11 @@ import java.util.concurrent.ExecutionException;
 
 import vinhlong.ditagis.com.capnhatdongho.MainActivity;
 import vinhlong.ditagis.com.capnhatdongho.R;
+import vinhlong.ditagis.com.capnhatdongho.adapter.FeatureViewInfoAdapter;
 import vinhlong.ditagis.com.capnhatdongho.adapter.FeatureViewMoreInfoAdapter;
 import vinhlong.ditagis.com.capnhatdongho.async.EditAsync;
 import vinhlong.ditagis.com.capnhatdongho.async.NotifyDataSetChangeAsync;
+import vinhlong.ditagis.com.capnhatdongho.async.QueryHanhChinhAsync;
 import vinhlong.ditagis.com.capnhatdongho.async.ViewAttachmentAsync;
 import vinhlong.ditagis.com.capnhatdongho.entities.DApplication;
 import vinhlong.ditagis.com.capnhatdongho.libs.FeatureLayerDTG;
@@ -68,7 +71,8 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
     private LinearLayout linearLayout;
     private MapView mMapView;
     private DApplication dApplication;
-
+    private ArrayList<Feature> quanhuyen_features;
+    private Feature quanhuyen_feature;
 
     public Popup(MainActivity mainActivity, MapView mMapView, Callout callout) {
         this.mainActivity = mainActivity;
@@ -86,22 +90,67 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
     }
 
+    public void setmSFTHanhChinh(ServiceFeatureTable mSFTHanhChinh) {
+        new QueryHanhChinhAsync(this.mainActivity, mSFTHanhChinh, output -> quanhuyen_features = output).execute();
+    }
 
-    private void refressPopup() {
-        Map<String, Object> attributes = featureDHKH.getAttributes();
-        for (Field field : this.featureDHKH.getFeatureTable().getFields()) {
-            Object value = attributes.get(field.getName());
-            if (value != null) {
-                switch (field.getName()) {
-                    case Constant.DongHoKhachHangFields.DBDongHoNuoc:
-                        ((TextView) linearLayout.findViewById(R.id.txt_danhbodongho)).setText(value.toString());
-                        break;
-                    case Constant.DongHoKhachHangFields.TenThueBao:
-                        ((TextView) linearLayout.findViewById(R.id.txt_tenkhachhang)).setText(value.toString());
-                        break;
+    private void getHanhChinhFeature(String IDHanhChinh) {
+        quanhuyen_feature = null;
+        if (quanhuyen_features != null) {
+            for (Feature feature : quanhuyen_features) {
+                Object idHanhChinh = feature.getAttributes().get("IDHanhChinh");
+                if (idHanhChinh != null && idHanhChinh.equals(IDHanhChinh)) {
+                    quanhuyen_feature = feature;
                 }
             }
+        }
+    }
 
+    public void refressPopup() {
+        String[] hiddenFields = this.mainActivity.getResources().getStringArray(R.array.hiddenFields);
+        Map<String, Object> attributes = featureDHKH.getAttributes();
+        ListView listView = linearLayout.findViewById(R.id.lstview_thongtinsuco);
+        FeatureViewInfoAdapter featureViewInfoAdapter = new FeatureViewInfoAdapter(this.mainActivity, new ArrayList<FeatureViewInfoAdapter.Item>());
+        listView.setAdapter(featureViewInfoAdapter);
+        boolean checkHiddenField;
+        Object maXa = attributes.get(Constant.HanhChinhFields.MAXA);
+        if(maXa != null){
+            getHanhChinhFeature(maXa.toString());
+        }
+        for (Field field : this.featureDHKH.getFeatureTable().getFields()) {
+            checkHiddenField = false;
+            for (String hiddenField : hiddenFields) {
+                if (hiddenField.equals(field.getName())) {
+                    checkHiddenField = true;
+                    break;
+                }
+            }
+            Object value = attributes.get(field.getName());
+            if (value != null && !checkHiddenField) {
+                FeatureViewInfoAdapter.Item item = new FeatureViewInfoAdapter.Item();
+                item.setAlias(field.getAlias());
+                item.setFieldName(field.getName());
+                if (item.getFieldName().toUpperCase().equals(Constant.HanhChinhFields.MAXA)) {
+                    if (quanhuyen_feature != null)
+                        item.setValue(quanhuyen_feature.getAttributes().get(Constant.HanhChinhFields.TENHANHCHINH).toString());
+                } else if (item.getFieldName().toUpperCase().equals(Constant.HanhChinhFields.MAHUYEN)) {
+                    if (quanhuyen_feature != null)
+                        item.setValue(quanhuyen_feature.getAttributes().get(Constant.HanhChinhFields.TENHUYEN).toString());
+                } else if (field.getDomain() != null) {
+                    List<CodedValue> codedValues = ((CodedValueDomain) this.featureDHKH.getFeatureTable().getField(item.getFieldName()).getDomain()).getCodedValues();
+                    Object valueDomainObject = getValueDomain(codedValues, value.toString());
+                    if (valueDomainObject != null) item.setValue(valueDomainObject.toString());
+                } else switch (field.getFieldType()) {
+                    case DATE:
+                        item.setValue(Constant.DATE_FORMAT.format(((Calendar) value).getTime()));
+                        break;
+                    default:
+                        item.setValue(value.toString());
+                }
+
+                featureViewInfoAdapter.add(item);
+                featureViewInfoAdapter.notifyDataSetChanged();
+            }
         }
     }
 
@@ -124,13 +173,11 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
         }
         LayoutInflater inflater = LayoutInflater.from(this.mainActivity.getApplicationContext());
         linearLayout = (LinearLayout) inflater.inflate(R.layout.popup, null);
-        linearLayout.findViewById(R.id.imgbtn_popup_diem_danh_gia_nuoc_cancel)
+        linearLayout.findViewById(R.id.imgbtn_close_popup)
                 .setOnClickListener(view -> {
                     if (mCallout != null && mCallout.isShowing()) mCallout.dismiss();
                 });
         refressPopup();
-
-
         if (dongHoKHDTG.getAction().isEdit()) {
             ImageButton imgBtn_ViewMoreInfo = (ImageButton) linearLayout.findViewById(R.id.imgBtn_ViewMoreInfo);
             imgBtn_ViewMoreInfo.setVisibility(View.VISIBLE);
@@ -178,6 +225,7 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
         });
         return linearLayout;
     }
+
     public void updateAttachment(ArcGISFeature featureDHKH) {
         Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
         File photo = ImageFile.getFile(mainActivity);
@@ -204,13 +252,23 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
         String[] updateFields = dongHoKHDTG.getUpdateFields();
         String[] unedit_Fields = mainActivity.getResources().getStringArray(R.array.unedit_DHKH_Fields);
         String typeIdField = featureDHKH.getFeatureTable().getTypeIdField();
+        Object maXa = attr.get(Constant.HanhChinhFields.MAXA);
+        if(maXa != null){
+            getHanhChinhFeature(maXa.toString());
+        }
         for (Field field : this.featureDHKH.getFeatureTable().getFields()) {
             Object value = attr.get(field.getName());
             FeatureViewMoreInfoAdapter.Item item = new FeatureViewMoreInfoAdapter.Item();
             item.setAlias(field.getAlias());
             item.setFieldName(field.getName());
             if (value != null) {
-                if (item.getFieldName().equals(typeIdField)) {
+                if (item.getFieldName().toUpperCase().equals(Constant.HanhChinhFields.MAXA)) {
+                    if (quanhuyen_feature != null)
+                        item.setValue(quanhuyen_feature.getAttributes().get(Constant.HanhChinhFields.TENHANHCHINH).toString());
+                } else if (item.getFieldName().toUpperCase().equals(Constant.HanhChinhFields.MAHUYEN)) {
+                    if (quanhuyen_feature != null)
+                        item.setValue(quanhuyen_feature.getAttributes().get(Constant.HanhChinhFields.TENHUYEN).toString());
+                } else if (item.getFieldName().equals(typeIdField)) {
                     List<FeatureType> featureTypes = featureDHKH.getFeatureTable().getFeatureTypes();
                     String valueFeatureType = getValueFeatureType(featureTypes, value.toString()).toString();
                     if (valueFeatureType != null) item.setValue(valueFeatureType);

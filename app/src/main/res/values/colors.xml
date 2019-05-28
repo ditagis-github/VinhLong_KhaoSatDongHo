@@ -43,7 +43,7 @@
     <color name="colorTextColorTitle_2">#ffffff</color>
     <color name="colorTextViewChangePassword_2">#27ae60</color>
     <color name="colorToolBar_Row_2">#000066</color>
-    <color name="colorTextLogin_2">#000000</color>
+    <color name="colorBlack">#000000</color>
     <color name="colorAlertWrongPassword_2">#e74c3c</color>
     <color name="colorImgBtnUpload_2">#67b2e4</color>
     <color name="colorBorderEditext_2">#ffffff</color>

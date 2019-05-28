@@ -122,7 +122,6 @@ public class VatTuApdapter extends ArrayAdapter<VatTuApdapter.VatTu> {
             }catch (Exception e){
             }
         }
-
         public String getTongTien() {
             this.tongTien = this.donGiaVatTu * this.soLuongVatTu;
             return formatter.format(this.tongTien) + Constant.DefineST.DonViTien;

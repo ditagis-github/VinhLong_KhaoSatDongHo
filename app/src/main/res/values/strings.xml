@@ -42,6 +42,8 @@
 
 
     <string name="title_danhsachvattu">Danh sách vật tư</string>
+    <string name="title_chitietvattu">Chi tiết vật tư</string>
+    <string name="title_themmoivattu">Thêm mới vật tư</string>
     <string name="tongloaitrangthai">tongloaitrangthai</string>
     <string name="title_activity_tra_cuu">TraCuuActivity</string>
     <string name="ket_qua_objectid">ket_qua_objectid</string>
@@ -78,11 +80,10 @@
     <string name="FAILED_TO_UPDATE_DATA">Cập nhật dữ liệu không thành công</string>
     <string name="INCORRECT_INPUT_FORMAT">Số liệu nhập vào không đúng định dạng!!!</string>
     <string name="INCORRECT_INPUT_FORMAT_WITH_TEXT">Dữ liệu nhập vào không đúng định dạng!!!</string>
-    <string name="DATA_NOT_FOUND">Chưa có danh bộ đồng hồ hoặc mã khách hàng!!!</string>
+    <string name="DATA_NOT_FOUND">Chưa có mã khách hàng!!!</string>
     <string name="ERROR_OCCURRED">Đã xảy ra lỗi</string>
     <string name="PROCESSING">Đang xử lý...</string>
     <string name="name_nhanvien">Nhân viên A</string>
-    <string name="gmail_nhanvien">nva.tanhoa@gmail.com</string>
 
     <!--preference begin-->
     <string name="preference_username">username</string>
@@ -128,6 +129,7 @@
     <string name="IDLayer_ChuyenDe">CHUYENDE</string>
     <string name="input_format_incorrect">Số liệu nhập vào không đúng định dạng!!!</string>
     <string name="question_delete_point">Bạn có chắc chắn xóa điểm này?</string>
+    <string name="question_capnhatdanhbo">Bạn có muốn cập nhật lại danh bộ?</string>
     <string name="no_access_permissions">Tài khoản không có quyền truy cập ứng dụng!!!</string>
 
 

@@ -72,7 +72,12 @@ public class Constant {
         public static final String GiaNC = "GiaNC";
         public static final String GiaMay = "GiaMay";
     }
-
+    public static class HanhChinhFields {
+        public static final String MAXA = "MAXA";
+        public static final String TENHANHCHINH = "TenHanhChinh";
+        public static final String MAHUYEN = "MAHUYEN";
+        public static final String TENHUYEN = "TenHuyen";
+    }
     public static final int idDongHoKhachHang = 5;
 
     public static class IDLayer {

@@ -60,7 +60,7 @@
                     android:textStyle="italic" />
             </LinearLayout>
             <TextView
-                android:id="@+id/txtTongItem"
+                android:id="@+id/txtTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Tổng số lượng: 0"

@@ -15,7 +15,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.esri.arcgisruntime.data.Feature;
 import com.esri.arcgisruntime.data.ServiceFeatureTable;
 
 import java.text.ParseException;
@@ -60,7 +59,7 @@ public class ThongKeActivity extends AppCompatActivity {
         items = timePeriodReport.getItems();
         thongKeAdapter = new ThongKeAdapter(this, items);
 
-        this.txtTongItem = this.findViewById(R.id.txtTongItem);
+        this.txtTongItem = this.findViewById(R.id.txtTitle);
         ((LinearLayout) ThongKeActivity.this.findViewById(R.id.layout_thongke_thoigian)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

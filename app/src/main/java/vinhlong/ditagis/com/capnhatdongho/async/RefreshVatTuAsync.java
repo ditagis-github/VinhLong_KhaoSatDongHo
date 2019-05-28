@@ -63,7 +63,7 @@ public class RefreshVatTuAsync extends AsyncTask<String, List<VatTuApdapter.VatT
         final List<Feature> features = new ArrayList<>();
         final List<VatTuApdapter.VatTu> vatTus = new ArrayList<>();
         QueryParameters queryParameters = new QueryParameters();
-        String queryClause = Constant.VatTuFields.DBDongHo + " = '" + params[0] + "'";
+        String queryClause = Constant.VatTuFields.MaKhachHang + " = '" + params[0] + "'";
         queryParameters.setWhereClause(queryClause);
         final ListenableFuture<FeatureQueryResult> queryResultListenableFuture = vatTuTable.queryFeaturesAsync(queryParameters, ServiceFeatureTable.QueryFeatureFields.LOAD_ALL);
         queryResultListenableFuture.addDoneListener(() -> {
@@ -99,9 +99,8 @@ public class RefreshVatTuAsync extends AsyncTask<String, List<VatTuApdapter.VatT
                     vatTus.add(vatTu);
                     features.add(feature);
                 }
-                delegate.processFinish(features);
                 publishProgress(vatTus);
-
+                delegate.processFinish(features);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
@@ -123,13 +122,6 @@ public class RefreshVatTuAsync extends AsyncTask<String, List<VatTuApdapter.VatT
         }
         return null;
     }
-
-    private String getValueAttributes(Feature feature, String fieldName) {
-        if (feature.getAttributes().get(fieldName) != null)
-            return feature.getAttributes().get(fieldName).toString();
-        return null;
-    }
-
 
     @Override
     protected void onProgressUpdate(List<VatTuApdapter.VatTu>... values) {

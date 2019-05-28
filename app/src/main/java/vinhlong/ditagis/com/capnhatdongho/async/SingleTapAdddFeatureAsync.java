@@ -2,12 +2,13 @@ package vinhlong.ditagis.com.capnhatdongho.async;
 
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
-import android.os.Build;
 
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.data.ArcGISFeature;
 import com.esri.arcgisruntime.data.Feature;
 import com.esri.arcgisruntime.data.FeatureEditResult;
+import com.esri.arcgisruntime.data.FeatureQueryResult;
+import com.esri.arcgisruntime.data.QueryParameters;
 import com.esri.arcgisruntime.data.ServiceFeatureTable;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.mapping.view.MapView;
@@ -16,6 +17,7 @@ import com.esri.arcgisruntime.tasks.geocode.LocatorTask;
 
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -88,12 +90,12 @@ public class SingleTapAdddFeatureAsync extends AsyncTask<Point, ArcGISFeature, V
         MySnackBar.make(mapView,mainActivity.getString(R.string.ERROR_OCCURRED) , false);
     }
 
-    private void addFeatureAsync(Feature feature) {
+    private void addFeatureAsync(Feature featureAdd) {
         Calendar currentTime = Calendar.getInstance();
-        feature.getAttributes().put(Constant.DongHoKhachHangFields.NgayCapNhat, currentTime);
-        feature.getAttributes().put(Constant.DongHoKhachHangFields.NguoiCapNhat, this.dApplication.getUser().getUserName());
+        featureAdd.getAttributes().put(Constant.DongHoKhachHangFields.NgayCapNhat, currentTime);
+        featureAdd.getAttributes().put(Constant.DongHoKhachHangFields.NguoiCapNhat, this.dApplication.getUser().getUserName());
 
-        ListenableFuture<Void> voidListenableFuture = this.dongHoKHSFT.addFeatureAsync(feature);
+        ListenableFuture<Void> voidListenableFuture = this.dongHoKHSFT.addFeatureAsync(featureAdd);
         voidListenableFuture.addDoneListener(() -> {
             try {
                 voidListenableFuture.get();
@@ -102,8 +104,25 @@ public class SingleTapAdddFeatureAsync extends AsyncTask<Point, ArcGISFeature, V
                     try {
                         List<FeatureEditResult> featureEditResults = listListenableEditAsync.get();
                         if (featureEditResults.size() > 0) {
-                            publishProgress((ArcGISFeature) feature);
-                            delegate.processFinish((ArcGISFeature) feature);
+                            long objectId = featureEditResults.get(0).getObjectId();
+                            final QueryParameters queryParameters = new QueryParameters();
+                            final String query = "OBJECTID = " + objectId;
+                            queryParameters.setWhereClause(query);
+                            final ListenableFuture<FeatureQueryResult> queryResultListenableFuture = this.dongHoKHSFT.queryFeaturesAsync(queryParameters);
+                            queryResultListenableFuture.addDoneListener(() ->{
+                                try {
+                                    FeatureQueryResult features = queryResultListenableFuture.get();
+                                    Iterator<Feature> iterator = features.iterator();
+                                    if (iterator.hasNext()) {
+                                        Feature feature = iterator.next();
+                                        publishProgress((ArcGISFeature) feature);
+                                        delegate.processFinish((ArcGISFeature) feature);
+                                    }
+                                } catch (InterruptedException | ExecutionException e) {
+                                    notifyError();
+                                    e.printStackTrace();
+                                }
+                            });
                         } else publishProgress();
                     } catch (InterruptedException | ExecutionException e) {
                         notifyError();

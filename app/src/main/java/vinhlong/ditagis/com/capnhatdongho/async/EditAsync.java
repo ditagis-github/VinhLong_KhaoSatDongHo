@@ -1,7 +1,6 @@
 package vinhlong.ditagis.com.capnhatdongho.async;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.os.AsyncTask;
 
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
@@ -62,7 +61,7 @@ public class EditAsync extends AsyncTask<FeatureViewMoreInfoAdapter, Void, Void>
     protected Void doInBackground(FeatureViewMoreInfoAdapter... params) {
         FeatureViewMoreInfoAdapter adapter = params[0];
         for (FeatureViewMoreInfoAdapter.Item item : adapter.getItems()) {
-            if (item.getValue() == null) continue;
+            if (item.getValue() == null || !item.isEdit()) continue;
             Domain domain = mSelectedArcGISFeature.getFeatureTable().getField(item.getFieldName()).getDomain();
             Object codeDomain = null;
             if (domain != null) {

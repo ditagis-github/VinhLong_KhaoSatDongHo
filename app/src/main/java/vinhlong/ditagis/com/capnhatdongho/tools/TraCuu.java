@@ -188,7 +188,7 @@ public class TraCuu {
                 }
             }
         });
-        TextView txtTongItem = (TextView) layout_table_tracuu.findViewById(R.id.txtTongItem);
+        TextView txtTongItem = (TextView) layout_table_tracuu.findViewById(R.id.txtTitle);
         new QueryDongHoKhachHangAsync(mainActivity, donghoKHSFT,txtTongItem, adapter, new QueryDongHoKhachHangAsync.AsyncResponse() {
             public void processFinish(List<Feature> features) {
                 table_feature = features;

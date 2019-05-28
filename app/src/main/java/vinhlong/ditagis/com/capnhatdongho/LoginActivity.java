@@ -81,8 +81,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             handleInfoLoginEmpty();
             return;
         }
-//        handleLoginSuccess(userName,passWord);
-        final String finalUserName = userName;
         NewLoginAsycn loginAsycn = new NewLoginAsycn(this, output -> {
             if (output != null) {
                 handleLoginSuccess(output);
