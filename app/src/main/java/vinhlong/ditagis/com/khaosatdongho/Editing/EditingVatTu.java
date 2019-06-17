@@ -71,7 +71,7 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
     private FeatureLayerDTG vatTuDTG;
     private VatTuApdapter vatTuApdapter;
     private List<Feature> table_feature;
-    private ArcGISFeature featureDHKH;
+    private ArcGISFeature feature;
     private ServiceFeatureTable dongHoKHSFT;
     private ServiceFeatureTable dmVatTuSFT;
     private ArrayList<Feature> dmVatTuFeatures;
@@ -175,7 +175,7 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
     }
 
     public void deleteDanhSachMauDanhGia(ArcGISFeature featureDHKH) {
-        this.featureDHKH = featureDHKH;
+        this.feature = featureDHKH;
         final Map<String, Object> attributes = featureDHKH.getAttributes();
         Object maKhachHang = attributes.get(Constant.DongHoKhachHangFields.MaKhachHang);
         if (maKhachHang != null) {
@@ -191,7 +191,7 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
     }
 
     public void showDanhSachVatTu(ArcGISFeature featureDHKH) {
-        this.featureDHKH = featureDHKH;
+        this.feature = featureDHKH;
         final Map<String, Object> attributes = featureDHKH.getAttributes();
         Object maKhachHang = attributes.get(Constant.DongHoKhachHangFields.MaKhachHang);
         if (maKhachHang != null) {
@@ -444,7 +444,7 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
     }
 
     private void getRefreshTableVatTuAsync() {
-        final Map<String, Object> attributes = this.featureDHKH.getAttributes();
+        final Map<String, Object> attributes = this.feature.getAttributes();
         String maKhachHang = attributes.get(Constant.DongHoKhachHangFields.MaKhachHang).toString();
         new RefreshVatTuAsync(mainActivity, vatTuSFT, this.dmVatTuFeatures, vatTuApdapter, this.vatTuDTG.getAction(), features -> {
             table_feature = features;
@@ -487,7 +487,7 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
     }
 
     private void capNhatDanhBo(Feature selectedFeature, AlertDialog alertDialog) {
-        final Map<String, Object> attributes = featureDHKH.getAttributes();
+        final Map<String, Object> attributes = feature.getAttributes();
         Object dBDongHoNuoc = attributes.get(Constant.DongHoKhachHangFields.ID);
         Object dbDongHoVatTu = selectedFeature.getAttributes().get(Constant.VatTuFields.DBDongHo);
         if (dBDongHoNuoc != null && dbDongHoVatTu != null && !dbDongHoVatTu.equals(dBDongHoNuoc)) {
@@ -531,7 +531,7 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
     }
 
     private void addTableVatTu1() {
-        final Map<String, Object> attributes = this.featureDHKH.getAttributes();
+        final Map<String, Object> attributes = this.feature.getAttributes();
         Object dBDongHo = attributes.get(Constant.DongHoKhachHangFields.ID);
         Object maKhachHang = attributes.get(Constant.DongHoKhachHangFields.MaKhachHang);
         if (maKhachHang == null) {
