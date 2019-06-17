@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="vinhlong.ditagis.com.capnhatdongho">
+    package="vinhlong.ditagis.com.khaosatdongho">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -41,9 +41,9 @@
             android:label="@string/app_name" />
 
         <activity
-            android:name="vinhlong.ditagis.com.capnhatdongho.ThongKeActivity"
+            android:name="vinhlong.ditagis.com.khaosatdongho.CongViecActivity"
             android:label="Thống kê"
-            android:parentActivityName="vinhlong.ditagis.com.capnhatdongho.MainActivity" />
+            android:parentActivityName="vinhlong.ditagis.com.khaosatdongho.MainActivity" />
     </application>
 
 </manifest>

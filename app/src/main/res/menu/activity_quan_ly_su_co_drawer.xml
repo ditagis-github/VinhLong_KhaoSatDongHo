@@ -26,10 +26,8 @@
         <menu>
             <group android:checkableBehavior="single">
                 <item
-                    
                     android:id="@+id/nav_thongke"
-                    android:icon="@drawable/ic_thongke"
-                    android:visible="false"
+                    android:icon="@drawable/ic_table"
                     android:title="@string/nav_thong_ke" />
                 <item
                     android:id="@+id/nav_tracuu"

@@ -20,7 +20,7 @@
                 android:layout_width="318dp"
                 android:layout_height="30dp"
                 android:gravity="center_vertical"
-                android:text="dbDongHoNuoc"
+                android:text="idDongHo"
                 android:textAppearance="?android:attr/textAppearanceMedium"
 
                 android:textStyle="bold" />

@@ -4,7 +4,7 @@
     <string name="license">runtimelite,1000,rud6046938574,none,4N5X0H4AH5JB003AD169</string>
     <string name="action_search">Tìm kiếm</string>
 
-    <string name="app_name">CẬP NHẬT ĐỒNG HỒ</string>
+    <string name="app_name">KHẢO SÁT ĐỒNG HỒ</string>
     <string name="btn_OK">OK</string>
     <string name="btn_Accept">Cập nhật</string>
     <string name="btn_Delete">Xóa</string>
@@ -34,7 +34,7 @@
     <!--DeclngayCapNhatalue config end-->
 
     <!--Attribute begin-->
-    <string name="objectID">objectID</string>
+    <string name="maVatTu">maVatTu</string>
     <string name="IDDIEMDANHGIA">IDDiemDanhGia</string>
     <string name="NGAY_CAP_NHAT">NgayCapNhat</string>
     <!--Attribute end-->
@@ -56,7 +56,7 @@
     <!--navigation-->
     <string name="nav_tra_cuu">Tra cứu</string>
     <string name="nav_log_out">Đăng xuất</string>
-    <string name="nav_thong_ke">Thống kê</string>
+    <string name="nav_thong_ke">Danh sách công việc</string>
     <string name="nav_thong_ke_tong_diem">Tổng số lượng: </string>
     <string name="nav_thong_ke_chua_sua_chua">Chưa sửa chữa</string>
     <string name="nav_thong_ke_dang_sua_chua">Đang sửa chữa</string>
@@ -91,7 +91,6 @@
     <string name="preference_displayname">displayname</string>
     <!--preference end-->
 
-    <string name="action_logout">Đăng xuất</string>
     <string name="validate_no_connect">Không có kết nối internet</string>
     <string name="info_login_empty">Danh bạ hoặc mật khẩu không được để trống</string>
     <string name="validate_login_fail">Sai danh bạ hoặc mật khẩu</string>
@@ -112,6 +111,8 @@
     <string name="login_message">Đang kiểm tra thông tin đăng nhập…</string>
     <string name="async_dang_tai_du_lieu">Đang tải dữ liệu…</string>
     <string name="async_dang_lay_hinh_anh_dinh_kem">Đang tải hình ảnh đính kèm…</string>
+    <string name="async_dang_lay_danh_sach_ten_mau">Đang lấy danh sách tên mẫu</string>
+    <string name="async_dang_lay_danh_sach_vat_tu">Đang lấy danh sách vật tư</string>
     <string name="preparing">Đang khởi tạo bản đồ…</string>
     <!--sql column login begin-->
     <string name="sql_coloumn_sys_id">LayerID</string>
