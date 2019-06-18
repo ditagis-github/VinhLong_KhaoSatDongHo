@@ -2,6 +2,7 @@ package vinhlong.ditagis.com.khaosatdongho.utities;
 
 import android.app.Activity;
 import android.view.MotionEvent;
+import android.widget.Toast;
 
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.data.ArcGISFeature;
@@ -23,6 +24,7 @@ import java.util.concurrent.ExecutionException;
 
 import vinhlong.ditagis.com.khaosatdongho.MainActivity;
 import vinhlong.ditagis.com.khaosatdongho.adapter.DanhSachDongHoKHAdapter;
+import vinhlong.ditagis.com.khaosatdongho.async.EditGeometryAsync;
 import vinhlong.ditagis.com.khaosatdongho.async.SingleTapAdddFeatureAsync;
 import vinhlong.ditagis.com.khaosatdongho.async.SingleTapMapViewAsync;
 import vinhlong.ditagis.com.khaosatdongho.entities.DApplication;
@@ -34,7 +36,7 @@ import vinhlong.ditagis.com.khaosatdongho.entities.DApplication;
 
 public class MapViewHandler extends Activity {
     private MapView mapView;
-    private ServiceFeatureTable hongHoKHSFT;
+    private ServiceFeatureTable dongHoKHSFT;
     private Popup popup;
     private MainActivity mainActivity;
     private DApplication dApplication;
@@ -46,22 +48,36 @@ public class MapViewHandler extends Activity {
         this.dApplication = (DApplication) mainActivity.getApplication();
     }
 
-    public void setHongHoKHSFT(ServiceFeatureTable hongHoKHSFT) {
-        this.hongHoKHSFT = hongHoKHSFT;
+    public void setDongHoKHSFT(ServiceFeatureTable dongHoKHSFT) {
+        this.dongHoKHSFT = dongHoKHSFT;
     }
 
     public void addFeature() {
         Point add_point = mapView.getCurrentViewpoint(Viewpoint.Type.CENTER_AND_SCALE).getTargetGeometry().getExtent().getCenter();
-        new SingleTapAdddFeatureAsync(mainActivity, mapView, this.hongHoKHSFT, feature -> {
-//            this.dApplication.getMainActivity().addFeatureClose();
+        new SingleTapAdddFeatureAsync(mainActivity, mapView, this.dongHoKHSFT, feature -> {
+//            this.dApplication.getMainActivity().dismissPin();
             if (feature != null) {
                 this.popup.showPopup(feature);
             } else this.popup.dimissCallout();
         }).execute(add_point);
-        ;
+
     }
 
+    public void updateGeometry(ArcGISFeature feature) {
+        Point point = mapView.getCurrentViewpoint(Viewpoint.Type.CENTER_AND_SCALE).getTargetGeometry().getExtent().getCenter();
 
+        //Kiểm tra cùng ngày, cùng vị trí đã có sự cố nào chưa, nếu có thì cảnh báo, chưa thì thêm bình thường
+        new EditGeometryAsync(mainActivity, this.dongHoKHSFT, feature, aBoolean -> {
+            if (aBoolean != null && aBoolean) {
+                mainActivity.setChangingGeometry(false,null);
+
+                Toast.makeText(mainActivity, "Đổi vị trí thành công", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                Toast.makeText(mainActivity, "Có lỗi xảy ra", Toast.LENGTH_SHORT).show();
+            }
+        }).execute(point);
+    }
     public double[] onScroll() {
         Point center = mapView.getCurrentViewpoint(Viewpoint.Type.CENTER_AND_SCALE).getTargetGeometry().getExtent().getCenter();
         Geometry project = GeometryEngine.project(center, SpatialReferences.getWgs84());
@@ -82,7 +98,7 @@ public class MapViewHandler extends Activity {
         final QueryParameters queryParameters = new QueryParameters();
         final String query = "OBJECTID = " + objectID;
         queryParameters.setWhereClause(query);
-        final ListenableFuture<FeatureQueryResult> feature = hongHoKHSFT.queryFeaturesAsync(queryParameters, ServiceFeatureTable.QueryFeatureFields.LOAD_ALL);
+        final ListenableFuture<FeatureQueryResult> feature = dongHoKHSFT.queryFeaturesAsync(queryParameters, ServiceFeatureTable.QueryFeatureFields.LOAD_ALL);
         feature.addDoneListener(() -> {
             try {
                 FeatureQueryResult result = feature.get();
@@ -110,7 +126,7 @@ public class MapViewHandler extends Activity {
         adapter.notifyDataSetChanged();
         QueryParameters queryParameters = new QueryParameters();
         StringBuilder builder = new StringBuilder();
-        for (Field field : hongHoKHSFT.getFields()) {
+        for (Field field : dongHoKHSFT.getFields()) {
             switch (field.getFieldType()) {
                 case OID:
                 case INTEGER:
@@ -142,7 +158,7 @@ public class MapViewHandler extends Activity {
         builder.append(" 1 = 2 ");
         queryParameters.setWhereClause(builder.toString());
         queryParameters.setMaxFeatures(100);
-        final ListenableFuture<FeatureQueryResult> feature = hongHoKHSFT.queryFeaturesAsync(queryParameters);
+        final ListenableFuture<FeatureQueryResult> feature = dongHoKHSFT.queryFeaturesAsync(queryParameters);
         feature.addDoneListener(() -> {
             try {
                 FeatureQueryResult result = feature.get();

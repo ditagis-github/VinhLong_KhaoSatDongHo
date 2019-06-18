@@ -141,7 +141,7 @@ public class SingleTapAdddFeatureAsync extends AsyncTask<Point, ArcGISFeature, V
         if (mDialog != null && mDialog.isShowing()) {
             mDialog.dismiss();
         }
-        mainActivity.addFeatureClose();
+        mainActivity.dismissPin();
         super.onProgressUpdate(values);
 
     }

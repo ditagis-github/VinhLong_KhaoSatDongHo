@@ -47,6 +47,7 @@ import android.widget.Toast;
 
 import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
 import com.esri.arcgisruntime.ArcGISRuntimeException;
+import com.esri.arcgisruntime.data.ArcGISFeature;
 import com.esri.arcgisruntime.data.ServiceFeatureTable;
 import com.esri.arcgisruntime.geometry.Geometry;
 import com.esri.arcgisruntime.geometry.GeometryEngine;
@@ -110,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private TraCuu traCuu;
     private int states[][];
     private int colors[];
-
+    private boolean isChangingGeometry = false;
     private LocationDisplay mLocationDisplay;
     private int requestCode = 2;
     private static final int REQUEST_ID_IMAGE_CAPTURE = 55;
@@ -119,6 +120,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private LocationHelper mLocationHelper;
     private Location mLocation;
     private DApplication mApplication;
+    private ArcGISFeature selectedFeature;
+
+    public void setChangingGeometry(boolean changingGeometry, ArcGISFeature feature) {
+        this.isChangingGeometry = changingGeometry;
+        if (this.isChangingGeometry) {
+            showPinToAdd();
+            this.selectedFeature = feature;
+        } else dismissPin();
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -256,6 +266,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final EditText edit_latitude = ((EditText) findViewById(R.id.edit_latitude));
         final EditText edit_longtitude = ((EditText) findViewById(R.id.edit_longtitude));
         mMapView.setOnTouchListener(new DefaultMapViewOnTouchListener(this, mMapView) {
+
+
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
                 try {
@@ -395,7 +407,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         addCheckBox_LayerDHKH(featureLayer);
                     });
                     mApplication.setDongHoKHDTG(featureLayerDTG);
-                    mMapViewHandler.setHongHoKHSFT(serviceFeatureTable);
+                    mMapViewHandler.setDongHoKHSFT(serviceFeatureTable);
                     mApplication.getEditingVatTu().setDongHoKHSFT(serviceFeatureTable);
                 }
                 if (layerInfoDTG.getId() != null && layerInfoDTG.getId().equals(Constant.IDLayer.VATTUDONGHOTBL)) {
@@ -583,6 +595,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    public void showPinToAdd() {
+        findViewById(R.id.linear_addfeature).setVisibility(View.VISIBLE);
+        findViewById(R.id.img_map_pin).setVisibility(View.VISIBLE);
+        findViewById(R.id.floatBtnAdd).setVisibility(View.GONE);
+    }
 
     @Override
     public void onClick(View v) {
@@ -612,15 +629,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 findViewById(R.id.floatBtnLayer).setVisibility(View.VISIBLE);
                 break;
             case R.id.img_layvitri:
-                mMapViewHandler.addFeature();
+                if (this.isChangingGeometry) {
+                    mMapViewHandler.updateGeometry(this.selectedFeature);
+                } else
+                    mMapViewHandler.addFeature();
                 break;
             case R.id.floatBtnAdd:
-                findViewById(R.id.linear_addfeature).setVisibility(View.VISIBLE);
-                findViewById(R.id.img_map_pin).setVisibility(View.VISIBLE);
-                findViewById(R.id.floatBtnAdd).setVisibility(View.GONE);
+                showPinToAdd();
                 break;
             case R.id.btn_add_feature_close:
-                addFeatureClose();
+                dismissPin();
                 break;
             case R.id.floatBtnLocation:
                 if (!mLocationDisplay.isStarted()) mLocationDisplay.startAsync();
@@ -632,7 +650,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    public void addFeatureClose() {
+    public void dismissPin() {
         findViewById(R.id.linear_addfeature).setVisibility(View.GONE);
         findViewById(R.id.img_map_pin).setVisibility(View.GONE);
         findViewById(R.id.floatBtnAdd).setVisibility(View.VISIBLE);

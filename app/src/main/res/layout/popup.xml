@@ -43,53 +43,167 @@
             android:layout_height="250dp"></ListView>
     </LinearLayout>
 
-    <LinearLayout
+    <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="right"
-        android:orientation="horizontal">
+        android:fillViewport="true"
+        android:measureAllChildren="false"
+        android:scrollbars="none">
 
-        <ImageButton
-            android:id="@+id/imgBtn_viewtablethoigian"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@android:color/white"
-            android:paddingRight="@dimen/padding_title_popup"
-            android:src="@drawable/ic_table"
-            android:visibility="gone" />
+        <LinearLayout
 
-        <ImageButton
-            android:id="@+id/imgBtn_ViewMoreInfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@android:color/white"
-            android:paddingRight="@dimen/padding_title_popup"
-            android:src="@drawable/ic_info"
-            android:visibility="gone" />
-        <ImageButton
-            android:id="@+id/imgBtn_takePics"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@android:color/white"
-            android:paddingRight="@dimen/padding_title_popup"
-            android:visibility="gone"
-            android:src="@drawable/ic_camera" />
-        <ImageButton
-            android:id="@+id/imgBtn_view_attachment"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@android:color/white"
-            android:paddingRight="@dimen/padding_title_popup"
-            android:visibility="gone"
-            android:src="@drawable/ic_colections" />
-        <ImageButton
-            android:id="@+id/imgBtn_delete"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@android:color/white"
-            android:paddingRight="@dimen/padding_title_popup"
-            android:src="@drawable/ic_delete"
-            android:visibility="gone" />
-    </LinearLayout>
+            android:gravity="right"
+            android:orientation="horizontal">
 
+            <LinearLayout
+                android:id="@+id/llayout_viewtablethoigian"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/border_curve"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <ImageButton
+
+                    android:layout_width="@dimen/width_image_popup"
+                    android:layout_height="@dimen/height_image_popup"
+                    android:background="@android:color/white"
+
+                    android:src="@drawable/ic_table" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="2dp"
+                    android:text="Thời gian"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llayout_ViewMoreInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/border_curve"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <ImageButton
+
+                    android:layout_width="@dimen/width_image_popup"
+                    android:layout_height="@dimen/height_image_popup"
+                    android:background="@android:color/white"
+                    android:src="@drawable/ic_info" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="2dp"
+                    android:text="C.nhật thông tin"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llayout_edit_location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/border_curve"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <ImageButton
+
+                    android:layout_width="@dimen/width_image_popup"
+                    android:layout_height="@dimen/height_image_popup"
+                    android:background="@android:color/white"
+                    android:src="@drawable/ic_edit_location" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="2dp"
+                    android:text="C.nhật vị trí"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llayout_takePics"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/border_curve"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <ImageButton
+                    android:layout_width="@dimen/width_image_popup"
+                    android:layout_height="@dimen/height_image_popup"
+                    android:background="@android:color/white"
+                    android:src="@drawable/ic_camera" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="2dp"
+                    android:text="Chụp ảnh"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llayout_view_attachment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/border_curve"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <ImageButton
+                    android:layout_width="@dimen/width_image_popup"
+                    android:layout_height="@dimen/height_image_popup"
+                    android:background="@android:color/white"
+                    android:src="@drawable/ic_colections" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="2dp"
+                    android:text="Xem ảnh"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llayout_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/border_curve"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <ImageButton
+
+                    android:layout_width="@dimen/width_image_popup"
+                    android:layout_height="@dimen/height_image_popup"
+                    android:background="@android:color/white"
+                    android:src="@drawable/ic_delete" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="2dp"
+                    android:text="Xóa"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+    </HorizontalScrollView>
 </LinearLayout>

@@ -18,7 +18,6 @@ import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -62,7 +61,7 @@ import vinhlong.ditagis.com.khaosatdongho.entities.DApplication;
 import vinhlong.ditagis.com.khaosatdongho.libs.FeatureLayerDTG;
 
 public class Popup extends AppCompatActivity implements View.OnClickListener {
-    private MainActivity mainActivity;
+    private MainActivity mMainActivity;
     private ArcGISFeature featureDHKH = null;
     private ServiceFeatureTable dongHoKHSFT;
     private Callout mCallout;
@@ -75,7 +74,7 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
     private Feature quanhuyen_feature;
 
     public Popup(MainActivity mainActivity, MapView mMapView, Callout callout) {
-        this.mainActivity = mainActivity;
+        this.mMainActivity = mainActivity;
         this.dApplication = (DApplication) mainActivity.getApplication();
         this.mCallout = callout;
         this.mMapView = mMapView;
@@ -91,7 +90,7 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
     }
 
     public void setmSFTHanhChinh(ServiceFeatureTable mSFTHanhChinh) {
-        new QueryHanhChinhAsync(this.mainActivity, mSFTHanhChinh, output -> quanhuyen_features = output).execute();
+        new QueryHanhChinhAsync(this.mMainActivity, mSFTHanhChinh, output -> quanhuyen_features = output).execute();
     }
 
     private void getHanhChinhFeature(String IDHanhChinh) {
@@ -107,14 +106,14 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
     }
 
     public void refressPopup() {
-        String[] hiddenFields = this.mainActivity.getResources().getStringArray(R.array.hiddenFields);
+        String[] hiddenFields = this.mMainActivity.getResources().getStringArray(R.array.hiddenFields);
         Map<String, Object> attributes = featureDHKH.getAttributes();
         ListView listView = linearLayout.findViewById(R.id.lstview_thongtinsuco);
-        FeatureViewInfoAdapter featureViewInfoAdapter = new FeatureViewInfoAdapter(this.mainActivity, new ArrayList<FeatureViewInfoAdapter.Item>());
+        FeatureViewInfoAdapter featureViewInfoAdapter = new FeatureViewInfoAdapter(this.mMainActivity, new ArrayList<FeatureViewInfoAdapter.Item>());
         listView.setAdapter(featureViewInfoAdapter);
         boolean checkHiddenField;
         Object maXa = attributes.get(Constant.HanhChinhFields.MAXA);
-        if(maXa != null){
+        if (maXa != null) {
             getHanhChinhFeature(maXa.toString());
         }
         for (Field field : this.featureDHKH.getFeatureTable().getFields()) {
@@ -171,7 +170,7 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
         for (int i = 0; i < featureDHKH.getFeatureTable().getFeatureTypes().size(); i++) {
             lstFeatureType.add(featureDHKH.getFeatureTable().getFeatureTypes().get(i).getName());
         }
-        LayoutInflater inflater = LayoutInflater.from(this.mainActivity.getApplicationContext());
+        LayoutInflater inflater = LayoutInflater.from(this.mMainActivity.getApplicationContext());
         linearLayout = (LinearLayout) inflater.inflate(R.layout.popup, null);
         linearLayout.findViewById(R.id.imgbtn_close_popup)
                 .setOnClickListener(view -> {
@@ -179,18 +178,18 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
                 });
         refressPopup();
         if (dongHoKHDTG.getAction().isEdit()) {
-            ImageButton imgBtn_ViewMoreInfo = linearLayout.findViewById(R.id.imgBtn_ViewMoreInfo);
+            LinearLayout imgBtn_ViewMoreInfo = linearLayout.findViewById(R.id.llayout_ViewMoreInfo);
             imgBtn_ViewMoreInfo.setVisibility(View.VISIBLE);
             imgBtn_ViewMoreInfo.setOnClickListener(v -> viewMoreInfo());
 
-            ImageButton imgBtn_viewtablethoigian = (ImageButton) linearLayout.findViewById(R.id.imgBtn_viewtablethoigian);
+            LinearLayout imgBtn_viewtablethoigian = linearLayout.findViewById(R.id.llayout_viewtablethoigian);
             imgBtn_viewtablethoigian.setVisibility(View.VISIBLE);
-            linearLayout.findViewById(R.id.imgBtn_viewtablethoigian).setOnClickListener(v -> {
+            linearLayout.findViewById(R.id.llayout_viewtablethoigian).setOnClickListener(v -> {
                 this.dApplication.getEditingVatTu().showDanhSachVatTu(featureDHKH);
             });
         }
         if (dongHoKHDTG.getAction().isDelete()) {
-            ImageButton imgBtn_delete = (ImageButton) linearLayout.findViewById(R.id.imgBtn_delete);
+            LinearLayout imgBtn_delete = linearLayout.findViewById(R.id.llayout_delete);
             imgBtn_delete.setVisibility(View.VISIBLE);
             imgBtn_delete.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -201,15 +200,21 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
             });
         }
         if (dongHoKHDTG.getAction().isEdit() && featureDHKH.canEditAttachments()) {
-            ImageButton imgBtn_takePics = (ImageButton) linearLayout.findViewById(R.id.imgBtn_takePics);
+            LinearLayout imgBtn_takePics = linearLayout.findViewById(R.id.llayout_takePics);
             imgBtn_takePics.setVisibility(View.VISIBLE);
             imgBtn_takePics.setOnClickListener(v -> updateAttachment(featureDHKH));
         }
         if (this.featureDHKH.canEditAttachments()) {
-            ImageButton imgBtn_view_attachment = (ImageButton) linearLayout.findViewById(R.id.imgBtn_view_attachment);
+            LinearLayout imgBtn_view_attachment = linearLayout.findViewById(R.id.llayout_view_attachment);
             imgBtn_view_attachment.setVisibility(View.VISIBLE);
             imgBtn_view_attachment.setOnClickListener(v -> viewAttachment(featureDHKH));
         }
+        if (this.featureDHKH.canUpdateGeometry()) {
+            LinearLayout edit_location = linearLayout.findViewById(R.id.llayout_edit_location);
+            edit_location.setVisibility(View.VISIBLE);
+            edit_location.setOnClickListener(v -> editLocation(featureDHKH));
+        }
+
         linearLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         Envelope envelope = featureDHKH.getGeometry().getExtent();
         double scale = mMapView.getMapScale();
@@ -226,34 +231,40 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
         return linearLayout;
     }
 
+    private void editLocation(ArcGISFeature feature) {
+        mMainActivity.setChangingGeometry(true, feature);
+        if (mCallout.isShowing())
+            mCallout.dismiss();
+    }
+
     public void updateAttachment(ArcGISFeature featureDHKH) {
         Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        File photo = ImageFile.getFile(mainActivity);
+        File photo = ImageFile.getFile(mMainActivity);
         Uri uri = Uri.fromFile(photo);
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
         dApplication.setSelectedFeature(featureDHKH);
         dApplication.setUri(uri);
-        mainActivity.startActivityForResult(cameraIntent, Constant.REQUEST.ID_UPDATE_ATTACHMENT);
+        mMainActivity.startActivityForResult(cameraIntent, Constant.REQUEST.ID_UPDATE_ATTACHMENT);
     }
 
     private void viewAttachment(ArcGISFeature featureDHKH) {
-        ViewAttachmentAsync viewAttachmentAsync = new ViewAttachmentAsync(mainActivity, featureDHKH);
+        ViewAttachmentAsync viewAttachmentAsync = new ViewAttachmentAsync(mMainActivity, featureDHKH);
         viewAttachmentAsync.execute();
     }
 
     private void viewMoreInfo() {
         Map<String, Object> attr = featureDHKH.getAttributes();
-        AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity, android.R.style.Theme_Material_Light_NoActionBar_Fullscreen);
-        View layout = mainActivity.getLayoutInflater().inflate(R.layout.layout_viewmoreinfo_feature, null);
-        final FeatureViewMoreInfoAdapter adapter = new FeatureViewMoreInfoAdapter(mainActivity, new ArrayList<FeatureViewMoreInfoAdapter.Item>());
+        AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity, android.R.style.Theme_Material_Light_NoActionBar_Fullscreen);
+        View layout = mMainActivity.getLayoutInflater().inflate(R.layout.layout_viewmoreinfo_feature, null);
+        final FeatureViewMoreInfoAdapter adapter = new FeatureViewMoreInfoAdapter(mMainActivity, new ArrayList<FeatureViewMoreInfoAdapter.Item>());
         final ListView lstView = layout.findViewById(R.id.lstView_ds_congviec);
         lstView.setAdapter(adapter);
         lstView.setOnItemClickListener((parent, view, position, id) -> edit(parent, view, position, id));
         String[] updateFields = dongHoKHDTG.getUpdateFields();
-        String[] unedit_Fields = mainActivity.getResources().getStringArray(R.array.unedit_DHKH_Fields);
+        String[] unedit_Fields = mMainActivity.getResources().getStringArray(R.array.unedit_DHKH_Fields);
         String typeIdField = featureDHKH.getFeatureTable().getTypeIdField();
         Object maXa = attr.get(Constant.HanhChinhFields.MAXA);
-        if(maXa != null){
+        if (maXa != null) {
             getHanhChinhFeature(maXa.toString());
         }
         for (Field field : this.featureDHKH.getFeatureTable().getFields()) {
@@ -314,8 +325,8 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
         }
         builder.setView(layout);
         builder.setCancelable(false);
-        builder.setPositiveButton(mainActivity.getString(R.string.btn_Accept), null);
-        builder.setNeutralButton(mainActivity.getString(R.string.btn_Esc), null);
+        builder.setPositiveButton(mMainActivity.getString(R.string.btn_Accept), null);
+        builder.setNeutralButton(mMainActivity.getString(R.string.btn_Esc), null);
         final AlertDialog dialog = builder.create();
 
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -323,7 +334,7 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
         dialog.show();
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> dialog.dismiss());
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            EditAsync editAsync = new EditAsync(mMapView, mainActivity, dongHoKHSFT, featureDHKH);
+            EditAsync editAsync = new EditAsync(mMapView, mMainActivity, dongHoKHSFT, featureDHKH);
             try {
                 editAsync.execute(adapter).get();
                 refressPopup();
@@ -364,7 +375,7 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
         if (parent.getItemAtPosition(position) instanceof FeatureViewMoreInfoAdapter.Item) {
             final FeatureViewMoreInfoAdapter.Item item = (FeatureViewMoreInfoAdapter.Item) parent.getItemAtPosition(position);
             if (item.isEdit()) {
-                final AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity, android.R.style.Theme_Material_Light_Dialog_Alert);
+                final AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity, android.R.style.Theme_Material_Light_Dialog_Alert);
                 builder.setTitle("Cập nhật thuộc tính");
                 builder.setMessage(item.getAlias());
                 builder.setCancelable(false).setNegativeButton("Hủy", new DialogInterface.OnClickListener() {
@@ -373,7 +384,7 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
                         dialog.dismiss();
                     }
                 });
-                final LinearLayout layout = (LinearLayout) mainActivity.getLayoutInflater().
+                final LinearLayout layout = (LinearLayout) mMainActivity.getLayoutInflater().
                         inflate(R.layout.layout_dialog_update_feature_listview, null);
 
                 final FrameLayout layoutTextView = layout.findViewById(R.id.layout_edit_viewmoreinfo_TextView);
@@ -411,8 +422,8 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
                         img_selectTime.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                final View dialogView = View.inflate(mainActivity, R.layout.date_time_picker, null);
-                                final android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(mainActivity).create();
+                                final View dialogView = View.inflate(mMainActivity, R.layout.date_time_picker, null);
+                                final android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(mMainActivity).create();
                                 dialogView.findViewById(R.id.date_time_set).setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {
@@ -461,7 +472,7 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
                                         double x = Double.parseDouble(editText.getText().toString());
                                         item.setValue(editText.getText().toString());
                                     } catch (Exception e) {
-                                        Toast.makeText(mainActivity, R.string.input_format_incorrect, Toast.LENGTH_LONG).show();
+                                        Toast.makeText(mMainActivity, R.string.input_format_incorrect, Toast.LENGTH_LONG).show();
                                     }
                                     break;
                                 case TEXT:
@@ -472,14 +483,14 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
                                         short x = Short.parseShort(editText.getText().toString());
                                         item.setValue(editText.getText().toString());
                                     } catch (Exception e) {
-                                        Toast.makeText(mainActivity, R.string.input_format_incorrect, Toast.LENGTH_LONG).show();
+                                        Toast.makeText(mMainActivity, R.string.input_format_incorrect, Toast.LENGTH_LONG).show();
                                     }
                                     break;
                             }
                         }
                         dialog.dismiss();
                         FeatureViewMoreInfoAdapter adapter = (FeatureViewMoreInfoAdapter) parent.getAdapter();
-                        new NotifyDataSetChangeAsync(mainActivity).execute(adapter);
+                        new NotifyDataSetChangeAsync(mMainActivity).execute(adapter);
                     }
                 });
                 builder.setView(layout);
@@ -493,7 +504,7 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
     }
 
     private void deleteFeature() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity, android.R.style.Theme_Material_Light_Dialog_Alert);
+        AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity, android.R.style.Theme_Material_Light_Dialog_Alert);
         builder.setTitle("Xác nhận");
         builder.setMessage(R.string.question_delete_point);
         builder.setPositiveButton("Có", new DialogInterface.OnClickListener() {
