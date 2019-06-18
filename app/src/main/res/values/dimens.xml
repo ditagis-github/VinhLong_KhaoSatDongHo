@@ -34,6 +34,8 @@
 
     <dimen name="width_image_popup">30dp</dimen>
     <dimen name="height_image_popup">30dp</dimen>
-
+    <dimen name="padding_medium">16dp</dimen>
+    <dimen name="margin_medium">16dp</dimen>
+    <dimen name="width_title_item">150dp</dimen>
 
 </resources>

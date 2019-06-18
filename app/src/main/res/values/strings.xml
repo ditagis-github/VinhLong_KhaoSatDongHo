@@ -97,7 +97,6 @@
     <string name="sql_coloumn_login_status">status</string>
 
 
-
     <!--sql column login begin-->
     <string name="sql_coloumn_login_displayname">DisplayName</string>
     <string name="sql_coloumn_login_username">Username</string>
@@ -132,7 +131,6 @@
     <string name="question_delete_point">Bạn có chắc chắn xóa điểm này?</string>
     <string name="question_capnhatdanhbo">Bạn có muốn cập nhật lại danh bộ?</string>
     <string name="no_access_permissions">Tài khoản không có quyền truy cập ứng dụng!!!</string>
-
 
 
 </resources>

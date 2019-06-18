@@ -51,6 +51,7 @@ import java.util.concurrent.ExecutionException;
 
 import vinhlong.ditagis.com.khaosatdongho.MainActivity;
 import vinhlong.ditagis.com.khaosatdongho.R;
+import vinhlong.ditagis.com.khaosatdongho.UpdateActivity;
 import vinhlong.ditagis.com.khaosatdongho.adapter.FeatureViewInfoAdapter;
 import vinhlong.ditagis.com.khaosatdongho.adapter.FeatureViewMoreInfoAdapter;
 import vinhlong.ditagis.com.khaosatdongho.async.EditAsync;
@@ -162,6 +163,7 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
     }
 
     public LinearLayout showPopup(ArcGISFeature featureDHKH) {
+
         dimissCallout();
         this.featureDHKH = featureDHKH;
         FeatureLayer featureLayer = dongHoKHDTG.getFeatureLayer();
@@ -180,7 +182,13 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
         if (dongHoKHDTG.getAction().isEdit()) {
             LinearLayout imgBtn_ViewMoreInfo = linearLayout.findViewById(R.id.llayout_ViewMoreInfo);
             imgBtn_ViewMoreInfo.setVisibility(View.VISIBLE);
-            imgBtn_ViewMoreInfo.setOnClickListener(v -> viewMoreInfo());
+            imgBtn_ViewMoreInfo.setOnClickListener(v -> {
+                dApplication.setSelectedFeature(Popup.this.featureDHKH);
+                Intent intent = new Intent(mMainActivity, UpdateActivity.class);
+                mMainActivity.startActivityForResult(intent, Constant.REQUEST.ID_UPDATE_ATTRIBUTE);
+
+            });
+
 
             LinearLayout imgBtn_viewtablethoigian = linearLayout.findViewById(R.id.llayout_viewtablethoigian);
             imgBtn_viewtablethoigian.setVisibility(View.VISIBLE);
@@ -214,7 +222,28 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
             edit_location.setVisibility(View.VISIBLE);
             edit_location.setOnClickListener(v -> editLocation(featureDHKH));
         }
-
+        if (dongHoKHDTG.getAction().isEdit()
+                && this.featureDHKH.getAttributes().get(Constant.DongHoKhachHangFields.TINH_TRANG).equals(Constant.TinhTrangDongHoKhachHang.DANG_KHAO_SAT)) {
+            LinearLayout completeLayout = linearLayout.findViewById(R.id.llayout_complete);
+            completeLayout.setVisibility(View.VISIBLE);
+            completeLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Popup.this.featureDHKH.getAttributes().put(Constant.DongHoKhachHangFields.TINH_TRANG, Constant.TinhTrangDongHoKhachHang.DANG_THIET_KE);
+                    new EditAsync(mMapView, mMainActivity, dongHoKHSFT, featureDHKH, new EditAsync.AsyncResponse() {
+                        @Override
+                        public void processFinish(Boolean isSuccess) {
+                            if (isSuccess) {
+                                Toast.makeText(mMainActivity, "Đã hoàn tất khảo sát", Toast.LENGTH_SHORT).show();
+                                if (Popup.this.mCallout.isShowing())
+                                    Popup.this.mCallout.dismiss();
+                            } else
+                                Toast.makeText(mMainActivity, "Có lỗi xảy ra", Toast.LENGTH_SHORT).show();
+                        }
+                    }).execute();
+                }
+            });
+        }
         linearLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         Envelope envelope = featureDHKH.getGeometry().getExtent();
         double scale = mMapView.getMapScale();
@@ -334,7 +363,12 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
         dialog.show();
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> dialog.dismiss());
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            EditAsync editAsync = new EditAsync(mMapView, mMainActivity, dongHoKHSFT, featureDHKH);
+            EditAsync editAsync = new EditAsync(mMapView, mMainActivity, dongHoKHSFT, featureDHKH, new EditAsync.AsyncResponse() {
+                @Override
+                public void processFinish(Boolean feature) {
+
+                }
+            });
             try {
                 editAsync.execute(adapter).get();
                 refressPopup();

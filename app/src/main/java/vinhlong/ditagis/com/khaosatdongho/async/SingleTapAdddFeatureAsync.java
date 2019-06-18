@@ -118,6 +118,9 @@ public class SingleTapAdddFeatureAsync extends AsyncTask<Point, ArcGISFeature, V
                                         publishProgress((ArcGISFeature) feature);
                                         delegate.processFinish((ArcGISFeature) feature);
                                     }
+                                    else {
+                                        notifyError();
+                                    }
                                 } catch (InterruptedException | ExecutionException e) {
                                     notifyError();
                                     e.printStackTrace();

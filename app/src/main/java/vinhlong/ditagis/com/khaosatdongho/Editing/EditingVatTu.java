@@ -228,7 +228,7 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
             this.titlePopup = layout_table_vattu.findViewById(R.id.txtTitlePopup);
             this.titlePopup.setText(mainActivity.getString(R.string.title_danhsachvattu));
 
-            if (this.vatTuDTG.getAction().isCreate() == false) {
+            if (!this.vatTuDTG.getAction().isCreate()) {
                 btnAdd.setVisibility(View.INVISIBLE);
             }
             btnAdd.setOnClickListener(v -> addTableVatTu());

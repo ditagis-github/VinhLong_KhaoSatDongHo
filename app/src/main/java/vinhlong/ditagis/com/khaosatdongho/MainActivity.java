@@ -408,6 +408,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     });
                     mApplication.setDongHoKHDTG(featureLayerDTG);
                     mMapViewHandler.setDongHoKHSFT(serviceFeatureTable);
+                    mApplication.setDongHoKHSFT(serviceFeatureTable);
                     mApplication.getEditingVatTu().setDongHoKHSFT(serviceFeatureTable);
                 }
                 if (layerInfoDTG.getId() != null && layerInfoDTG.getId().equals(Constant.IDLayer.VATTUDONGHOTBL)) {

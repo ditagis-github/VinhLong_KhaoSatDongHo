@@ -4,6 +4,7 @@ import android.app.Application;
 import android.net.Uri;
 
 import com.esri.arcgisruntime.data.ArcGISFeature;
+import com.esri.arcgisruntime.data.ServiceFeatureTable;
 
 import vinhlong.ditagis.com.khaosatdongho.Editing.EditingVatTu;
 import vinhlong.ditagis.com.khaosatdongho.MainActivity;
@@ -14,6 +15,15 @@ public class DApplication extends Application {
     private FeatureLayerDTG dongHoKHDTG;
     private FeatureLayerDTG vatTuDHDTG;
     private EditingVatTu editingVatTu;
+    private ServiceFeatureTable dongHoKHSFT;
+
+    public ServiceFeatureTable getDongHoKHSFT() {
+        return dongHoKHSFT;
+    }
+
+    public void setDongHoKHSFT(ServiceFeatureTable dongHoKHSFT) {
+        this.dongHoKHSFT = dongHoKHSFT;
+    }
 
     public FeatureLayerDTG getDongHoKHDTG() {
         return dongHoKHDTG;

@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 public class Constant {
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
     public static final String DIACHI = "DiaChi";
+    public static final String EMPTY = "";
     public static final String NGAY_CAP_NHAT = "NgayCapNhat";
     public static final int REQUEST_LOGIN = 0;
     private static final String SERVER_API = "http://vwa.ditagis.com/api";
@@ -38,6 +39,7 @@ public class Constant {
     }
     public static class REQUEST {
         public static final int ID_UPDATE_ATTACHMENT = 50;
+        public static final int ID_UPDATE_ATTRIBUTE = 10;
     }
     public static class TENMAU {
         public static final String SELECT = "Chọn thiết lập mẫu";
@@ -50,7 +52,12 @@ public class Constant {
         public static final String DonViTien = " (đồng)";
     }
 
+    public static class TinhTrangDongHoKhachHang {
+        public static final String DANG_KHAO_SAT = "DKS";
+        public static final String DANG_THIET_KE = "DTK";
+    }
     public static class DongHoKhachHangFields {
+        public static final String TINH_TRANG = "TinhTrang";
         public static final String MaKhachHang = "CMND";
         public static final String ID = "ID";
         public static final String TenKH = "TenKH";

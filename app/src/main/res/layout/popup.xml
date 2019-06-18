@@ -181,6 +181,30 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/llayout_complete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/border_curve"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <ImageButton
+                    android:layout_width="@dimen/width_image_popup"
+                    android:layout_height="@dimen/height_image_popup"
+                    android:background="@android:color/white"
+                    android:src="@drawable/ic_complete" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="2dp"
+                    android:text="H.tất khảo sát"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/llayout_delete"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
