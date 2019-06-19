@@ -3,9 +3,15 @@ package vinhlong.ditagis.com.khaosatdongho.async;
 
 import android.app.Activity;
 import android.os.AsyncTask;
+import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.widget.LinearLayoutManager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -91,7 +97,6 @@ public class LoadingDataFeatureAsync extends AsyncTask<Void, Void, Void> {
             layoutView.findViewById(R.id.llayout_add_feature_edittext).setVisibility(View.GONE);
             layoutView.findViewById(R.id.llayout_add_feature_number).setVisibility(View.GONE);
 
-            ((TextView) layoutView.findViewById(R.id.txt_add_spiner_title)).setText(field.getAlias());
             adapter.addAll(values);
             adapter.notifyDataSetChanged();
 
@@ -104,6 +109,8 @@ public class LoadingDataFeatureAsync extends AsyncTask<Void, Void, Void> {
         } else {
             NumberFormat nm = NumberFormat.getCurrencyInstance();
             switch (field.getFieldType()) {
+                case UNKNOWN:
+                    break;
                 case INTEGER:
                 case SHORT:
                     layoutView.findViewById(R.id.llayout_add_feature_number_decimal).setVisibility(View.GONE);
@@ -112,9 +119,9 @@ public class LoadingDataFeatureAsync extends AsyncTask<Void, Void, Void> {
                     layoutView.findViewById(R.id.llayout_add_feature_number).setVisibility(View.VISIBLE);
 
 
-                    ((TextView) layoutView.findViewById(R.id.txt_add_edit_number_title)).setText(field.getAlias());
-
-                    if (value != null) {
+                   TextInputEditText edit_number_value = layoutView.findViewById(R.id.etxt_add_edit_number_value);
+                    edit_number_value.setHint(field.getAlias());
+                  if (value != null) {
 
                         try {
                             switch (field.getFieldType()) {
@@ -134,6 +141,8 @@ public class LoadingDataFeatureAsync extends AsyncTask<Void, Void, Void> {
 
                     }
                     break;
+                case GUID:
+                    break;
                 case DOUBLE:
                 case FLOAT:
                     layoutView.findViewById(R.id.llayout_add_feature_number_decimal).setVisibility(View.VISIBLE);
@@ -142,8 +151,9 @@ public class LoadingDataFeatureAsync extends AsyncTask<Void, Void, Void> {
                     layoutView.findViewById(R.id.llayout_add_feature_number).setVisibility(View.GONE);
 
 
-                    ((TextView) layoutView.findViewById(R.id.txt_add_edit_number_decimal_title)).setText(field.getAlias());
 
+                    TextInputEditText edit_number_decimal_value = layoutView.findViewById(R.id.etxt_add_edit_number_decimal_value);
+                    edit_number_decimal_value.setHint(field.getAlias());
                     if (value != null) {
                         try {
                             switch (field.getFieldType()) {
@@ -162,12 +172,17 @@ public class LoadingDataFeatureAsync extends AsyncTask<Void, Void, Void> {
 
 
                     }
+                case DATE:
+                    break;
                 case TEXT:
                     layoutView.findViewById(R.id.llayout_add_feature_number_decimal).setVisibility(View.GONE);
                     layoutView.findViewById(R.id.llayout_add_feature_spinner).setVisibility(View.GONE);
                     layoutView.findViewById(R.id.llayout_add_feature_edittext).setVisibility(View.VISIBLE);
                     layoutView.findViewById(R.id.llayout_add_feature_number).setVisibility(View.GONE);
-                    ((TextView) layoutView.findViewById(R.id.txt_add_edit_text_title)).setText(field.getAlias());
+
+                    TextInputEditText edittext_value = layoutView.findViewById(R.id.edit_add_edittext_value);
+                    edittext_value.setHint(field.getAlias());
+
                     if (value != null) {
                         try {
                             ((TextView) layoutView.findViewById(R.id.edit_add_edittext_value)).setText(value.toString());
@@ -178,6 +193,18 @@ public class LoadingDataFeatureAsync extends AsyncTask<Void, Void, Void> {
                     }
                     break;
 
+                case OID:
+                    break;
+                case GLOBALID:
+                    break;
+                case BLOB:
+                    break;
+                case GEOMETRY:
+                    break;
+                case RASTER:
+                    break;
+                case XML:
+                    break;
                 default:
                     layoutView.findViewById(R.id.llayout_add_feature_number_decimal).setVisibility(View.GONE);
                     layoutView.findViewById(R.id.llayout_add_feature_spinner).setVisibility(View.GONE);
@@ -190,4 +217,6 @@ public class LoadingDataFeatureAsync extends AsyncTask<Void, Void, Void> {
 
 
     }
+
+
 }

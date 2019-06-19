@@ -66,6 +66,8 @@ import com.esri.arcgisruntime.mapping.view.LocationDisplay;
 import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.util.ListenableList;
 
+import org.w3c.dom.Text;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -563,6 +565,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
         if (id == R.id.nav_thongke) {
             final Intent intent = new Intent(this, CongViecActivity.class);
+            this.startActivityForResult(intent, requestCode);
+        } else if (id == R.id.nav_test) {
+            final Intent intent = new Intent(this, TextInputLayoutActivity.class);
             this.startActivityForResult(intent, requestCode);
         } else if (id == R.id.nav_tracuu) {
             traCuu.start();
