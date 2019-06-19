@@ -196,17 +196,17 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
                 this.dApplication.getEditingVatTu().showDanhSachVatTu(featureDHKH);
             });
         }
-        if (dongHoKHDTG.getAction().isDelete()) {
-            LinearLayout imgBtn_delete = linearLayout.findViewById(R.id.llayout_delete);
-            imgBtn_delete.setVisibility(View.VISIBLE);
-            imgBtn_delete.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    featureDHKH.getFeatureTable().getFeatureLayer().clearSelection();
-                    deleteFeature();
-                }
-            });
-        }
+//        if (dongHoKHDTG.getAction().isDelete()) {
+//            LinearLayout imgBtn_delete = linearLayout.findViewById(R.id.llayout_delete);
+//            imgBtn_delete.setVisibility(View.VISIBLE);
+//            imgBtn_delete.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    featureDHKH.getFeatureTable().getFeatureLayer().clearSelection();
+//                    deleteFeature();
+//                }
+//            });
+//        }
         if (dongHoKHDTG.getAction().isEdit() && featureDHKH.canEditAttachments()) {
             LinearLayout imgBtn_takePics = linearLayout.findViewById(R.id.llayout_takePics);
             imgBtn_takePics.setVisibility(View.VISIBLE);
@@ -229,18 +229,7 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
             completeLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Popup.this.featureDHKH.getAttributes().put(Constant.DongHoKhachHangFields.TINH_TRANG, Constant.TinhTrangDongHoKhachHang.DANG_THIET_KE);
-                    new EditAsync(mMapView, mMainActivity, dongHoKHSFT, featureDHKH, new EditAsync.AsyncResponse() {
-                        @Override
-                        public void processFinish(Boolean isSuccess) {
-                            if (isSuccess) {
-                                Toast.makeText(mMainActivity, "Đã hoàn tất khảo sát", Toast.LENGTH_SHORT).show();
-                                if (Popup.this.mCallout.isShowing())
-                                    Popup.this.mCallout.dismiss();
-                            } else
-                                Toast.makeText(mMainActivity, "Có lỗi xảy ra", Toast.LENGTH_SHORT).show();
-                        }
-                    }).execute();
+                    hoanTatKhaoSat();
                 }
             });
         }
@@ -260,6 +249,35 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
         return linearLayout;
     }
 
+    private void hoanTatKhaoSat() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity, android.R.style.Theme_Material_Dialog_Alert);
+        builder.setTitle("Xác nhận");
+        builder.setMessage(String.format("Bạn có chắc muốn hoàn tất đồng hồ %s", Popup.this.featureDHKH.getAttributes().get(Constant.DongHoKhachHangFields.ID)));
+        builder.setNegativeButton("Hoàn tất", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Popup.this.featureDHKH.getAttributes().put(Constant.DongHoKhachHangFields.TINH_TRANG, Constant.TinhTrangDongHoKhachHang.DANG_THIET_KE);
+                new EditAsync(mMapView, mMainActivity, dongHoKHSFT, featureDHKH, new EditAsync.AsyncResponse() {
+                    @Override
+                    public void processFinish(Boolean isSuccess) {
+                        if (isSuccess) {
+                            Toast.makeText(mMainActivity, "Đã hoàn tất khảo sát", Toast.LENGTH_SHORT).show();
+                            if (Popup.this.mCallout.isShowing())
+                                Popup.this.mCallout.dismiss();
+                        } else
+                            Toast.makeText(mMainActivity, "Có lỗi xảy ra", Toast.LENGTH_SHORT).show();
+                    }
+                }).execute();
+                dialog.dismiss();
+            }
+        }).setPositiveButton("Hủy", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        }).setCancelable(false);
+
+    }
     private void editLocation(ArcGISFeature feature) {
         mMainActivity.setChangingGeometry(true, feature);
         if (mCallout.isShowing())

@@ -78,7 +78,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="2dp"
-                    android:text="Thời gian"
+                    android:text="Vật tư"
                     android:textStyle="bold" />
             </LinearLayout>
 

@@ -57,12 +57,8 @@ public class LoadingDataFeatureAsync extends AsyncTask<Void, Void, Void> {
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
 
         for (Field field : mArcGISFeature.getFeatureTable().getFields()) {
-            String name = field.getName();
-            if (name == Constant.DongHoKhachHangFields.TINH_TRANG
-                    || name == Constant.DongHoKhachHangFields.TINH_TRANG
-                    )
-                continue;
-            views.add(getView(field));
+            if (Constant.DongHoKhachHangFields.UpdateFields.contains(field.getName()))
+                views.add(getView(field));
 
         }
 

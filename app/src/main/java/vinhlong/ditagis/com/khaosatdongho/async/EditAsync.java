@@ -109,8 +109,8 @@ public class EditAsync extends AsyncTask<FeatureViewMoreInfoAdapter, Boolean, Vo
             }
         }
         Calendar currentTime = Calendar.getInstance();
-        mSelectedArcGISFeature.getAttributes().put(Constant.DongHoKhachHangFields.NgayCapNhat, currentTime);
-        mSelectedArcGISFeature.getAttributes().put(Constant.DongHoKhachHangFields.NguoiCapNhat, this.dApplication.getUser().getUserName());
+        mSelectedArcGISFeature.getAttributes().put(Constant.DongHoKhachHangFields.NGAY_CAP_NHAT, currentTime);
+        mSelectedArcGISFeature.getAttributes().put(Constant.DongHoKhachHangFields.NGUOI_CAP_NHAT, this.dApplication.getUser().getUserName());
         ListenableFuture<Void> voidListenableFuture = mServiceFeatureTable.updateFeatureAsync(mSelectedArcGISFeature);
         voidListenableFuture.addDoneListener(() -> {
             try {

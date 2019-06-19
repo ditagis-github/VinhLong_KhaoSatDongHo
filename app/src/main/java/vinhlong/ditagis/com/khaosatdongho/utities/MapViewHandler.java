@@ -169,8 +169,8 @@ public class MapViewHandler extends Activity {
                     DanhSachDongHoKHAdapter.Item dongHoKH = new DanhSachDongHoKHAdapter.Item();
                     dongHoKH.setObjectID(attributes.get(Constant.LayerFields.OBJECTID).toString());
                     Object danhboDongHo = attributes.get(Constant.DongHoKhachHangFields.ID);
-                    Object tenKH = attributes.get(Constant.DongHoKhachHangFields.TenKH);
-                    Object maKhachHang = attributes.get(Constant.DongHoKhachHangFields.MaKhachHang);
+                    Object tenKH = attributes.get(Constant.DongHoKhachHangFields.TEN_KH);
+                    Object maKhachHang = attributes.get(Constant.DongHoKhachHangFields.CMND);
                     if (danhboDongHo != null)
                         dongHoKH.setIdDongHo(danhboDongHo.toString());
                     if (tenKH != null) {

@@ -74,7 +74,7 @@ public class SingleTapAdddFeatureAsync extends AsyncTask<Point, ArcGISFeature, V
                         attrs.put(key, geocodeResult.getAttributes().get(key));
                     }
                     String address = geocodeResult.getAttributes().get("LongLabel").toString();
-                    feature.getAttributes().put(Constant.DongHoKhachHangFields.GhiChu, address);
+                    feature.getAttributes().put(Constant.DongHoKhachHangFields.GHI_CHU, address);
                 }
                 addFeatureAsync(feature);
             } catch (InterruptedException | ExecutionException e) {
@@ -92,8 +92,8 @@ public class SingleTapAdddFeatureAsync extends AsyncTask<Point, ArcGISFeature, V
 
     private void addFeatureAsync(Feature featureAdd) {
         Calendar currentTime = Calendar.getInstance();
-        featureAdd.getAttributes().put(Constant.DongHoKhachHangFields.NgayCapNhat, currentTime);
-        featureAdd.getAttributes().put(Constant.DongHoKhachHangFields.NguoiCapNhat, this.dApplication.getUser().getUserName());
+        featureAdd.getAttributes().put(Constant.DongHoKhachHangFields.NGAY_CAP_NHAT, currentTime);
+        featureAdd.getAttributes().put(Constant.DongHoKhachHangFields.NGUOI_CAP_NHAT, this.dApplication.getUser().getUserName());
 
         ListenableFuture<Void> voidListenableFuture = this.dongHoKHSFT.addFeatureAsync(featureAdd);
         voidListenableFuture.addDoneListener(() -> {

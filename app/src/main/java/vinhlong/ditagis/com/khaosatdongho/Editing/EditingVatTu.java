@@ -177,7 +177,7 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
     public void deleteDanhSachMauDanhGia(ArcGISFeature featureDHKH) {
         this.feature = featureDHKH;
         final Map<String, Object> attributes = featureDHKH.getAttributes();
-        Object maKhachHang = attributes.get(Constant.DongHoKhachHangFields.MaKhachHang);
+        Object maKhachHang = attributes.get(Constant.DongHoKhachHangFields.CMND);
         if (maKhachHang != null) {
             List<VatTuApdapter.VatTu> vatTus = new ArrayList<>();
 //            vatTuApdapter = new VatTuApdapter(mainActivity, vatTus);
@@ -193,7 +193,7 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
     public void showDanhSachVatTu(ArcGISFeature featureDHKH) {
         this.feature = featureDHKH;
         final Map<String, Object> attributes = featureDHKH.getAttributes();
-        Object maKhachHang = attributes.get(Constant.DongHoKhachHangFields.MaKhachHang);
+        Object maKhachHang = attributes.get(Constant.DongHoKhachHangFields.CMND);
         if (maKhachHang != null) {
             getVatTu(maKhachHang.toString());
             final AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity, android.R.style.Theme_Holo_Light_NoActionBar_Fullscreen);
@@ -445,7 +445,7 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
 
     private void getRefreshTableVatTuAsync() {
         final Map<String, Object> attributes = this.feature.getAttributes();
-        String maKhachHang = attributes.get(Constant.DongHoKhachHangFields.MaKhachHang).toString();
+        String maKhachHang = attributes.get(Constant.DongHoKhachHangFields.CMND).toString();
         new RefreshVatTuAsync(mainActivity, vatTuSFT, this.dmVatTuFeatures, vatTuApdapter, this.vatTuDTG.getAction(), features -> {
             table_feature = features;
             if (this.titlePopup != null && features != null) {
@@ -533,7 +533,7 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
     private void addTableVatTu1() {
         final Map<String, Object> attributes = this.feature.getAttributes();
         Object dBDongHo = attributes.get(Constant.DongHoKhachHangFields.ID);
-        Object maKhachHang = attributes.get(Constant.DongHoKhachHangFields.MaKhachHang);
+        Object maKhachHang = attributes.get(Constant.DongHoKhachHangFields.CMND);
         if (maKhachHang == null) {
             Toast.makeText(mainActivity.getApplicationContext(), mainActivity.getString(R.string.DATA_NOT_FOUND), Toast.LENGTH_SHORT).show();
             return;

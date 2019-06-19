@@ -39,7 +39,7 @@ public class UpdateActivity extends AppCompatActivity {
                 mApplication.getSelectedFeature(), new EditAsync.AsyncResponse() {
             @Override
             public void processFinish(Boolean feature) {
-                ((LinearLayout) UpdateActivity.this.findViewById(R.id.llayout_update_feature_progress)).setVisibility(View.GONE);
+                UpdateActivity.this.findViewById(R.id.llayout_update_feature_progress).setVisibility(View.GONE);
                 ((LinearLayout) UpdateActivity.this.findViewById(R.id.llayout_update_feature_main)).setVisibility(View.VISIBLE);
                 if (feature != null) {
                     Toast.makeText(UpdateActivity.this, "Cập nhật thành công", Toast.LENGTH_SHORT).show();

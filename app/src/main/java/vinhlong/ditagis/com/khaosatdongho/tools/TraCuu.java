@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 import vinhlong.ditagis.com.khaosatdongho.MainActivity;
@@ -42,6 +43,7 @@ import vinhlong.ditagis.com.khaosatdongho.async.NotifyTraCuuAdapterValueChangeAs
 import vinhlong.ditagis.com.khaosatdongho.async.QueryDongHoKhachHangAsync;
 import vinhlong.ditagis.com.khaosatdongho.entities.DApplication;
 import vinhlong.ditagis.com.khaosatdongho.libs.FeatureLayerDTG;
+import vinhlong.ditagis.com.khaosatdongho.libs.TimeAgo;
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant;
 import vinhlong.ditagis.com.khaosatdongho.utities.Popup;
 
@@ -189,9 +191,47 @@ public class TraCuu {
             }
         });
         TextView txtTongItem = (TextView) layout_table_tracuu.findViewById(R.id.txtTitle);
-        new QueryDongHoKhachHangAsync(mainActivity, donghoKHSFT,txtTongItem, adapter, new QueryDongHoKhachHangAsync.AsyncResponse() {
+        new QueryDongHoKhachHangAsync(mainActivity, donghoKHSFT, txtTongItem, new QueryDongHoKhachHangAsync.AsyncResponse() {
+
             public void processFinish(List<Feature> features) {
                 table_feature = features;
+                items.clear();
+                for (Feature feature : features) {
+                    Map<String, Object> attributes = feature.getAttributes();
+                    String objectID = attributes.get(Constant.LayerFields.OBJECTID).toString();
+                    DanhSachDongHoKHAdapter.Item item = new DanhSachDongHoKHAdapter.Item(objectID);
+                    Object idDongHo = attributes.get(Constant.DongHoKhachHangFields.ID);
+                    if (idDongHo != null) {
+                        item.setIdDongHo(idDongHo.toString());
+                    }
+                    Object ngayCapNhat = attributes.get(Constant.DongHoKhachHangFields.NGAY_CAP_NHAT);
+                    if (ngayCapNhat != null) {
+                        long endTime = Calendar.getInstance().getTimeInMillis();
+                        long startTime = ((Calendar) ngayCapNhat).getTimeInMillis();
+                        String time = TimeAgo.DateDifference(endTime - startTime);
+                        item.setThoiGian(time);
+                    }
+                    Object tenKH = attributes.get(Constant.DongHoKhachHangFields.TEN_KH);
+                    if (tenKH != null) {
+                        item.setTenKhachHang(tenKH.toString());
+                    }
+                    Object maKH = attributes.get(Constant.DongHoKhachHangFields.CMND);
+                    if (maKH != null) {
+                        item.setMaKhachHang(maKH.toString());
+                    }
+                    Object soDienThoai = attributes.get(Constant.DongHoKhachHangFields.SO_DIEN_THOAI);
+                    if (soDienThoai != null) {
+                        item.setSoDienThoai(soDienThoai.toString());
+                    }
+                    Object diaChi = attributes.get(Constant.DongHoKhachHangFields.DIA_CHI);
+                    if (diaChi != null) {
+                        item.setDiaChi(diaChi.toString());
+                    }
+                    items.add(item);
+                }
+                adapter.setItems(items);
+                adapter.notifyDataSetChanged();
+
             }
         }).execute(whereClause);
 

@@ -1,6 +1,8 @@
 package vinhlong.ditagis.com.khaosatdongho.utities;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by ThanLe on 3/1/2018.
@@ -13,6 +15,7 @@ public class Constant {
     public static final String NGAY_CAP_NHAT = "NgayCapNhat";
     public static final int REQUEST_LOGIN = 0;
     private static final String SERVER_API = "http://vwa.ditagis.com/api";
+
 
     //    private static final String SERVER_API = "http://113.161.88.180:798/apiv1/api";
     public class AttachmentName {
@@ -57,21 +60,27 @@ public class Constant {
         public static final String DANG_THIET_KE = "DTK";
     }
     public static class DongHoKhachHangFields {
-        public static final String TINH_TRANG = "TinhTrang";
-        public static final String MaKhachHang = "CMND";
+        public static final String OBJECT_ID = "OBJECTID";
         public static final String ID = "ID";
-        public static final String TenKH = "TenKH";
-        public static final String GhiChu = "GhiChu";
-        public static final String NgayCapNhat = "TGGiaoKS";
-        public static final String NguoiCapNhat = "NVKhaoSat";
-        public static final String SoDienThoai = "SoDienThoai";
-        public static final String DiaChi = "DiaChi";
+        public static final String TINH_TRANG = "TinhTrang";
+        public static final String CMND = "CMND";
+        public static final String TEN_KH = "TenKH";
+        public static final String GHI_CHU = "GhiChu";
+        public static final String GHI_CHU_KS = "GhiChuKS";
+        public static final String NGAY_CAP_NHAT = "TGGiaoKS";
+        public static final String NGUOI_CAP_NHAT = "NVKhaoSat";
+        public static final String SO_DIEN_THOAI = "SoDienThoai";
+        public static final String DIA_CHI = "DiaChi";
+        public static final String DIA_CHI_LAP_DAT = "DiaChiLapDat";
 
+        public static final List<String> UpdateFields = Arrays.asList(TEN_KH, CMND, DIA_CHI_LAP_DAT, SO_DIEN_THOAI, GHI_CHU_KS);
+        public static final List<String> OutFields = Arrays.asList(ID, TEN_KH, CMND, DIA_CHI, DIA_CHI_LAP_DAT, SO_DIEN_THOAI, GHI_CHU_KS);
     }
+
 
     public static class VatTuFields {
         public static final String DBDongHo = "DBDongHo";
-        public static final String MaKhachHang = "MaKhachHang";
+        public static final String MaKhachHang = "CMND";
         public static final String MaVatTu = "MaVatTu";
         public static final String SoLuong = "SoLuong";
         public static final String NgayCapNhat = "NgayCapNhat";
@@ -115,6 +124,7 @@ public class Constant {
     }
 
     private Constant() {
+
     }
 
 }
