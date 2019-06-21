@@ -3,12 +3,15 @@ package vinhlong.ditagis.com.khaosatdongho.async;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
+import android.support.design.widget.BottomSheetDialog;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.data.ArcGISFeature;
@@ -31,41 +34,47 @@ import vinhlong.ditagis.com.khaosatdongho.adapter.FeatureViewMoreInfoAttachments
  */
 
 public class ViewAttachmentAsync extends AsyncTask<Void, Integer, Void> {
-    private ProgressDialog mDialog;
-    private MainActivity mMainActivity;
+    private BottomSheetDialog mDialog;
+    private MainActivity mActivity;
     private ArcGISFeature mSelectedArcGISFeature = null;
     private AlertDialog.Builder builder;
     private View layout;
 
     public ViewAttachmentAsync(MainActivity context, ArcGISFeature selectedArcGISFeature) {
-        mMainActivity = context;
+        mActivity = context;
         mSelectedArcGISFeature = selectedArcGISFeature;
-        mDialog = new ProgressDialog(context, android.R.style.Theme_Material_Dialog_Alert);
-    }
+   }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        mDialog.setMessage(mMainActivity.getString(R.string.async_dang_lay_hinh_anh_dinh_kem));
-        mDialog.setCancelable(false);
-        mDialog.setButton("Hủy", new DialogInterface.OnClickListener() {
+
+
+        mDialog = new BottomSheetDialog(this.mActivity);
+        LinearLayout view = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.layout_progress_dialog, null, false);
+        ((TextView) view.findViewById(R.id.txt_progress_dialog_title)).setText("Đang tải hình ảnh đính kèm...");
+        LinearLayout layoutCancel = view.findViewById(R.id.layout_progress_dialog_cancel);
+        layoutCancel.setVisibility(View.VISIBLE);
+        layoutCancel.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
+            public void onClick(View v) {
                 publishProgress(0);
             }
         });
-        mDialog.show();
+        mDialog.setContentView(view);
+        mDialog.setCancelable(false);
 
+        mDialog.show();
     }
 
     @Override
     protected Void doInBackground(Void... params) {
-        builder = new AlertDialog.Builder(mMainActivity, android.R.style.Theme_Material_Light_NoActionBar_Fullscreen);
-        LayoutInflater layoutInflater = LayoutInflater.from(mMainActivity);
+        builder = new AlertDialog.Builder(mActivity, android.R.style.Theme_Material_Light_NoActionBar_Fullscreen);
+        LayoutInflater layoutInflater = LayoutInflater.from(mActivity);
         layout = layoutInflater.inflate(R.layout.layout_viewmoreinfo_feature_attachment, null);
         ListView lstViewAttachment = layout.findViewById(R.id.lstView_alertdialog_attachments);
 
-        final FeatureViewMoreInfoAttachmentsAdapter attachmentsAdapter = new FeatureViewMoreInfoAttachmentsAdapter(mMainActivity, new ArrayList<>());
+        final FeatureViewMoreInfoAttachmentsAdapter attachmentsAdapter = new FeatureViewMoreInfoAttachmentsAdapter(mActivity, new ArrayList<>());
         lstViewAttachment.setAdapter(attachmentsAdapter);
         final ListenableFuture<List<Attachment>> attachmentResults = mSelectedArcGISFeature.fetchAttachmentsAsync();
         attachmentResults.addDoneListener(new Runnable() {

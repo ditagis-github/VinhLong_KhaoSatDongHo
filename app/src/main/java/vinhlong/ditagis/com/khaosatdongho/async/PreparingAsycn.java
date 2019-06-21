@@ -1,9 +1,11 @@
 package vinhlong.ditagis.com.khaosatdongho.async;
 
-import android.app.ProgressDialog;
-import android.content.Context;
+import android.app.Activity;
 import android.os.AsyncTask;
+import android.support.design.widget.BottomSheetDialog;
 import android.util.Log;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,26 +26,29 @@ import vinhlong.ditagis.com.khaosatdongho.utities.Preference;
 
 
 public class PreparingAsycn extends AsyncTask<Void, Void, Void> {
-    private ProgressDialog mDialog;
-    private Context mContext;
+    private BottomSheetDialog mDialog;
+    private Activity mActivity;
     private AsyncResponse mDelegate;
 
     public interface AsyncResponse {
         void processFinish(Void output);
     }
 
-    public PreparingAsycn(Context context, AsyncResponse delegate) {
-        this.mContext = context;
+    public PreparingAsycn(Activity activity, AsyncResponse delegate) {
+        this.mActivity = activity;
         this.mDelegate = delegate;
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        this.mDialog = new ProgressDialog(this.mContext, android.R.style.Theme_Material_Dialog_Alert);
-        this.mDialog.setMessage(mContext.getString(R.string.preparing));
-        this.mDialog.setCancelable(false);
-        this.mDialog.show();
+        mDialog = new BottomSheetDialog(this.mActivity);
+        LinearLayout view = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.layout_progress_dialog, null, false);
+        ((TextView) view.findViewById(R.id.txt_progress_dialog_title)).setText("Đang khởi tạo bản đồ...");
+        mDialog.setContentView(view);
+        mDialog.setCancelable(false);
+
+        mDialog.show();
     }
 
     @Override
@@ -54,7 +59,7 @@ public class PreparingAsycn extends AsyncTask<Void, Void, Void> {
             try {
                 conn.setDoOutput(false);
                 conn.setRequestMethod(Constant.METHOD.GET);
-                conn.setRequestProperty("Authorization", Preference.getInstance().loadPreference(mContext.getString(R.string.preference_login_api)));
+                conn.setRequestProperty("Authorization", Preference.getInstance().loadPreference(mActivity.getString(R.string.preference_login_api)));
                 conn.connect();
 
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -69,9 +74,9 @@ public class PreparingAsycn extends AsyncTask<Void, Void, Void> {
             } finally {
                 conn.disconnect();
             }
-//            ListFeatureLayerDTGDB listFeatureLayerDTGDB = new ListFeatureLayerDTGDB(mContext);
+//            ListFeatureLayerDTGDB listFeatureLayerDTGDB = new ListFeatureLayerDTGDB(mActivity);
 //            ListObjectDB.getInstance().setLstFeatureLayerDTG(listFeatureLayerDTGDB.find(Preference.getInstance().loadPreference(
-//                    mContext.getString(R.string.preference_username)
+//                    mActivity.getString(R.string.preference_username)
 //            )));
         } catch (Exception e) {
             Log.e("Lỗi lấy danh sách DMA", e.toString());
@@ -106,12 +111,12 @@ public class PreparingAsycn extends AsyncTask<Void, Void, Void> {
 
 
 //           LayerInfoDTG layerInfoDTG = new LayerInfoDTG();
-            layerDTGS.add(new LayerInfoDTG(jsonRoute.getString(mContext.getString(R.string.sql_coloumn_sys_id)),
-                    jsonRoute.getString(mContext.getString(R.string.sql_coloumn_sys_title)),
-                    jsonRoute.getString(mContext.getString(R.string.sql_coloumn_sys_url)),
-                    jsonRoute.getBoolean(mContext.getString(R.string.sql_coloumn_sys_iscreate)), jsonRoute.getBoolean(mContext.getString(R.string.sql_coloumn_sys_isdelete)),
-                    jsonRoute.getBoolean(mContext.getString(R.string.sql_coloumn_sys_isedit)), jsonRoute.getBoolean(mContext.getString(R.string.sql_coloumn_sys_isview)),
-                    jsonRoute.getString(mContext.getString(R.string.sql_coloumn_sys_outfield)), jsonRoute.getString(mContext.getString(R.string.sql_coloumn_sys_definition))));
+            layerDTGS.add(new LayerInfoDTG(jsonRoute.getString(mActivity.getString(R.string.sql_coloumn_sys_id)),
+                    jsonRoute.getString(mActivity.getString(R.string.sql_coloumn_sys_title)),
+                    jsonRoute.getString(mActivity.getString(R.string.sql_coloumn_sys_url)),
+                    jsonRoute.getBoolean(mActivity.getString(R.string.sql_coloumn_sys_iscreate)), jsonRoute.getBoolean(mActivity.getString(R.string.sql_coloumn_sys_isdelete)),
+                    jsonRoute.getBoolean(mActivity.getString(R.string.sql_coloumn_sys_isedit)), jsonRoute.getBoolean(mActivity.getString(R.string.sql_coloumn_sys_isview)),
+                    jsonRoute.getString(mActivity.getString(R.string.sql_coloumn_sys_outfield)), jsonRoute.getString(mActivity.getString(R.string.sql_coloumn_sys_definition))));
 
 
         }

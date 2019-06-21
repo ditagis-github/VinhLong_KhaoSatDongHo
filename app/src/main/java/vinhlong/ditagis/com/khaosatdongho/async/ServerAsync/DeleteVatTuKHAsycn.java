@@ -1,10 +1,12 @@
 package vinhlong.ditagis.com.khaosatdongho.async.ServerAsync;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.support.design.widget.BottomSheetDialog;
 import android.util.Log;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -14,25 +16,29 @@ import vinhlong.ditagis.com.khaosatdongho.utities.Constant;
 import vinhlong.ditagis.com.khaosatdongho.utities.Preference;
 
 public class DeleteVatTuKHAsycn extends AsyncTask<String, Void, Boolean> {
-    private ProgressDialog mDialog;
+    private BottomSheetDialog mDialog;
     private Context mContext;
     private AsyncResponse mDelegate;
-
+    private Activity mActivity;
     public interface AsyncResponse {
         void processFinish(Boolean output);
     }
 
     public DeleteVatTuKHAsycn(Activity activity,AsyncResponse delegate) {
         this.mContext = activity;
+        this.mActivity = activity;
         this.mDelegate = delegate;
     }
 
     protected void onPreExecute() {
         super.onPreExecute();
-        this.mDialog = new ProgressDialog(this.mContext, android.R.style.Theme_Material_Dialog_Alert);
-        this.mDialog.setMessage(mContext.getString(R.string.connect_message));
-        this.mDialog.setCancelable(false);
-        this.mDialog.show();
+        mDialog = new BottomSheetDialog(this.mActivity);
+        LinearLayout view = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.layout_progress_dialog, null, false);
+        ((TextView) view.findViewById(R.id.txt_progress_dialog_title)).setText("Đang xóa vật tư...");
+        mDialog.setContentView(view);
+        mDialog.setCancelable(false);
+
+        mDialog.show();
     }
 
     @Override

@@ -1,33 +1,25 @@
 package vinhlong.ditagis.com.khaosatdongho.async.ServerAsync;
 
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.os.AsyncTask;
+import android.support.design.widget.BottomSheetDialog;
 import android.util.Log;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 import vinhlong.ditagis.com.khaosatdongho.MainActivity;
 import vinhlong.ditagis.com.khaosatdongho.R;
 import vinhlong.ditagis.com.khaosatdongho.entities.DApplication;
-import vinhlong.ditagis.com.khaosatdongho.entities.entitiesDB.LayerInfoDTG;
-import vinhlong.ditagis.com.khaosatdongho.entities.entitiesDB.ListObjectDB;
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant;
-import vinhlong.ditagis.com.khaosatdongho.utities.Preference;
 
 
 public class QueryTenMauAsycn extends AsyncTask<Void, String, Void> {
-    private ProgressDialog mDialog;
-    private MainActivity mainActivity;
+    private BottomSheetDialog mDialog;
+    private MainActivity mActivity;
     private AsyncResponse mDelegate;
 
     public interface AsyncResponse {
@@ -35,7 +27,7 @@ public class QueryTenMauAsycn extends AsyncTask<Void, String, Void> {
     }
 
     public QueryTenMauAsycn(MainActivity mainActivity, AsyncResponse delegate) {
-        this.mainActivity = mainActivity;
+        this.mActivity = mainActivity;
         this.mDelegate = delegate;
         DApplication dApplication = (DApplication) mainActivity.getApplication();
 
@@ -44,10 +36,13 @@ public class QueryTenMauAsycn extends AsyncTask<Void, String, Void> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        this.mDialog = new ProgressDialog(this.mainActivity, android.R.style.Theme_Material_Dialog_Alert);
-        this.mDialog.setMessage(mainActivity.getString(R.string.async_dang_lay_danh_sach_ten_mau));
-        this.mDialog.setCancelable(false);
-        this.mDialog.show();
+        mDialog = new BottomSheetDialog(this.mActivity);
+        LinearLayout view = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.layout_progress_dialog, null, false);
+        ((TextView) view.findViewById(R.id.txt_progress_dialog_title)).setText("Đang lấy danh sách tên mẫu...");
+        mDialog.setContentView(view);
+        mDialog.setCancelable(false);
+
+        mDialog.show();
     }
 
     @Override

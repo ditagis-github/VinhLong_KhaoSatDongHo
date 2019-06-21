@@ -1,7 +1,9 @@
 package vinhlong.ditagis.com.khaosatdongho.async;
 
-import android.app.ProgressDialog;
 import android.os.AsyncTask;
+import android.support.design.widget.BottomSheetDialog;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.data.ArcGISFeature;
@@ -17,8 +19,8 @@ import vinhlong.ditagis.com.khaosatdongho.R;
 import vinhlong.ditagis.com.khaosatdongho.entities.DApplication;
 
 public class SingleTapMapViewAsync extends AsyncTask<android.graphics.Point, ArcGISFeature, Void> {
-    private ProgressDialog mDialog;
-    private MainActivity mainActivity;
+    private BottomSheetDialog mDialog;
+    private MainActivity mActivity;
     private MapView mapView;
     private DApplication dApplication;
     private FeatureLayer dongHoKHFL;
@@ -27,9 +29,8 @@ public class SingleTapMapViewAsync extends AsyncTask<android.graphics.Point, Arc
         void processFinish(ArcGISFeature features);
     }
     public SingleTapMapViewAsync(MainActivity mainActivity, MapView mapView, SingleTapMapViewAsync.AsyncResponse asyncResponse) {
-        this.mainActivity = mainActivity;
+        this.mActivity = mainActivity;
         this.mapView = mapView;
-        this.mDialog = new ProgressDialog(mainActivity, android.R.style.Theme_Material_Dialog_Alert);
         this.dApplication = (DApplication) mainActivity.getApplication();
         this.dongHoKHFL = this.dApplication.getDongHoKHDTG().getFeatureLayer();
         this.delegate = asyncResponse;
@@ -40,8 +41,12 @@ public class SingleTapMapViewAsync extends AsyncTask<android.graphics.Point, Arc
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        mDialog.setMessage(mainActivity.getString(R.string.PROCESSING));
+        mDialog = new BottomSheetDialog(this.mActivity);
+        LinearLayout view = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.layout_progress_dialog, null, false);
+        ((TextView) view.findViewById(R.id.txt_progress_dialog_title)).setText("Đang tìm kiếm thông tin...");
+        mDialog.setContentView(view);
         mDialog.setCancelable(false);
+
         mDialog.show();
     }
 

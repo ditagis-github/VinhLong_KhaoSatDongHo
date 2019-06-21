@@ -1,8 +1,9 @@
 package vinhlong.ditagis.com.khaosatdongho.async;
 
-import android.app.ProgressDialog;
-import android.content.Context;
+import android.app.Activity;
 import android.os.AsyncTask;
+import android.support.design.widget.BottomSheetDialog;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
@@ -16,8 +17,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import vinhlong.ditagis.com.khaosatdongho.CongViecActivity;
-import vinhlong.ditagis.com.khaosatdongho.MainActivity;
 import vinhlong.ditagis.com.khaosatdongho.R;
 
 /**
@@ -25,26 +24,17 @@ import vinhlong.ditagis.com.khaosatdongho.R;
  */
 
 public class QueryDongHoKhachHangAsync extends AsyncTask<String, List<Feature>, Void> {
-    private ProgressDialog dialog;
-    private Context mContext;
+    private BottomSheetDialog mDialog;
+    private Activity mActivity;
     private ServiceFeatureTable serviceFeatureTable;
     private TextView txtTongItem;
 
 
-    public QueryDongHoKhachHangAsync(CongViecActivity congViecActivity, ServiceFeatureTable serviceFeatureTable, TextView txtTongItem, AsyncResponse asyncResponse) {
+    public QueryDongHoKhachHangAsync(Activity congViecActivity, ServiceFeatureTable serviceFeatureTable, TextView txtTongItem, AsyncResponse asyncResponse) {
         this.mDelegate = asyncResponse;
-        mContext = congViecActivity;
+        mActivity = congViecActivity;
         this.serviceFeatureTable = serviceFeatureTable;
         this.txtTongItem = txtTongItem;
-        dialog = new ProgressDialog(congViecActivity, android.R.style.Theme_Material_Dialog_Alert);
-    }
-
-    public QueryDongHoKhachHangAsync(MainActivity mainActivity, ServiceFeatureTable serviceFeatureTable, TextView txtTongItem, AsyncResponse asyncResponse) {
-        this.mDelegate = asyncResponse;
-        mContext = mainActivity;
-        this.serviceFeatureTable = serviceFeatureTable;
-        this.txtTongItem = txtTongItem;
-        dialog = new ProgressDialog(mainActivity, android.R.style.Theme_Material_Dialog_Alert);
     }
 
     public interface AsyncResponse {
@@ -57,9 +47,14 @@ public class QueryDongHoKhachHangAsync extends AsyncTask<String, List<Feature>, 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        dialog.setMessage("Đang lấy danh sách công việc...");
-        dialog.setCancelable(false);
-        dialog.show();
+        mDialog = new BottomSheetDialog(this.mActivity);
+        LinearLayout view = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.layout_progress_dialog, null, false);
+        ((TextView) view.findViewById(R.id.txt_progress_dialog_title)).setText("Đang lấy danh sách công việc...");
+        mDialog.setContentView(view);
+        mDialog.setCancelable(false);
+
+        mDialog.show();
+
 
     }
 
@@ -97,8 +92,8 @@ public class QueryDongHoKhachHangAsync extends AsyncTask<String, List<Feature>, 
 
 
         if (txtTongItem != null)
-            txtTongItem.setText(mContext.getString(R.string.nav_thong_ke_tong_diem) + values[0].size());
-        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+            txtTongItem.setText(mActivity.getString(R.string.nav_thong_ke_tong_diem) + values[0].size());
+        if (mDialog != null && mDialog.isShowing()) mDialog.dismiss();
         mDelegate.processFinish(values[0]);
         super.onProgressUpdate(values);
 

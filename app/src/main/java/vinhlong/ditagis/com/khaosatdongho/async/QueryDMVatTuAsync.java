@@ -1,8 +1,10 @@
 package vinhlong.ditagis.com.khaosatdongho.async;
 
-import android.app.ProgressDialog;
-import android.content.Context;
+import android.app.Activity;
 import android.os.AsyncTask;
+import android.support.design.widget.BottomSheetDialog;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.data.Feature;
@@ -28,15 +30,14 @@ public class QueryDMVatTuAsync extends AsyncTask<Void, ArrayList<Feature>, Void>
 
     public AsyncResponse delegate = null;
 
-    private ProgressDialog mDialog;
-    private Context mContext;
+    private BottomSheetDialog mDialog;
+    private Activity mActivity;
     private ServiceFeatureTable mServiceFeatureTable;
     public  ArrayList<Feature> features;
 
-    public QueryDMVatTuAsync(Context context, ServiceFeatureTable serviceFeatureTable, AsyncResponse delegate) {
-        mContext = context;
+    public QueryDMVatTuAsync(Activity activity, ServiceFeatureTable serviceFeatureTable, AsyncResponse delegate) {
+        mActivity = activity;
         mServiceFeatureTable = serviceFeatureTable;
-        mDialog = new ProgressDialog(context, android.R.style.Theme_Material_Dialog_Alert);
         this.delegate = delegate;
     }
 
@@ -69,10 +70,13 @@ public class QueryDMVatTuAsync extends AsyncTask<Void, ArrayList<Feature>, Void>
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        mDialog.setMessage(mContext.getString(R.string.async_dang_tai_du_lieu));
+        mDialog = new BottomSheetDialog(this.mActivity);
+        LinearLayout view = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.layout_progress_dialog, null, false);
+        ((TextView) view.findViewById(R.id.txt_progress_dialog_title)).setText("Đang tải dữ liệu...");
+        mDialog.setContentView(view);
         mDialog.setCancelable(false);
-        mDialog.show();
 
+        mDialog.show();
     }
 
 

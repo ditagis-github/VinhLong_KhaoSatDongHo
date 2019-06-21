@@ -259,7 +259,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mMap = new ArcGISMap(Basemap.Type.OPEN_STREET_MAP, LATITUDE, LONGTITUDE, LEVEL_OF_DETAIL);
         mMapView.setMap(mMap);
         mCallout = mMapView.getCallout();
-        final PreparingAsycn preparingAsycn = new PreparingAsycn(this, output -> {
+        final PreparingAsycn preparingAsycn = new PreparingAsycn(MainActivity.this, output -> {
             ListObjectDB.getInstance().getLstFeatureLayerDTG();
             setFeatureService();
         });

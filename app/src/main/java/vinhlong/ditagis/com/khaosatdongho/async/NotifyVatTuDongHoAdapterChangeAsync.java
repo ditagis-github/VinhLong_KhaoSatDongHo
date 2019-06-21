@@ -1,9 +1,11 @@
 package vinhlong.ditagis.com.khaosatdongho.async;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.support.design.widget.BottomSheetDialog;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import vinhlong.ditagis.com.khaosatdongho.R;
 import vinhlong.ditagis.com.khaosatdongho.adapter.ChiTietVatTuAdapter;
@@ -13,22 +15,24 @@ import vinhlong.ditagis.com.khaosatdongho.adapter.ChiTietVatTuAdapter;
  */
 
 public class NotifyVatTuDongHoAdapterChangeAsync extends AsyncTask<ChiTietVatTuAdapter, Void, Void> {
-    private ProgressDialog dialog;
+    private BottomSheetDialog mDialog;
     private Context mContext;
     private Activity mActivity;
 
     public NotifyVatTuDongHoAdapterChangeAsync(Activity activity) {
         mActivity =activity;
-        dialog = new ProgressDialog(mActivity, android.R.style.Theme_Material_Dialog_Alert);
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        dialog.setMessage(mActivity.getString(R.string.async_dang_cap_nhat_giao_dien));
-        dialog.setCancelable(false);
+        mDialog = new BottomSheetDialog(this.mContext);
+        LinearLayout view = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.layout_progress_dialog, null, false);
+        ((TextView) view.findViewById(R.id.txt_progress_dialog_title)).setText("Đang cập nhật giao diện...");
+        mDialog.setContentView(view);
+        mDialog.setCancelable(false);
 
-        dialog.show();
+        mDialog.show();
 
     }
 
@@ -61,8 +65,8 @@ public class NotifyVatTuDongHoAdapterChangeAsync extends AsyncTask<ChiTietVatTuA
 
     @Override
     protected void onPostExecute(Void result) {
-        if (dialog != null || dialog.isShowing())
-            dialog.dismiss();
+        if (mDialog != null || mDialog.isShowing())
+            mDialog.dismiss();
         super.onPostExecute(result);
 
     }

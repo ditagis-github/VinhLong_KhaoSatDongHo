@@ -3,7 +3,10 @@ package vinhlong.ditagis.com.khaosatdongho.async;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
+import android.support.design.widget.BottomSheetDialog;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.data.ArcGISFeature;
@@ -31,7 +34,7 @@ import vinhlong.ditagis.com.khaosatdongho.utities.MySnackBar;
  */
 
 public class EditAsync extends AsyncTask<FeatureViewMoreInfoAdapter, Boolean, Void> {
-    private ProgressDialog dialog;
+    private BottomSheetDialog mDialog;
     private Activity mainActivity;
     private ServiceFeatureTable mServiceFeatureTable;
     private ArcGISFeature mSelectedArcGISFeature = null;
@@ -49,7 +52,6 @@ public class EditAsync extends AsyncTask<FeatureViewMoreInfoAdapter, Boolean, Vo
         this.mDelegate = delegate;
         mServiceFeatureTable = serviceFeatureTable;
         mSelectedArcGISFeature = selectedArcGISFeature;
-        dialog = new ProgressDialog(mainActivity, android.R.style.Theme_Material_Dialog_Alert);
         this.mapView = mapView;
         this.dApplication = (DApplication) mainActivity.getApplication();
     }
@@ -57,10 +59,13 @@ public class EditAsync extends AsyncTask<FeatureViewMoreInfoAdapter, Boolean, Vo
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        dialog.setMessage(mainActivity.getString(R.string.async_dang_xu_ly));
-        dialog.setCancelable(false);
+        mDialog = new BottomSheetDialog(this.mainActivity);
+        LinearLayout view = (LinearLayout) mainActivity.getLayoutInflater().inflate(R.layout.layout_progress_dialog, null, false);
+        ((TextView) view.findViewById(R.id.txt_progress_dialog_title)).setText("Đang cập nhật thông tin...");
+        mDialog.setContentView(view);
+        mDialog.setCancelable(false);
 
-        dialog.show();
+        mDialog.show();
 
     }
 
@@ -166,8 +171,8 @@ public class EditAsync extends AsyncTask<FeatureViewMoreInfoAdapter, Boolean, Vo
         if (values != null && values[0]) {
             mDelegate.processFinish(true);
         } else mDelegate.processFinish(false);
-        if (dialog != null && dialog.isShowing()) {
-            dialog.dismiss();
+        if (mDialog != null && mDialog.isShowing()) {
+            mDialog.dismiss();
         }
     }
 

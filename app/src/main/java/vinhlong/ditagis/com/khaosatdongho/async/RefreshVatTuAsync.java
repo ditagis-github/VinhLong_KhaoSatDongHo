@@ -1,8 +1,10 @@
 package vinhlong.ditagis.com.khaosatdongho.async;
 
-import android.app.ProgressDialog;
-import android.content.Context;
+import android.app.Activity;
 import android.os.AsyncTask;
+import android.support.design.widget.BottomSheetDialog;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.data.Feature;
@@ -26,8 +28,8 @@ import vinhlong.ditagis.com.khaosatdongho.utities.Constant;
  */
 
 public class RefreshVatTuAsync extends AsyncTask<String, List<VatTuApdapter.VatTu>, Void> {
-    private ProgressDialog dialog;
-    private Context mContext;
+    private BottomSheetDialog mDialog;
+    private Activity mActivity;
     private ServiceFeatureTable vatTuTable;
     private VatTuApdapter vatTuApdapter;
     private Action action;
@@ -39,12 +41,11 @@ public class RefreshVatTuAsync extends AsyncTask<String, List<VatTuApdapter.VatT
 
     private AsyncResponse delegate;
 
-    public RefreshVatTuAsync(Context context, ServiceFeatureTable vatTuTable, ArrayList<Feature> features, VatTuApdapter vatTuApdapter, Action action, AsyncResponse asyncResponse) {
+    public RefreshVatTuAsync(Activity activity, ServiceFeatureTable vatTuTable, ArrayList<Feature> features, VatTuApdapter vatTuApdapter, Action action, AsyncResponse asyncResponse) {
         this.delegate = asyncResponse;
-        mContext = context;
+        mActivity = activity;
         this.vatTuTable = vatTuTable;
         this.vatTuApdapter = vatTuApdapter;
-        dialog = new ProgressDialog(context, android.R.style.Theme_Material_Dialog_Alert);
         this.action = action;
         this.dmVatTuFeatures = features;
     }
@@ -52,9 +53,13 @@ public class RefreshVatTuAsync extends AsyncTask<String, List<VatTuApdapter.VatT
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        dialog.setMessage(mContext.getString(R.string.async_dang_xu_ly));
-        dialog.setCancelable(false);
-        dialog.show();
+        mDialog = new BottomSheetDialog(this.mActivity);
+        LinearLayout view = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.layout_progress_dialog, null, false);
+        ((TextView) view.findViewById(R.id.txt_progress_dialog_title)).setText("Đang xử lý...");
+        mDialog.setContentView(view);
+        mDialog.setCancelable(false);
+
+        mDialog.show();
 
     }
 
@@ -127,7 +132,7 @@ public class RefreshVatTuAsync extends AsyncTask<String, List<VatTuApdapter.VatT
         vatTuApdapter.clear();
 //        vatTuApdapter.setVatTus(values[0]);
         vatTuApdapter.notifyDataSetChanged();
-        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        if (mDialog != null && mDialog.isShowing()) mDialog.dismiss();
         super.onProgressUpdate(values);
 
     }

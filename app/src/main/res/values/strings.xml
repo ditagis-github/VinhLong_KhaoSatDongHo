@@ -108,7 +108,6 @@
     <string name="find_khachhHang_message">Đang lấy thông tin khách hàng…</string>
     <string name="connect_message">Đang kết nối đến máy chủ…</string>
     <string name="login_message">Đang kiểm tra thông tin đăng nhập…</string>
-    <string name="async_dang_tai_du_lieu">Đang tải dữ liệu…</string>
     <string name="async_dang_lay_hinh_anh_dinh_kem">Đang tải hình ảnh đính kèm…</string>
     <string name="async_dang_lay_danh_sach_ten_mau">Đang lấy danh sách tên mẫu</string>
     <string name="async_dang_lay_danh_sach_vat_tu">Đang lấy danh sách vật tư</string>

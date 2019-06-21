@@ -1,9 +1,11 @@
 package vinhlong.ditagis.com.khaosatdongho.async;
 
 import android.annotation.SuppressLint;
-import android.app.ProgressDialog;
-import android.content.Context;
+import android.app.Activity;
 import android.os.AsyncTask;
+import android.support.design.widget.BottomSheetDialog;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.data.ArcGISFeature;
@@ -21,31 +23,32 @@ import vinhlong.ditagis.com.khaosatdongho.R;
  */
 
 public class EditGeometryAsync extends AsyncTask<Point, Boolean, Void> {
-    private ProgressDialog mDialog;
+    private BottomSheetDialog mDialog;
     @SuppressLint("StaticFieldLeak")
-    private Context mContext;
+    private Activity mActivity;
     private ServiceFeatureTable mServiceFeatureTable;
     private ArcGISFeature mSelectedArcGISFeature;
 
     private AsyncResponse mDelegate;
 
-    public EditGeometryAsync(Context context, ServiceFeatureTable serviceFeatureTable,
+    public EditGeometryAsync(Activity activity, ServiceFeatureTable serviceFeatureTable,
                              ArcGISFeature selectedArcGISFeature, AsyncResponse delegate) {
-        mContext = context;
+        mActivity = activity;
         this.mDelegate = delegate;
         mServiceFeatureTable = serviceFeatureTable;
         mSelectedArcGISFeature = selectedArcGISFeature;
-        mDialog = new ProgressDialog(context, android.R.style.Theme_Material_Dialog_Alert);
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        mDialog.setMessage(mContext.getString(R.string.async_dang_xu_ly));
+        mDialog = new BottomSheetDialog(this.mActivity);
+        LinearLayout view = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.layout_progress_dialog, null, false);
+        ((TextView) view.findViewById(R.id.txt_progress_dialog_title)).setText("Đang cập nhật vị trí...");
+        mDialog.setContentView(view);
         mDialog.setCancelable(false);
 
         mDialog.show();
-
     }
 
     @Override

@@ -1,8 +1,10 @@
 package vinhlong.ditagis.com.khaosatdongho.async.ServerAsync;
 
-import android.app.ProgressDialog;
 import android.os.AsyncTask;
+import android.support.design.widget.BottomSheetDialog;
 import android.util.Log;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,8 +22,8 @@ import vinhlong.ditagis.com.khaosatdongho.utities.Constant;
 
 
 public class QueryVatTuTheoMauAsycn extends AsyncTask<String, ArrayList<QueryVatTuTheoMauAsycn.VatTu>, Void> {
-    private ProgressDialog mDialog;
-    private MainActivity mainActivity;
+    private BottomSheetDialog mDialog;
+    private MainActivity mActivity;
     private AsyncResponse mDelegate;
 
     public interface AsyncResponse {
@@ -29,17 +31,20 @@ public class QueryVatTuTheoMauAsycn extends AsyncTask<String, ArrayList<QueryVat
     }
 
     public QueryVatTuTheoMauAsycn(MainActivity mainActivity, AsyncResponse delegate) {
-        this.mainActivity = mainActivity;
+        this.mActivity = mainActivity;
         this.mDelegate = delegate;
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        this.mDialog = new ProgressDialog(this.mainActivity, android.R.style.Theme_Material_Dialog_Alert);
-        this.mDialog.setMessage(mainActivity.getString(R.string.async_dang_lay_danh_sach_ten_mau));
-        this.mDialog.setCancelable(false);
-        this.mDialog.show();
+        mDialog = new BottomSheetDialog(this.mActivity);
+        LinearLayout view = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.layout_progress_dialog, null, false);
+        ((TextView) view.findViewById(R.id.txt_progress_dialog_title)).setText("Đang lấy danh sách tên mẫu...");
+        mDialog.setContentView(view);
+        mDialog.setCancelable(false);
+
+        mDialog.show();
     }
 
     @Override

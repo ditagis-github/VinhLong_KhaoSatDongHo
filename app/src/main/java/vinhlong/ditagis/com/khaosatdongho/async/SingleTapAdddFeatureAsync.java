@@ -1,7 +1,10 @@
 package vinhlong.ditagis.com.khaosatdongho.async;
 
-import android.app.ProgressDialog;
+import android.app.Activity;
 import android.os.AsyncTask;
+import android.support.design.widget.BottomSheetDialog;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.data.ArcGISFeature;
@@ -29,32 +32,35 @@ import vinhlong.ditagis.com.khaosatdongho.utities.Constant;
 import vinhlong.ditagis.com.khaosatdongho.utities.MySnackBar;
 
 public class SingleTapAdddFeatureAsync extends AsyncTask<Point, ArcGISFeature, Void> {
-    private ProgressDialog mDialog;
+    private BottomSheetDialog mDialog;
     private ServiceFeatureTable dongHoKHSFT;
     private MapView mapView;
     private LocatorTask locatorTask = new LocatorTask("http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer");
     private DApplication dApplication;
     private SingleTapAdddFeatureAsync.AsyncResponse delegate;
-    private MainActivity mainActivity;
+    private MainActivity mActivity;
 
     public interface AsyncResponse {
         void processFinish(ArcGISFeature features);
     }
 
     public SingleTapAdddFeatureAsync(MainActivity mainActivity, MapView mapView, ServiceFeatureTable hongHoKHSFT, SingleTapAdddFeatureAsync.AsyncResponse asyncResponse) {
-        mDialog = new ProgressDialog(mainActivity, android.R.style.Theme_Material_Dialog_Alert);
         this.dongHoKHSFT = hongHoKHSFT;
         this.mapView = mapView;
         this.dApplication = (DApplication) mainActivity.getApplication();
         this.delegate = asyncResponse;
-        this.mainActivity = mainActivity;
+        this.mActivity = mainActivity;
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        mDialog.setMessage(mainActivity.getString(R.string.PROCESSING));
+        mDialog = new BottomSheetDialog(this.mActivity);
+        LinearLayout view = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.layout_progress_dialog, null, false);
+        ((TextView) view.findViewById(R.id.txt_progress_dialog_title)).setText("Đang xử lý...");
+        mDialog.setContentView(view);
         mDialog.setCancelable(false);
+
         mDialog.show();
     }
 
@@ -87,7 +93,7 @@ public class SingleTapAdddFeatureAsync extends AsyncTask<Point, ArcGISFeature, V
 
     private void notifyError() {
         publishProgress();
-        MySnackBar.make(mapView,mainActivity.getString(R.string.ERROR_OCCURRED) , false);
+        MySnackBar.make(mapView, mActivity.getString(R.string.ERROR_OCCURRED) , false);
     }
 
     private void addFeatureAsync(Feature featureAdd) {
@@ -144,7 +150,7 @@ public class SingleTapAdddFeatureAsync extends AsyncTask<Point, ArcGISFeature, V
         if (mDialog != null && mDialog.isShowing()) {
             mDialog.dismiss();
         }
-        mainActivity.dismissPin();
+        mActivity.dismissPin();
         super.onProgressUpdate(values);
 
     }

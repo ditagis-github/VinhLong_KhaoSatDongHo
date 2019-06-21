@@ -1,8 +1,10 @@
 package vinhlong.ditagis.com.khaosatdongho.async;
 
-import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.support.design.widget.BottomSheetDialog;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.data.ArcGISFeature;
@@ -23,18 +25,17 @@ import vinhlong.ditagis.com.khaosatdongho.utities.Constant;
  */
 
 public class UpdateAttachmentAsync extends AsyncTask<Void, Void, Void> {
-    private ProgressDialog mDialog;
-    private MainActivity mainActivity;
+    private BottomSheetDialog mDialog;
+    private MainActivity mActivity;
     private ServiceFeatureTable mServiceFeatureTable;
     private ArcGISFeature mSelectedArcGISFeature = null;
     private byte[] mImage;
     private DApplication dApplication;
 
     public UpdateAttachmentAsync(MainActivity mainActivity, ArcGISFeature selectedArcGISFeature, byte[] image) {
-        this.mainActivity = mainActivity;
+        this.mActivity = mainActivity;
         mServiceFeatureTable = (ServiceFeatureTable) selectedArcGISFeature.getFeatureTable();
         mSelectedArcGISFeature = selectedArcGISFeature;
-        mDialog = new ProgressDialog(mainActivity, android.R.style.Theme_Material_Dialog_Alert);
         this.mImage = image;
         this.dApplication = (DApplication) mainActivity.getApplication();
     }
@@ -42,11 +43,13 @@ public class UpdateAttachmentAsync extends AsyncTask<Void, Void, Void> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        mDialog.setMessage(mainActivity.getString(R.string.async_dang_xu_ly));
+        mDialog = new BottomSheetDialog(this.mActivity);
+        LinearLayout view = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.layout_progress_dialog, null, false);
+        ((TextView) view.findViewById(R.id.txt_progress_dialog_title)).setText("Đang cập nhật thông tin...");
+        mDialog.setContentView(view);
         mDialog.setCancelable(false);
 
         mDialog.show();
-
     }
 
     @Override

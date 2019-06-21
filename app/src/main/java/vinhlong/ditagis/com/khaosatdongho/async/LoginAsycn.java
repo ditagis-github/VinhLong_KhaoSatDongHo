@@ -1,10 +1,12 @@
 package vinhlong.ditagis.com.khaosatdongho.async;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.support.design.widget.BottomSheetDialog;
 import android.util.Log;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,29 +27,34 @@ import vinhlong.ditagis.com.khaosatdongho.entities.entitiesDB.UserDangNhap;
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant;
 import vinhlong.ditagis.com.khaosatdongho.utities.Preference;
 
-public class NewLoginAsycn extends AsyncTask<String, Void, User> {
+public class LoginAsycn extends AsyncTask<String, Void, User> {
     private Exception exception;
-    private ProgressDialog mDialog;
+    private BottomSheetDialog mDialog;
     private Context mContext;
     private AsyncResponse mDelegate;
     private DApplication mApplication;
-
+    private Activity mActivity;
     public interface AsyncResponse {
         void processFinish(User output);
     }
 
-    public NewLoginAsycn(Activity activity, AsyncResponse delegate) {
+    public LoginAsycn(Activity activity, AsyncResponse delegate) {
         this.mApplication = (DApplication) activity.getApplication();
         this.mContext = activity;
         this.mDelegate = delegate;
+        this.mActivity = activity;
     }
 
     protected void onPreExecute() {
         super.onPreExecute();
-        this.mDialog = new ProgressDialog(this.mContext, android.R.style.Theme_Material_Dialog_Alert);
-        this.mDialog.setMessage(mContext.getString(R.string.connect_message));
-        this.mDialog.setCancelable(false);
-        this.mDialog.show();
+        mDialog = new BottomSheetDialog(this.mContext);
+        LinearLayout view = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.layout_progress_dialog, null, false);
+        ((TextView) view.findViewById(R.id.txt_progress_dialog_title)).setText("Đang kiểm tra thông tin đăng nhập...");
+        mDialog.setContentView(view);
+        mDialog.setCancelable(false);
+
+        mDialog.show();
+
     }
 
     @Override

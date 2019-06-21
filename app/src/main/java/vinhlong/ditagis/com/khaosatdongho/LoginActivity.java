@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import vinhlong.ditagis.com.khaosatdongho.async.NewLoginAsycn;
+import vinhlong.ditagis.com.khaosatdongho.async.LoginAsycn;
 import vinhlong.ditagis.com.khaosatdongho.entities.DApplication;
 import vinhlong.ditagis.com.khaosatdongho.entities.entitiesDB.User;
 import vinhlong.ditagis.com.khaosatdongho.utities.CheckConnectInternet;
@@ -81,7 +81,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             handleInfoLoginEmpty();
             return;
         }
-        NewLoginAsycn loginAsycn = new NewLoginAsycn(this, output -> {
+        LoginAsycn loginAsycn = new LoginAsycn(LoginActivity.this, output -> {
             if (output != null) {
                 handleLoginSuccess(output);
                 dApplication.setUser(output);
