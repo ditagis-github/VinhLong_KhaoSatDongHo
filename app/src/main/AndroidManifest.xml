@@ -48,9 +48,6 @@
         <activity
             android:name=".UpdateActivity"
             android:parentActivityName=".MainActivity" />
-        <activity
-            android:name=".TextInputLayoutActivity"
-            android:parentActivityName=".MainActivity"></activity>
     </application>
 
 </manifest>

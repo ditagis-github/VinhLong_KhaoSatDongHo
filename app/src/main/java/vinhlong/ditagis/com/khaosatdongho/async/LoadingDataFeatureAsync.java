@@ -6,12 +6,8 @@ import android.os.AsyncTask;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.widget.LinearLayoutManager;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -73,16 +69,19 @@ public class LoadingDataFeatureAsync extends AsyncTask<Void, Void, Void> {
     }
 
     private View getView(Field field) {
+
+
         LinearLayout layoutView = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.item_add_feature, null, false);
-        ArrayAdapter adapter = new ArrayAdapter(mActivity, android.R.layout.simple_list_item_1, new ArrayList<String>());
-        Spinner spinner = layoutView.findViewById(R.id.spinner_add_spinner_value);
-        spinner.setAdapter(adapter);
+
         Object value = null;
         if (mArcGISFeature != null) {
             value = mArcGISFeature.getAttributes().get(field.getName());
         }
         if (field.getDomain() != null) {
             CodedValueDomain codedValueDomain = (CodedValueDomain) field.getDomain();
+            ArrayAdapter adapter = new ArrayAdapter(mActivity, android.R.layout.simple_list_item_1, new ArrayList<String>());
+            Spinner spinner = layoutView.findViewById(R.id.spinner_add_spinner_value);
+            spinner.setAdapter(adapter);
             ArrayList values = new ArrayList<String>();
             values.add(Constant.EMPTY);
             String selectedValue = null;
@@ -96,6 +95,9 @@ public class LoadingDataFeatureAsync extends AsyncTask<Void, Void, Void> {
             layoutView.findViewById(R.id.llayout_add_feature_spinner).setVisibility(View.VISIBLE);
             layoutView.findViewById(R.id.llayout_add_feature_edittext).setVisibility(View.GONE);
             layoutView.findViewById(R.id.llayout_add_feature_number).setVisibility(View.GONE);
+
+            TextInputLayout spinLayout = layoutView.findViewById(R.id.llayout_add_feature_spinner);
+            spinLayout.setHint(field.getAlias());
 
             adapter.addAll(values);
             adapter.notifyDataSetChanged();
@@ -119,8 +121,8 @@ public class LoadingDataFeatureAsync extends AsyncTask<Void, Void, Void> {
                     layoutView.findViewById(R.id.llayout_add_feature_number).setVisibility(View.VISIBLE);
 
 
-                   TextInputEditText edit_number_value = layoutView.findViewById(R.id.etxt_add_edit_number_value);
-                    edit_number_value.setHint(field.getAlias());
+                   TextInputLayout edit_number_layout = layoutView.findViewById(R.id.llayout_add_feature_number);
+                    edit_number_layout.setHint(field.getAlias());
                   if (value != null) {
 
                         try {
@@ -152,8 +154,8 @@ public class LoadingDataFeatureAsync extends AsyncTask<Void, Void, Void> {
 
 
 
-                    TextInputEditText edit_number_decimal_value = layoutView.findViewById(R.id.etxt_add_edit_number_decimal_value);
-                    edit_number_decimal_value.setHint(field.getAlias());
+                    TextInputLayout edit_number_decimal_layout = layoutView.findViewById(R.id.llayout_add_feature_number_decimal);
+                    edit_number_decimal_layout.setHint(field.getAlias());
                     if (value != null) {
                         try {
                             switch (field.getFieldType()) {
@@ -180,8 +182,8 @@ public class LoadingDataFeatureAsync extends AsyncTask<Void, Void, Void> {
                     layoutView.findViewById(R.id.llayout_add_feature_edittext).setVisibility(View.VISIBLE);
                     layoutView.findViewById(R.id.llayout_add_feature_number).setVisibility(View.GONE);
 
-                    TextInputEditText edittext_value = layoutView.findViewById(R.id.edit_add_edittext_value);
-                    edittext_value.setHint(field.getAlias());
+                    TextInputLayout textLayout = layoutView.findViewById(R.id.llayout_add_feature_edittext);
+                    textLayout.setHint(field.getAlias());
 
                     if (value != null) {
                         try {
@@ -213,7 +215,8 @@ public class LoadingDataFeatureAsync extends AsyncTask<Void, Void, Void> {
                     break;
             }
         }
-        return layoutView;
+
+          return layoutView;
 
 
     }

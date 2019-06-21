@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_marginLeft="@dimen/margin_small"
-    android:layout_marginRight="@dimen/margin_small"
-    android:layout_marginTop="@dimen/margin_small"
-    android:layout_marginBottom="@dimen/margin_small"
+
     android:background="@color/colorWhite"
     android:orientation="vertical">
 
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/llayout_add_feature_number"
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:hintEnabled="true">
@@ -22,7 +20,8 @@
             android:id="@+id/etxt_add_edit_number_value"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+
+            android:hint="sdff"
             android:inputType="number"
             android:src="@drawable/ic_right_menu" />
     </android.support.design.widget.TextInputLayout>
@@ -30,15 +29,14 @@
     <android.support.design.widget.TextInputLayout
         android:id="@+id/llayout_add_feature_number_decimal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:hintEnabled="true">
+        android:visibility="gone"
+        android:layout_height="wrap_content">
 
 
         <android.support.design.widget.TextInputEditText
             android:id="@+id/etxt_add_edit_number_decimal_value"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
             android:inputType="numberDecimal"
             android:src="@drawable/ic_right_menu" />
     </android.support.design.widget.TextInputLayout>
@@ -47,6 +45,7 @@
         android:id="@+id/llayout_add_feature_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         app:hintEnabled="true">
 
 
@@ -54,7 +53,6 @@
             android:id="@+id/spinner_add_spinner_value"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
             android:src="@drawable/ic_right_menu" />
     </android.support.design.widget.TextInputLayout>
 
@@ -62,6 +60,7 @@
         android:id="@+id/llayout_add_feature_edittext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         app:hintEnabled="true">
 
 
@@ -69,7 +68,7 @@
             android:id="@+id/edit_add_edittext_value"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:hint="ádfsf"
             android:inputType="text"
             android:src="@drawable/ic_right_menu" />
     </android.support.design.widget.TextInputLayout>

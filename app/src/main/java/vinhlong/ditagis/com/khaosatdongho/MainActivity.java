@@ -566,10 +566,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (id == R.id.nav_thongke) {
             final Intent intent = new Intent(this, CongViecActivity.class);
             this.startActivityForResult(intent, requestCode);
-        } else if (id == R.id.nav_test) {
-            final Intent intent = new Intent(this, TextInputLayoutActivity.class);
-            this.startActivityForResult(intent, requestCode);
-        } else if (id == R.id.nav_tracuu) {
+        }  else if (id == R.id.nav_tracuu) {
             traCuu.start();
         } else if (id == R.id.nav_logOut) {
             startSignIn();
