@@ -40,7 +40,7 @@
         <ListView
             android:id="@+id/lstview_thongtinsuco"
             android:layout_width="match_parent"
-            android:layout_height="250dp"></ListView>
+            android:layout_height="250dp" />
     </LinearLayout>
 
     <HorizontalScrollView
@@ -54,7 +54,6 @@
 
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="right"
             android:orientation="horizontal">
 
             <LinearLayout
@@ -71,13 +70,13 @@
                     android:layout_height="@dimen/height_image_popup"
                     android:background="@android:color/white"
 
-                    android:src="@drawable/ic_table" />
+                    android:src="@drawable/ic_list" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="2dp"
+                    android:layout_marginLeft="@dimen/margin_inner_button_popup"
                     android:text="Vật tư"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -86,7 +85,7 @@
                 android:id="@+id/llayout_ViewMoreInfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
+                android:layout_marginLeft="@dimen/margin_button_popup"
                 android:background="@drawable/border_curve"
                 android:orientation="horizontal"
                 android:visibility="gone">
@@ -96,13 +95,13 @@
                     android:layout_width="@dimen/width_image_popup"
                     android:layout_height="@dimen/height_image_popup"
                     android:background="@android:color/white"
-                    android:src="@drawable/ic_info" />
+                    android:src="@drawable/ic_edit" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="2dp"
+                    android:layout_marginLeft="@dimen/margin_inner_button_popup"
                     android:text="C.nhật thông tin"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -111,7 +110,7 @@
                 android:id="@+id/llayout_edit_location"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
+                android:layout_marginLeft="@dimen/margin_button_popup"
                 android:background="@drawable/border_curve"
                 android:orientation="horizontal"
                 android:visibility="gone">
@@ -127,7 +126,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="2dp"
+                    android:layout_marginLeft="@dimen/margin_inner_button_popup"
                     android:text="C.nhật vị trí"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -136,7 +135,7 @@
                 android:id="@+id/llayout_takePics"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
+                android:layout_marginLeft="@dimen/margin_button_popup"
                 android:background="@drawable/border_curve"
                 android:orientation="horizontal"
                 android:visibility="gone">
@@ -151,7 +150,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="2dp"
+                    android:layout_marginLeft="@dimen/margin_inner_button_popup"
                     android:text="Chụp ảnh"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -160,7 +159,7 @@
                 android:id="@+id/llayout_view_attachment"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
+                android:layout_marginLeft="@dimen/margin_button_popup"
                 android:background="@drawable/border_curve"
                 android:orientation="horizontal"
                 android:visibility="gone">
@@ -169,13 +168,13 @@
                     android:layout_width="@dimen/width_image_popup"
                     android:layout_height="@dimen/height_image_popup"
                     android:background="@android:color/white"
-                    android:src="@drawable/ic_colections" />
+                    android:src="@drawable/ic_collections" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="2dp"
+                    android:layout_marginLeft="@dimen/margin_inner_button_popup"
                     android:text="Xem ảnh"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -184,7 +183,7 @@
                 android:id="@+id/llayout_complete"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
+                android:layout_marginLeft="@dimen/margin_button_popup"
                 android:background="@drawable/border_curve"
                 android:orientation="horizontal"
                 android:visibility="gone">
@@ -199,7 +198,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="2dp"
+                    android:layout_marginLeft="@dimen/margin_inner_button_popup"
                     android:text="H.tất khảo sát"
                     android:textStyle="bold" />
             </LinearLayout>

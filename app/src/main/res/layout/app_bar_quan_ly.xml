@@ -286,6 +286,7 @@
         android:layout_marginBottom="80dp"
         android:layout_marginRight="@dimen/fab_margin"
         android:src="@drawable/location"
+        android:tint="@color/colorPrimary"
         app:backgroundTint="@android:color/white" />
 
     <android.support.design.widget.FloatingActionButton
@@ -296,6 +297,7 @@
         android:layout_marginBottom="15dp"
         android:layout_marginRight="@dimen/fab_margin"
         android:src="@drawable/add"
+        android:tint="@color/colorPrimary"
         app:backgroundTint="@android:color/white" />
 
     <LinearLayout

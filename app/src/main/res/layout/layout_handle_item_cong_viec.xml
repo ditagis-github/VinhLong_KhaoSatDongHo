@@ -37,16 +37,16 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginRight="32dp"
+            android:layout_marginRight="@dimen/margin_medium"
             android:src="@drawable/ic_nearme"
-            android:tint="#737373" />
+            android:tint="@color/colorPrimary" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:text="Tìm đường đi"
-            android:textColor="#737373" />
+            style="@style/MyTextAppearance.Prime"/>
     </LinearLayout>
 
     <LinearLayout
@@ -61,15 +61,15 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginRight="32dp"
+            android:layout_marginRight="@dimen/margin_medium"
             android:src="@drawable/ic_place"
-            android:tint="#737373" />
+            android:tint="@color/colorPrimary" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:text="Xem trên bản đồ"
-            android:textColor="#737373" />
+            style="@style/MyTextAppearance.Prime" />
     </LinearLayout>
 </LinearLayout>

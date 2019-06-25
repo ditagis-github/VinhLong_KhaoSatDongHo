@@ -37,5 +37,7 @@
     <dimen name="padding_medium">16dp</dimen>
     <dimen name="margin_medium">16dp</dimen>
     <dimen name="width_title_item">150dp</dimen>
+    <dimen name="margin_button_popup">8dp</dimen>
+    <dimen name="margin_inner_button_popup">3dp</dimen>
 
 </resources>
