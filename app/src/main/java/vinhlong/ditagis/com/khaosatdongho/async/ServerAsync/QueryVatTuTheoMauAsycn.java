@@ -1,5 +1,6 @@
 package vinhlong.ditagis.com.khaosatdongho.async.ServerAsync;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.support.design.widget.BottomSheetDialog;
 import android.util.Log;
@@ -16,22 +17,21 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
-import vinhlong.ditagis.com.khaosatdongho.MainActivity;
 import vinhlong.ditagis.com.khaosatdongho.R;
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant;
 
 
 public class QueryVatTuTheoMauAsycn extends AsyncTask<String, ArrayList<QueryVatTuTheoMauAsycn.VatTu>, Void> {
     private BottomSheetDialog mDialog;
-    private MainActivity mActivity;
+    private Activity mActivity;
     private AsyncResponse mDelegate;
 
     public interface AsyncResponse {
         void processFinish(ArrayList<VatTu> output);
     }
 
-    public QueryVatTuTheoMauAsycn(MainActivity mainActivity, AsyncResponse delegate) {
-        this.mActivity = mainActivity;
+    public QueryVatTuTheoMauAsycn(Activity activity, AsyncResponse delegate) {
+        this.mActivity = activity;
         this.mDelegate = delegate;
     }
 
@@ -111,6 +111,8 @@ public class QueryVatTuTheoMauAsycn extends AsyncTask<String, ArrayList<QueryVat
     @Override
     protected void onProgressUpdate(ArrayList<VatTu>... values) {
         super.onProgressUpdate(values);
+        if (values == null || values.length == 0)
+            this.mDelegate.processFinish(null);
         this.mDelegate.processFinish(values[0]);
 
     }

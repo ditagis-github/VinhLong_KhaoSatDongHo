@@ -80,8 +80,10 @@ public class QueryDongHoKhachHangAsync extends AsyncTask<String, List<Feature>, 
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                publishProgress();
             } catch (ExecutionException e) {
                 e.printStackTrace();
+                publishProgress();
             }
         });
         return null;
@@ -94,7 +96,10 @@ public class QueryDongHoKhachHangAsync extends AsyncTask<String, List<Feature>, 
         if (txtTongItem != null)
             txtTongItem.setText(mActivity.getString(R.string.nav_thong_ke_tong_diem) + values[0].size());
         if (mDialog != null && mDialog.isShowing()) mDialog.dismiss();
-        mDelegate.processFinish(values[0]);
+        if (values == null || values.length == 0)
+            mDelegate.processFinish(null);
+        else
+            mDelegate.processFinish(values[0]);
         super.onProgressUpdate(values);
 
     }

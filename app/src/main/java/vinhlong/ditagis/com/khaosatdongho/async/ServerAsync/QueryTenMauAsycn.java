@@ -1,5 +1,6 @@
 package vinhlong.ditagis.com.khaosatdongho.async.ServerAsync;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.support.design.widget.BottomSheetDialog;
 import android.util.Log;
@@ -11,7 +12,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import vinhlong.ditagis.com.khaosatdongho.MainActivity;
 import vinhlong.ditagis.com.khaosatdongho.R;
 import vinhlong.ditagis.com.khaosatdongho.entities.DApplication;
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant;
@@ -19,17 +19,17 @@ import vinhlong.ditagis.com.khaosatdongho.utities.Constant;
 
 public class QueryTenMauAsycn extends AsyncTask<Void, String, Void> {
     private BottomSheetDialog mDialog;
-    private MainActivity mActivity;
+    private Activity mActivity;
     private AsyncResponse mDelegate;
 
     public interface AsyncResponse {
         void processFinish(String output);
     }
 
-    public QueryTenMauAsycn(MainActivity mainActivity, AsyncResponse delegate) {
-        this.mActivity = mainActivity;
+    public QueryTenMauAsycn(Activity activity, AsyncResponse delegate) {
+        this.mActivity = activity;
         this.mDelegate = delegate;
-        DApplication dApplication = (DApplication) mainActivity.getApplication();
+        DApplication dApplication = (DApplication) activity.getApplication();
 
     }
 
@@ -77,7 +77,10 @@ public class QueryTenMauAsycn extends AsyncTask<Void, String, Void> {
     @Override
     protected void onProgressUpdate(String... values) {
         super.onProgressUpdate(values);
-        this.mDelegate.processFinish(values[0]);
+        if (values == null || values.length == 0)
+            this.mDelegate.processFinish(null);
+        else
+            this.mDelegate.processFinish(values[0]);
 
     }
 

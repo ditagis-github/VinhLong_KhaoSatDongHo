@@ -1,7 +1,9 @@
-package vinhlong.ditagis.com.khaosatdongho.Editing;
+package vinhlong.ditagis.com.khaosatdongho;
 
 import android.content.DialogInterface;
+import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
@@ -29,7 +31,6 @@ import com.esri.arcgisruntime.data.Domain;
 import com.esri.arcgisruntime.data.Feature;
 import com.esri.arcgisruntime.data.FeatureEditResult;
 import com.esri.arcgisruntime.data.Field;
-import com.esri.arcgisruntime.data.ServiceFeatureTable;
 import com.esri.arcgisruntime.mapping.view.MapView;
 
 import org.json.JSONArray;
@@ -44,8 +45,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import vinhlong.ditagis.com.khaosatdongho.MainActivity;
-import vinhlong.ditagis.com.khaosatdongho.R;
 import vinhlong.ditagis.com.khaosatdongho.adapter.ChiTietVatTuAdapter;
 import vinhlong.ditagis.com.khaosatdongho.adapter.VatTuApdapter;
 import vinhlong.ditagis.com.khaosatdongho.async.NotifyVatTuDongHoAdapterChangeAsync;
@@ -54,44 +53,43 @@ import vinhlong.ditagis.com.khaosatdongho.async.RefreshVatTuAsync;
 import vinhlong.ditagis.com.khaosatdongho.async.ServerAsync.AddVatTuKHAsycn;
 import vinhlong.ditagis.com.khaosatdongho.async.ServerAsync.DeleteVatTuKHAsycn;
 import vinhlong.ditagis.com.khaosatdongho.async.ServerAsync.QueryDanhSachVatTuAsycn;
+import vinhlong.ditagis.com.khaosatdongho.async.ServerAsync.QueryTenMauAsycn;
 import vinhlong.ditagis.com.khaosatdongho.async.ServerAsync.QueryVatTuDongHoAsycn;
 import vinhlong.ditagis.com.khaosatdongho.async.ServerAsync.QueryVatTuTheoMauAsycn;
-import vinhlong.ditagis.com.khaosatdongho.async.ServerAsync.QueryTenMauAsycn;
-import vinhlong.ditagis.com.khaosatdongho.libs.FeatureLayerDTG;
+import vinhlong.ditagis.com.khaosatdongho.entities.DApplication;
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant;
 import vinhlong.ditagis.com.khaosatdongho.utities.MySnackBar;
 
-/**
- * Created by NGUYEN HONG on 5/7/2018.
- */
-
-public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
-    private MainActivity mainActivity;
-    private ServiceFeatureTable vatTuSFT;
-    private FeatureLayerDTG vatTuDTG;
+public class VatTuActivity extends AppCompatActivity {
     private VatTuApdapter vatTuApdapter;
     private List<Feature> table_feature;
     private ArcGISFeature feature;
-    private ServiceFeatureTable dongHoKHSFT;
-    private ServiceFeatureTable dmVatTuSFT;
     private ArrayList<Feature> dmVatTuFeatures;
+    private ArrayAdapter mAdapter;
     private MapView mapView;
     private TextView titlePopup;
     List<String> tenMaus;
     ArrayList<QueryDanhSachVatTuAsycn.VatTu> danhSachVatTu;
-
+    private DApplication mApplication;
     public NumberFormat formatter = new DecimalFormat("###,###,###");
 
-    public EditingVatTu(MainActivity mainActivity, MapView mapView) {
-        this.mainActivity = mainActivity;
-        this.mapView = mapView;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_vat_tu);
+        mApplication = (DApplication) getApplication();
+        new QueryDMVatTuAsync(VatTuActivity.this, mApplication.getDmVatTuKHSFT(), features -> {
+            this.dmVatTuFeatures = features;
+        }).execute();
         this.getMauThietLaps();
         this.getDanhSachVatTu();
+
+
     }
 
     private void getMauThietLaps() {
         tenMaus = new ArrayList<>();
-        new QueryTenMauAsycn(mainActivity, danhsachtenmau -> {
+        new QueryTenMauAsycn(VatTuActivity.this, danhsachtenmau -> {
             JSONArray jsonArray;
             try {
                 jsonArray = new JSONArray(danhsachtenmau);
@@ -99,23 +97,26 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
                 for (int i = 0; i < jsonArray.length(); i++) {
                     tenMaus.add(jsonArray.get(i).toString());
                 }
+                showDanhSachVatTu(mApplication.getSelectedFeature());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
 
         }).execute();
     }
-    private void getVatTu(String maKhachHang){
-        new QueryVatTuDongHoAsycn(mainActivity, vatTus -> {
+
+    private void getVatTu(String maKhachHang) {
+        new QueryVatTuDongHoAsycn(VatTuActivity.this, vatTus -> {
             if (vatTus != null) {
                 vatTuApdapter.setVatTus(vatTus);
                 vatTuApdapter.notifyDataSetChanged();
             }
         }).execute(maKhachHang);
     }
+
     private void getVatTuTheoMau(String tenThietLapMau, String maKhachHang) {
         ArrayList<VatTuApdapter.VatTu> vatTusAdapter = new ArrayList<>();
-        new QueryVatTuTheoMauAsycn(mainActivity, vatTuTheoMau -> {
+        new QueryVatTuTheoMauAsycn(VatTuActivity.this, vatTuTheoMau -> {
             if (vatTuTheoMau != null) {
                 for (int i = 0; i < vatTuTheoMau.size(); i++) {
                     VatTuApdapter.VatTu vatTuAdapter = new VatTuApdapter.VatTu(i + 1);
@@ -151,27 +152,11 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
     }
 
     private void getDanhSachVatTu() {
-        new QueryDanhSachVatTuAsycn(mainActivity, danhSachVatTu -> {
+        new QueryDanhSachVatTuAsycn(VatTuActivity.this, danhSachVatTu -> {
             if (danhSachVatTu != null) {
                 this.danhSachVatTu = danhSachVatTu;
             }
         }).execute();
-    }
-
-    public void setVatTuDTG(FeatureLayerDTG vatTuDTG) {
-        this.vatTuDTG = vatTuDTG;
-        this.vatTuSFT = (ServiceFeatureTable) vatTuDTG.getFeatureLayer().getFeatureTable();
-    }
-
-    public void setDmVatTuSFT(ServiceFeatureTable dmVatTuSFT) {
-        this.dmVatTuSFT = dmVatTuSFT;
-        new QueryDMVatTuAsync(mainActivity, this.dmVatTuSFT, features -> {
-            this.dmVatTuFeatures = features;
-        }).execute();
-    }
-
-    public void setDongHoKHSFT(ServiceFeatureTable dongHoKHSFT) {
-        this.dongHoKHSFT = dongHoKHSFT;
     }
 
     public void deleteDanhSachMauDanhGia(ArcGISFeature featureDHKH) {
@@ -180,7 +165,7 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
         Object maKhachHang = attributes.get(Constant.DongHoKhachHangFields.CMND);
         if (maKhachHang != null) {
             List<VatTuApdapter.VatTu> vatTus = new ArrayList<>();
-//            vatTuApdapter = new VatTuApdapter(mainActivity, vatTus);
+//            vatTuApdapter = new VatTuApdapter(VatTuActivity.this, vatTus);
             getRefreshTableVatTuAsync();
             if (table_feature != null && table_feature.size() > 0) {
                 for (Feature feature : table_feature) {
@@ -196,24 +181,22 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
         Object maKhachHang = attributes.get(Constant.DongHoKhachHangFields.CMND);
         if (maKhachHang != null) {
             getVatTu(maKhachHang.toString());
-            final AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity, android.R.style.Theme_Holo_Light_NoActionBar_Fullscreen);
-            final View layout_table_vattu = mainActivity.getLayoutInflater().inflate(R.layout.layout_title_listview_button, null);
-            Spinner spin_thietlapmau = layout_table_vattu.findViewById(R.id.spin_thietlapmau);
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(mainActivity.getApplicationContext(), android.R.layout.simple_list_item_1, tenMaus);
-            spin_thietlapmau.setAdapter(adapter);
-            Button btnAdd = layout_table_vattu.findViewById(R.id.btnAccept);
+            Spinner spin_thietlapmau = findViewById(R.id.spin_thietlapmau);
+            mAdapter = new ArrayAdapter<>(VatTuActivity.this, android.R.layout.simple_spinner_dropdown_item, tenMaus);
+            spin_thietlapmau.setAdapter(mAdapter);
+            TextView txtAdd = findViewById(R.id.txtAccept);
+            spin_thietlapmau.setSelection(0);
             spin_thietlapmau.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                     Object itemAtPosition = spin_thietlapmau.getItemAtPosition(position);
                     if (itemAtPosition != null) {
                         String tenThietLapMau = itemAtPosition.toString();
-                        if(!tenThietLapMau.equals(Constant.TENMAU.SELECT)) {
-                            btnAdd.setEnabled(true);
+                        if (!tenThietLapMau.equals(Constant.TENMAU.SELECT)) {
+                            txtAdd.setEnabled(true);
                             getVatTuTheoMau(tenThietLapMau, maKhachHang.toString());
-                        }
-                        else {
-                            btnAdd.setEnabled(false);
+                        } else {
+                            txtAdd.setEnabled(false);
                         }
                     }
                 }
@@ -224,22 +207,20 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
                 }
 
             });
-            ListView listView = layout_table_vattu.findViewById(R.id.listview);
-            this.titlePopup = layout_table_vattu.findViewById(R.id.txtTitlePopup);
-            this.titlePopup.setText(mainActivity.getString(R.string.title_danhsachvattu));
+            ListView listView = findViewById(R.id.listview);
 
-            if (!this.vatTuDTG.getAction().isCreate()) {
-                btnAdd.setVisibility(View.INVISIBLE);
+            if (!mApplication.getVatTuDHDTG().getAction().isCreate()) {
+                txtAdd.setVisibility(View.INVISIBLE);
             }
-            btnAdd.setOnClickListener(v -> addTableVatTu());
+            txtAdd.setOnClickListener(v -> addTableVatTu());
             listView.setOnItemClickListener((parent, view, position, id) -> {
-                if (vatTuDTG.getAction().isView()) {
+                if (mApplication.getVatTuDHDTG().getAction().isView()) {
 //                    final VatTuApdapter.VatTu itemAtPosition = vatTuApdapter.getVatTus().get(position);
 //                    String objectid = itemAtPosition.getMaVatTu();
 //                    QueryParameters queryParameters = new QueryParameters();
 //                    String queryClause = Constant.LayerFields.OBJECTID + " = " + objectid;
 //                    queryParameters.setWhereClause(queryClause);
-//                    final ListenableFuture<FeatureQueryResult> queryResultListenableFuture = vatTuSFT.queryFeaturesAsync(queryParameters, ServiceFeatureTable.QueryFeatureFields.LOAD_ALL);
+//                    final ListenableFuture<FeatureQueryResult> queryResultListenableFuture = mApplication.getVatTuKHSFT().queryFeaturesAsync(queryParameters, ServiceFeatureTable.QueryFeatureFields.LOAD_ALL);
 //                    queryResultListenableFuture.addDoneListener(new Runnable() {
 //                        @Override
 //                        public void run() {
@@ -262,15 +243,12 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
                 }
             });
             ArrayList<VatTuApdapter.VatTu> vatTus = new ArrayList<>();
-            vatTuApdapter = new VatTuApdapter(mainActivity, vatTus);
+            vatTuApdapter = new VatTuApdapter(VatTuActivity.this, vatTus);
             listView.setAdapter(vatTuApdapter);
             getRefreshTableVatTuAsync();
-            builder.setView(layout_table_vattu);
-            AlertDialog dialog = builder.create();
-            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-            dialog.show();
+
         } else {
-            MySnackBar.make(mapView, mainActivity.getString(R.string.DATA_NOT_FOUND), true);
+            MySnackBar.make(mapView, VatTuActivity.this.getString(R.string.DATA_NOT_FOUND), true);
             return;
         }
     }
@@ -303,17 +281,17 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
 
     private void showInfosSelectedItem(Feature selectedFeature) {
         Map<String, Object> attributes = selectedFeature.getAttributes();
-        View layout_chitiet_vattudongho = mainActivity.getLayoutInflater().inflate(R.layout.layout_title_listview, null);
+        View layout_chitiet_vattudongho = VatTuActivity.this.getLayoutInflater().inflate(R.layout.layout_title_listview, null);
         ListView listview_chitiet_maudanhgia = layout_chitiet_vattudongho.findViewById(R.id.listview);
         if (attributes.get(Constant.VatTuFields.DBDongHo) != null) {
             ((TextView) layout_chitiet_vattudongho.findViewById(R.id.txtTitle)).setText(attributes.get(Constant.VatTuFields.DBDongHo).toString());
         } else {
-            ((TextView) layout_chitiet_vattudongho.findViewById(R.id.txtTitle)).setText(mainActivity.getString(R.string.title_chitietvattu));
+            ((TextView) layout_chitiet_vattudongho.findViewById(R.id.txtTitle)).setText(VatTuActivity.this.getString(R.string.title_chitietvattu));
         }
         final List<ChiTietVatTuAdapter.Item> items = new ArrayList<>();
-        List<Field> fields = vatTuSFT.getFields();
-        final String[] updateFields = vatTuDTG.getUpdateFields();
-        String[] unedit_Fields = mainActivity.getResources().getStringArray(R.array.unedit_VT_Fields);
+        List<Field> fields = mApplication.getVatTuKHSFT().getFields();
+        final String[] updateFields = mApplication.getVatTuDHDTG().getUpdateFields();
+        String[] unedit_Fields = VatTuActivity.this.getResources().getStringArray(R.array.unedit_VT_Fields);
         for (Field field : fields) {
             ChiTietVatTuAdapter.Item item = new ChiTietVatTuAdapter.Item();
             item.setAlias(field.getAlias());
@@ -342,7 +320,7 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
                             item.setValue(attributes.get(field.getName()).toString());
                 }
             }
-            if (this.vatTuDTG.getAction().isEdit()) {
+            if (this.mApplication.getVatTuDHDTG().getAction().isEdit()) {
                 if (updateFields.length > 0) {
                     if (updateFields[0].equals("*") || updateFields[0].equals("")) {
                         item.setEdit(true);
@@ -364,21 +342,21 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
             }
             items.add(item);
         }
-        ChiTietVatTuAdapter chiTietVatTuAdapter = new ChiTietVatTuAdapter(mainActivity, items);
+        ChiTietVatTuAdapter chiTietVatTuAdapter = new ChiTietVatTuAdapter(VatTuActivity.this, items);
         if (items != null) listview_chitiet_maudanhgia.setAdapter(chiTietVatTuAdapter);
-        AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity, android.R.style.Theme_Holo_Light_NoActionBar_Fullscreen);
+        AlertDialog.Builder builder = new AlertDialog.Builder(VatTuActivity.this, android.R.style.Theme_Holo_Light_NoActionBar_Fullscreen);
         builder.setView(layout_chitiet_vattudongho);
-        if (this.vatTuDTG.getAction().isEdit()) {
-            builder.setPositiveButton(mainActivity.getString(R.string.btn_Accept), null);
+        if (this.mApplication.getVatTuDHDTG().getAction().isEdit()) {
+            builder.setPositiveButton(VatTuActivity.this.getString(R.string.btn_Accept), null);
         }
-        if (this.vatTuDTG.getAction().isDelete()) {
-            builder.setNegativeButton(mainActivity.getString(R.string.btn_Delete), null);
+        if (this.mApplication.getVatTuDHDTG().getAction().isDelete()) {
+            builder.setNegativeButton(VatTuActivity.this.getString(R.string.btn_Delete), null);
         }
-        builder.setNeutralButton(mainActivity.getString(R.string.btn_Esc), null);
+        builder.setNeutralButton(VatTuActivity.this.getString(R.string.btn_Esc), null);
         listview_chitiet_maudanhgia.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (vatTuDTG.getAction().isEdit()) {
+                if (mApplication.getVatTuDHDTG().getAction().isEdit()) {
                     editValueAttribute(parent, view, position, id);
                 }
             }
@@ -389,7 +367,7 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
         // Chỉnh sửa
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             for (ChiTietVatTuAdapter.Item item : items) {
-                Domain domain = vatTuSFT.getField(item.getFieldName()).getDomain();
+                Domain domain = mApplication.getVatTuKHSFT().getField(item.getFieldName()).getDomain();
                 Object codeDomain = null;
                 if (item.getFieldName().equals(Constant.VatTuFields.NgayCapNhat)) {
                     Calendar currentTime = Calendar.getInstance();
@@ -446,7 +424,7 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
     private void getRefreshTableVatTuAsync() {
         final Map<String, Object> attributes = this.feature.getAttributes();
         String maKhachHang = attributes.get(Constant.DongHoKhachHangFields.CMND).toString();
-        new RefreshVatTuAsync(mainActivity, vatTuSFT, this.dmVatTuFeatures, vatTuApdapter, this.vatTuDTG.getAction(), features -> {
+        new RefreshVatTuAsync(VatTuActivity.this, mApplication.getVatTuKHSFT(), this.dmVatTuFeatures, vatTuApdapter, this.mApplication.getVatTuDHDTG().getAction(), features -> {
             table_feature = features;
             if (this.titlePopup != null && features != null) {
                 double sum = 0;
@@ -491,7 +469,7 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
         Object dBDongHoNuoc = attributes.get(Constant.DongHoKhachHangFields.ID);
         Object dbDongHoVatTu = selectedFeature.getAttributes().get(Constant.VatTuFields.DBDongHo);
         if (dBDongHoNuoc != null && dbDongHoVatTu != null && !dbDongHoVatTu.equals(dBDongHoNuoc)) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity, android.R.style.Theme_Material_Light_Dialog_Alert);
+            AlertDialog.Builder builder = new AlertDialog.Builder(VatTuActivity.this, android.R.style.Theme_Material_Light_Dialog_Alert);
             builder.setTitle("Danh bộ của đồng hồ nước khác với danh bộ vật tư");
             builder.setMessage(R.string.question_capnhatdanhbo);
             builder.setPositiveButton("Có", (dialog, which) -> {
@@ -522,122 +500,12 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
     }
 
     private void addTableVatTu() {
-        new DeleteVatTuKHAsycn(mainActivity, output -> {
+        new DeleteVatTuKHAsycn(VatTuActivity.this, output -> {
             if (output) {
-                new AddVatTuKHAsycn(mainActivity).execute(vatTuApdapter.getVatTus());
+                new AddVatTuKHAsycn(VatTuActivity.this).execute(vatTuApdapter.getVatTus());
             }
         }).execute(vatTuApdapter.getVatTus().get(0).getiDKhachHang());
 
-    }
-
-    private void addTableVatTu1() {
-        final Map<String, Object> attributes = this.feature.getAttributes();
-        Object dBDongHo = attributes.get(Constant.DongHoKhachHangFields.ID);
-        Object maKhachHang = attributes.get(Constant.DongHoKhachHangFields.CMND);
-        if (maKhachHang == null) {
-            Toast.makeText(mainActivity.getApplicationContext(), mainActivity.getString(R.string.DATA_NOT_FOUND), Toast.LENGTH_SHORT).show();
-            return;
-        }
-        final Feature vatTuFeature = vatTuSFT.createFeature();
-        final AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity, android.R.style.Theme_Holo_Light_NoActionBar_Fullscreen);
-        View layout_add_vatu = mainActivity.getLayoutInflater().inflate(R.layout.layout_title_listview_button, null);
-        ListView listView = layout_add_vatu.findViewById(R.id.listview);
-        ((TextView) layout_add_vatu.findViewById(R.id.txtTitlePopup)).setText(mainActivity.getString(R.string.title_themmoivattu));
-        final List<ChiTietVatTuAdapter.Item> items = new ArrayList<>();
-        final ChiTietVatTuAdapter chiTietVatTuAdapter = new ChiTietVatTuAdapter(mainActivity, items);
-        if (items != null) listView.setAdapter(chiTietVatTuAdapter);
-        builder.setView(layout_add_vatu);
-        final AlertDialog dialog = builder.create();
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.show();
-        listView.setOnItemClickListener((parent, view, position, id) -> editValueAttribute(parent, view, position, id));
-        List<Field> fields = vatTuSFT.getFields();
-        String[] updateFields = vatTuDTG.getUpdateFields();
-        String[] unedit_Fields = mainActivity.getResources().getStringArray(R.array.unedit_VT_Fields);
-        for (Field field : fields) {
-            if (!field.getName().equals(Constant.LayerFields.OBJECTID)) {
-                ChiTietVatTuAdapter.Item item = new ChiTietVatTuAdapter.Item();
-                item.setAlias(field.getAlias());
-                item.setFieldName(field.getName());
-                item.setFieldType(field.getFieldType());
-                if (field.getName().equals(Constant.VatTuFields.MaVatTu)) {
-                    item.setAlias(Constant.VatTuAlias.LoaiVatTu);
-                }
-                if (updateFields.length > 0) {
-                    if (updateFields[0].equals("*") || updateFields[0].equals("")) {
-                        item.setEdit(true);
-                    } else {
-                        for (String updateField : updateFields) {
-                            if (item.getFieldName().equals(updateField)) {
-                                item.setEdit(true);
-                                break;
-                            }
-                        }
-                    }
-                }
-                for (String unedit_Field : unedit_Fields) {
-                    if (unedit_Field.toUpperCase().equals(item.getFieldName().toUpperCase())) {
-                        item.setEdit(false);
-                        break;
-                    }
-                }
-                if (field.getName().equals(Constant.VatTuFields.DBDongHo)) {
-                    if (dBDongHo != null) {
-                        item.setValue(dBDongHo.toString());
-                    }
-                }
-                if (field.getName().equals(Constant.VatTuFields.MaKhachHang)) {
-                    item.setValue(maKhachHang.toString());
-                }
-                items.add(item);
-            }
-        }
-        Button btnAdd = layout_add_vatu.findViewById(R.id.btnAccept);
-        btnAdd.setText(mainActivity.getString(R.string.title_add));
-        btnAdd.setOnClickListener(v -> {
-            dialog.dismiss();
-            for (ChiTietVatTuAdapter.Item item : items) {
-                Domain domain = vatTuSFT.getField(item.getFieldName()).getDomain();
-                Object codeDomain = null;
-                if (item.getFieldName().equals(Constant.VatTuFields.NgayCapNhat)) {
-                    Calendar currentTime = Calendar.getInstance();
-                    vatTuFeature.getAttributes().put(Constant.VatTuFields.NgayCapNhat, currentTime);
-                } else if (domain != null) {
-                    List<CodedValue> codedValues = ((CodedValueDomain) domain).getCodedValues();
-                    codeDomain = getCodeDomain(codedValues, item.getValue());
-                    vatTuFeature.getAttributes().put(item.getFieldName(), item.getValue());
-                }
-                if (item.getFieldName().equals(Constant.VatTuFields.MaVatTu)) {
-                    Feature loaiVatTu_ten = getLoaiVatTu_Ten(item.getValue());
-                    if (loaiVatTu_ten != null)
-                        vatTuFeature.getAttributes().put(item.getFieldName(), loaiVatTu_ten.getAttributes().get(Constant.LoaiVatTuFields.MaVatTu).toString());
-                } else {
-                    switch (item.getFieldType()) {
-                        case DATE:
-                            if (item.getCalendar() != null)
-                                vatTuFeature.getAttributes().put(item.getFieldName(), item.getCalendar());
-                            break;
-                        case DOUBLE:
-                            if (item.getValue() != null)
-                                vatTuFeature.getAttributes().put(item.getFieldName(), Double.parseDouble(item.getValue()));
-                            break;
-                        case SHORT:
-                            if (codeDomain != null) {
-                                vatTuFeature.getAttributes().put(item.getFieldName(), Short.parseShort(codeDomain.toString()));
-                            } else if (item.getValue() != null)
-                                vatTuFeature.getAttributes().put(item.getFieldName(), Short.parseShort(item.getValue()));
-                            break;
-                        case TEXT:
-                            if (codeDomain != null) {
-                                vatTuFeature.getAttributes().put(item.getFieldName(), codeDomain.toString());
-                            } else if (item.getValue() != null)
-                                vatTuFeature.getAttributes().put(item.getFieldName(), item.getValue());
-                            break;
-                    }
-                }
-            }
-            addFeature(vatTuFeature);
-        });
     }
 
     private Object getCodeDomain(List<CodedValue> codedValues, String value) {
@@ -654,17 +522,17 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
 
 
     private void addFeature(final Feature feature) {
-        ListenableFuture<Void> mapViewResult = vatTuSFT.addFeatureAsync(feature);
+        ListenableFuture<Void> mapViewResult = mApplication.getVatTuKHSFT().addFeatureAsync(feature);
         mapViewResult.addDoneListener(() -> {
-            final ListenableFuture<List<FeatureEditResult>> listListenableEditAsync = vatTuSFT.applyEditsAsync();
+            final ListenableFuture<List<FeatureEditResult>> listListenableEditAsync = mApplication.getVatTuKHSFT().applyEditsAsync();
             listListenableEditAsync.addDoneListener(() -> {
                 try {
                     List<FeatureEditResult> featureEditResults = listListenableEditAsync.get();
                     if (featureEditResults.size() > 0) {
-                        Toast.makeText(mainActivity.getApplicationContext(), mainActivity.getString(R.string.DATA_SUCCESSFULLY_INSERTED), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(VatTuActivity.this.getApplicationContext(), VatTuActivity.this.getString(R.string.DATA_SUCCESSFULLY_INSERTED), Toast.LENGTH_SHORT).show();
                         getRefreshTableVatTuAsync();
                     } else {
-                        Toast.makeText(mainActivity.getApplicationContext(), mainActivity.getString(R.string.FAILED_TO_INSERT_DATA), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(VatTuActivity.this.getApplicationContext(), VatTuActivity.this.getString(R.string.FAILED_TO_INSERT_DATA), Toast.LENGTH_SHORT).show();
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -678,17 +546,17 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
 
 
     private void deleteFeature(Feature feature) {
-        final ListenableFuture<Void> mapViewResult = vatTuSFT.deleteFeatureAsync(feature);
+        final ListenableFuture<Void> mapViewResult = mApplication.getVatTuKHSFT().deleteFeatureAsync(feature);
         mapViewResult.addDoneListener(() -> {
-            final ListenableFuture<List<FeatureEditResult>> listListenableEditAsync = vatTuSFT.applyEditsAsync();
+            final ListenableFuture<List<FeatureEditResult>> listListenableEditAsync = mApplication.getVatTuKHSFT().applyEditsAsync();
             listListenableEditAsync.addDoneListener(() -> {
                 try {
                     List<FeatureEditResult> featureEditResults = listListenableEditAsync.get();
                     if (featureEditResults.size() > 0) {
-                        Toast.makeText(mainActivity.getApplicationContext(), mainActivity.getString(R.string.DATA_SUCCESSFULLY_DELETED), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(VatTuActivity.this.getApplicationContext(), VatTuActivity.this.getString(R.string.DATA_SUCCESSFULLY_DELETED), Toast.LENGTH_SHORT).show();
                         getRefreshTableVatTuAsync();
                     } else {
-                        Toast.makeText(mainActivity.getApplicationContext(), mainActivity.getString(R.string.FAILED_TO_DELETE_DATA), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(VatTuActivity.this.getApplicationContext(), VatTuActivity.this.getString(R.string.FAILED_TO_DELETE_DATA), Toast.LENGTH_SHORT).show();
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -701,17 +569,17 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
     }
 
     private void updateFeature(final Feature feature) {
-        final ListenableFuture<Void> mapViewResult = vatTuSFT.updateFeatureAsync(feature);
+        final ListenableFuture<Void> mapViewResult = mApplication.getVatTuKHSFT().updateFeatureAsync(feature);
         mapViewResult.addDoneListener(() -> {
-            final ListenableFuture<List<FeatureEditResult>> listListenableEditAsync = vatTuSFT.applyEditsAsync();
+            final ListenableFuture<List<FeatureEditResult>> listListenableEditAsync = mApplication.getVatTuKHSFT().applyEditsAsync();
             listListenableEditAsync.addDoneListener(() -> {
                 try {
                     List<FeatureEditResult> featureEditResults = listListenableEditAsync.get();
                     if (featureEditResults.size() > 0) {
-                        Toast.makeText(mainActivity.getApplicationContext(), mainActivity.getString(R.string.DATA_SUCCESSFULLY_UPDATED), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(VatTuActivity.this.getApplicationContext(), VatTuActivity.this.getString(R.string.DATA_SUCCESSFULLY_UPDATED), Toast.LENGTH_SHORT).show();
                         getRefreshTableVatTuAsync();
                     } else {
-                        Toast.makeText(mainActivity.getApplicationContext(), mainActivity.getString(R.string.FAILED_TO_UPDATE_DATA), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(VatTuActivity.this.getApplicationContext(), VatTuActivity.this.getString(R.string.FAILED_TO_UPDATE_DATA), Toast.LENGTH_SHORT).show();
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -727,11 +595,11 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
         ChiTietVatTuAdapter.Item item = (ChiTietVatTuAdapter.Item) parent.getItemAtPosition(position);
         if (item.isEdit()) {
             final Calendar[] calendar = new Calendar[1];
-            final AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity, android.R.style.Theme_Material_Light_Dialog_Alert);
+            final AlertDialog.Builder builder = new AlertDialog.Builder(VatTuActivity.this, android.R.style.Theme_Material_Light_Dialog_Alert);
             builder.setTitle("Cập nhật thuộc tính");
             builder.setMessage(item.getAlias());
             builder.setCancelable(false).setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss());
-            LinearLayout layout = (LinearLayout) mainActivity.getLayoutInflater().
+            LinearLayout layout = (LinearLayout) VatTuActivity.this.getLayoutInflater().
                     inflate(R.layout.layout_dialog_update_feature_listview, null);
             builder.setView(layout);
             final FrameLayout layoutTextView = layout.findViewById(R.id.layout_edit_viewmoreinfo_TextView);
@@ -742,7 +610,7 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
             LinearLayout layoutSpin = layout.findViewById(R.id.layout_edit_viewmoreinfo_Spinner);
             Spinner spin = layout.findViewById(R.id.spin_edit_viewmoreinfo);
             AutoCompleteTextView autoCompleteTextView = layout.findViewById(R.id.autoCompleteTextView);
-            Field field = vatTuSFT.getField(item.getFieldName());
+            Field field = mApplication.getVatTuKHSFT().getField(item.getFieldName());
             Domain domain = field.getDomain();
             if (field.getName().equals(Constant.VatTuFields.MaVatTu)) {
                 layout.findViewById(R.id.layout_edit_viewmoreinfo_AutoComplete).setVisibility(View.VISIBLE);
@@ -772,8 +640,8 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
                     layoutTextView.setVisibility(View.VISIBLE);
                     textView.setText(item.getValue());
                     img_selectTime.setOnClickListener(v -> {
-                        final View dialogView = View.inflate(mainActivity, R.layout.date_time_picker, null);
-                        final android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(mainActivity).create();
+                        final View dialogView = View.inflate(VatTuActivity.this, R.layout.date_time_picker, null);
+                        final android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(VatTuActivity.this).create();
                         dialogView.findViewById(R.id.date_time_set).setOnClickListener(view1 -> {
                             DatePicker datePicker = dialogView.findViewById(R.id.date_picker);
                             calendar[0] = new GregorianCalendar(datePicker.getYear(), datePicker.getMonth(), datePicker.getDayOfMonth());
@@ -812,7 +680,7 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
                             if (feature != null)
                                 item.setValue(text.toString());
                             else
-                                Toast.makeText(mainActivity, mainActivity.getString(R.string.INCORRECT_INPUT_FORMAT_WITH_TEXT), Toast.LENGTH_LONG).show();
+                                Toast.makeText(VatTuActivity.this, VatTuActivity.this.getString(R.string.INCORRECT_INPUT_FORMAT_WITH_TEXT), Toast.LENGTH_LONG).show();
                         }
                     } else if (domain != null) {
                         item.setValue(spin.getSelectedItem().toString());
@@ -827,7 +695,7 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
                                     double x = Double.parseDouble(editText.getText().toString());
                                     item.setValue(editText.getText().toString());
                                 } catch (Exception e) {
-                                    Toast.makeText(mainActivity, mainActivity.getString(R.string.INCORRECT_INPUT_FORMAT), Toast.LENGTH_LONG).show();
+                                    Toast.makeText(VatTuActivity.this, VatTuActivity.this.getString(R.string.INCORRECT_INPUT_FORMAT), Toast.LENGTH_LONG).show();
                                 }
                                 break;
                             case TEXT:
@@ -838,13 +706,13 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
                                     short x = Short.parseShort(editText.getText().toString());
                                     item.setValue(editText.getText().toString());
                                 } catch (Exception e) {
-                                    Toast.makeText(mainActivity, mainActivity.getString(R.string.INCORRECT_INPUT_FORMAT), Toast.LENGTH_LONG).show();
+                                    Toast.makeText(VatTuActivity.this, VatTuActivity.this.getString(R.string.INCORRECT_INPUT_FORMAT), Toast.LENGTH_LONG).show();
                                 }
                                 break;
                         }
                     }
                     ChiTietVatTuAdapter adapter = (ChiTietVatTuAdapter) parent.getAdapter();
-                    new NotifyVatTuDongHoAdapterChangeAsync(mainActivity).execute(adapter);
+                    new NotifyVatTuDongHoAdapterChangeAsync(VatTuActivity.this).execute(adapter);
                 }
             });
             builder.setView(layout);
@@ -854,8 +722,4 @@ public class EditingVatTu implements RefreshVatTuAsync.AsyncResponse {
         }
     }
 
-    @Override
-    public void processFinish(List<Feature> features) {
-
-    }
 }

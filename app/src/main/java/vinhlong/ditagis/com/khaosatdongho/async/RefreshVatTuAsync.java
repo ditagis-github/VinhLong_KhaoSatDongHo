@@ -107,8 +107,10 @@ public class RefreshVatTuAsync extends AsyncTask<String, List<VatTuApdapter.VatT
                 delegate.processFinish(features);
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                publishProgress();
             } catch (ExecutionException e) {
                 e.printStackTrace();
+                publishProgress();
             }
         });
         return null;

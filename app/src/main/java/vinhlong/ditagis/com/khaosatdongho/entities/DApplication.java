@@ -6,7 +6,6 @@ import android.net.Uri;
 import com.esri.arcgisruntime.data.ArcGISFeature;
 import com.esri.arcgisruntime.data.ServiceFeatureTable;
 
-import vinhlong.ditagis.com.khaosatdongho.Editing.EditingVatTu;
 import vinhlong.ditagis.com.khaosatdongho.MainActivity;
 import vinhlong.ditagis.com.khaosatdongho.entities.entitiesDB.User;
 import vinhlong.ditagis.com.khaosatdongho.libs.FeatureLayerDTG;
@@ -14,8 +13,25 @@ import vinhlong.ditagis.com.khaosatdongho.libs.FeatureLayerDTG;
 public class DApplication extends Application {
     private FeatureLayerDTG dongHoKHDTG;
     private FeatureLayerDTG vatTuDHDTG;
-    private EditingVatTu editingVatTu;
     private ServiceFeatureTable dongHoKHSFT;
+    private ServiceFeatureTable vatTuKHSFT;
+    private ServiceFeatureTable dmVatTuKHSFT;
+
+    public ServiceFeatureTable getDmVatTuKHSFT() {
+        return dmVatTuKHSFT;
+    }
+
+    public void setDmVatTuKHSFT(ServiceFeatureTable dmVatTuKHSFT) {
+        this.dmVatTuKHSFT = dmVatTuKHSFT;
+    }
+
+    public ServiceFeatureTable getVatTuKHSFT() {
+        return vatTuKHSFT;
+    }
+
+    public void setVatTuKHSFT(ServiceFeatureTable vatTuKHSFT) {
+        this.vatTuKHSFT = vatTuKHSFT;
+    }
 
     public ServiceFeatureTable getDongHoKHSFT() {
         return dongHoKHSFT;
@@ -41,13 +57,6 @@ public class DApplication extends Application {
         this.vatTuDHDTG = vatTuDHDTG;
     }
 
-    public EditingVatTu getEditingVatTu() {
-        return editingVatTu;
-    }
-
-    public void setEditingVatTu(EditingVatTu editingVatTu) {
-        this.editingVatTu = editingVatTu;
-    }
 
     // user
     private User user;

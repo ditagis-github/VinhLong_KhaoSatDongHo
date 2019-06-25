@@ -7,51 +7,35 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.text.InputType;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.DatePicker;
-import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.data.ArcGISFeature;
 import com.esri.arcgisruntime.data.CodedValue;
 import com.esri.arcgisruntime.data.CodedValueDomain;
-import com.esri.arcgisruntime.data.Domain;
 import com.esri.arcgisruntime.data.Feature;
-import com.esri.arcgisruntime.data.FeatureEditResult;
 import com.esri.arcgisruntime.data.FeatureType;
 import com.esri.arcgisruntime.data.Field;
 import com.esri.arcgisruntime.data.ServiceFeatureTable;
 import com.esri.arcgisruntime.geometry.Envelope;
 import com.esri.arcgisruntime.layers.FeatureLayer;
-import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.view.Callout;
 import com.esri.arcgisruntime.mapping.view.MapView;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import vinhlong.ditagis.com.khaosatdongho.MainActivity;
 import vinhlong.ditagis.com.khaosatdongho.R;
 import vinhlong.ditagis.com.khaosatdongho.UpdateActivity;
+import vinhlong.ditagis.com.khaosatdongho.VatTuActivity;
 import vinhlong.ditagis.com.khaosatdongho.adapter.FeatureViewInfoAdapter;
 import vinhlong.ditagis.com.khaosatdongho.async.EditAsync;
 import vinhlong.ditagis.com.khaosatdongho.async.QueryHanhChinhAsync;
@@ -188,10 +172,13 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
             });
 
 
-            LinearLayout imgBtn_viewtablethoigian = linearLayout.findViewById(R.id.llayout_viewtablethoigian);
-            imgBtn_viewtablethoigian.setVisibility(View.VISIBLE);
-            linearLayout.findViewById(R.id.llayout_viewtablethoigian).setOnClickListener(v -> {
-                this.dApplication.getEditingVatTu().showDanhSachVatTu(featureDHKH);
+            LinearLayout imgBtn_vatTu = linearLayout.findViewById(R.id.llayout_vattu);
+            imgBtn_vatTu.setVisibility(View.VISIBLE);
+            linearLayout.findViewById(R.id.llayout_vattu).setOnClickListener(v -> {
+//                this.dApplication.getEditingVatTu().showDanhSachVatTu(featureDHKH);
+                dApplication.setSelectedFeature(Popup.this.featureDHKH);
+                Intent intent = new Intent(mMainActivity, VatTuActivity.class);
+                mMainActivity.startActivityForResult(intent, Constant.REQUEST.ID_UPDATE_VAT_TU);
             });
         }
 //        if (dongHoKHDTG.getAction().isDelete()) {
@@ -321,78 +308,10 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
     }
 
 
-    private void deleteFeature() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity, android.R.style.Theme_Material_Light_Dialog_Alert);
-        builder.setTitle("Xác nhận");
-        builder.setMessage(R.string.question_delete_point);
-        builder.setPositiveButton("Có", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                featureDHKH.loadAsync();
-
-                // update the selected feature
-                featureDHKH.addDoneLoadingListener(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (featureDHKH.getLoadStatus() == LoadStatus.FAILED_TO_LOAD) {
-                            Log.d(getResources().getString(R.string.app_name), "Error while loading feature");
-                        }
-                        try {
-                            // update feature in the feature table
-                            ListenableFuture<Void> mapViewResult = dongHoKHSFT.deleteFeatureAsync(featureDHKH);
-                            mapViewResult.addDoneListener(new Runnable() {
-                                @Override
-                                public void run() {
-                                    // apply change to the server
-                                    final ListenableFuture<List<FeatureEditResult>> serverResult = dongHoKHSFT.applyEditsAsync();
-                                    serverResult.addDoneListener(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            List<FeatureEditResult> edits = null;
-                                            try {
-                                                edits = serverResult.get();
-                                                if (edits.size() > 0) {
-                                                    dApplication.getEditingVatTu().deleteDanhSachMauDanhGia(featureDHKH);
-                                                    if (!edits.get(0).hasCompletedWithErrors()) {
-                                                        Log.e("", "Feature successfully updated");
-                                                    }
-                                                }
-                                            } catch (InterruptedException e) {
-                                                e.printStackTrace();
-                                            } catch (ExecutionException e) {
-                                                e.printStackTrace();
-                                            }
-
-                                        }
-                                    });
-                                }
-                            });
-
-                        } catch (Exception e) {
-                            Log.e(getResources().getString(R.string.app_name), "deteting feature in the feature table failed: " + e.getMessage());
-                        }
-                    }
-                });
-                if (mCallout != null) mCallout.dismiss();
-            }
-        }).setNegativeButton("Không", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        }).setCancelable(false);
-        AlertDialog dialog = builder.create();
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.show();
-
-
-    }
-
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.btnAccept:
+            case R.id.txtAccept:
 //            @Override
 //
                 break;

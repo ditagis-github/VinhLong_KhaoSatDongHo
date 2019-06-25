@@ -1,5 +1,6 @@
 package vinhlong.ditagis.com.khaosatdongho.async.ServerAsync;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.support.design.widget.BottomSheetDialog;
 import android.util.Log;
@@ -16,7 +17,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
-import vinhlong.ditagis.com.khaosatdongho.MainActivity;
 import vinhlong.ditagis.com.khaosatdongho.R;
 import vinhlong.ditagis.com.khaosatdongho.adapter.VatTuApdapter;
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant;
@@ -25,15 +25,15 @@ import vinhlong.ditagis.com.khaosatdongho.utities.Preference;
 
 public class QueryVatTuDongHoAsycn extends AsyncTask<String, ArrayList<VatTuApdapter.VatTu>, Void> {
     private BottomSheetDialog mDialog;
-    private MainActivity mActivity;
+    private Activity mActivity;
     private AsyncResponse mDelegate;
 
     public interface AsyncResponse {
         void processFinish(ArrayList<VatTuApdapter.VatTu> output);
     }
 
-    public QueryVatTuDongHoAsycn(MainActivity mainActivity, AsyncResponse delegate) {
-        this.mActivity = mainActivity;
+    public QueryVatTuDongHoAsycn(Activity activity, AsyncResponse delegate) {
+        this.mActivity = activity;
         this.mDelegate = delegate;
     }
 
@@ -74,7 +74,7 @@ public class QueryVatTuDongHoAsycn extends AsyncTask<String, ArrayList<VatTuApda
                     Log.e("error", e.toString());
                 } finally {
                     conn.disconnect();
-                    this.mDialog.dismiss();
+                    publishProgress();
                 }
             }
         } catch (Exception e) {
@@ -116,7 +116,11 @@ public class QueryVatTuDongHoAsycn extends AsyncTask<String, ArrayList<VatTuApda
     @Override
     protected void onProgressUpdate(ArrayList<VatTuApdapter.VatTu>... values) {
         super.onProgressUpdate(values);
-        this.mDelegate.processFinish(values[0]);
+        this.mDialog.dismiss();
+        if (values == null || values.length == 0)
+            this.mDelegate.processFinish(null);
+        else
+            this.mDelegate.processFinish(values[0]);
 
     }
 

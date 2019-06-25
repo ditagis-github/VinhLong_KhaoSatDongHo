@@ -9,10 +9,7 @@
         style="@style/MyTextAppearance.Prime.Big"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/margin_medium"
-        android:layout_marginTop="@dimen/margin_medium"
-        android:layout_marginRight="@dimen/margin_medium"
-        android:layout_marginBottom="@dimen/margin_small"
+        android:layout_margin="@dimen/margin_small"
         android:text="Đang tìm kiếm dữ liệu..." />
 
     <ProgressBar
@@ -21,8 +18,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:backgroundTint="@android:color/white"
-        android:layout_marginLeft="@dimen/margin_medium"
-        android:layout_marginRight="@dimen/margin_medium"
+        android:layout_marginLeft="@dimen/margin_small"
+        android:layout_marginRight="@dimen/margin_small"
         android:indeterminate="true"
         android:indeterminateTint="@color/colorPrimary"
         android:max="100" />

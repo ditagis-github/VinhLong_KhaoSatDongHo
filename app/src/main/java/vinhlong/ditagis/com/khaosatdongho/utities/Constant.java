@@ -43,6 +43,7 @@ public class Constant {
     public static class REQUEST {
         public static final int ID_UPDATE_ATTACHMENT = 50;
         public static final int ID_UPDATE_ATTRIBUTE = 10;
+        public static final int ID_UPDATE_VAT_TU = 11;
     }
     public static class TENMAU {
         public static final String SELECT = "Chọn thiết lập mẫu";

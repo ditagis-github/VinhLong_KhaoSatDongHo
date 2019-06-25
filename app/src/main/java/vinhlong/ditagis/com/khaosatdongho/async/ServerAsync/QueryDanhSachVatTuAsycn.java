@@ -1,5 +1,6 @@
 package vinhlong.ditagis.com.khaosatdongho.async.ServerAsync;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.support.design.widget.BottomSheetDialog;
 import android.util.Log;
@@ -16,22 +17,21 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
-import vinhlong.ditagis.com.khaosatdongho.MainActivity;
 import vinhlong.ditagis.com.khaosatdongho.R;
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant;
 
 
 public class QueryDanhSachVatTuAsycn extends AsyncTask<Void, ArrayList<QueryDanhSachVatTuAsycn.VatTu>, Void> {
     private BottomSheetDialog mDialog;
-    private MainActivity mActivity;
+    private Activity mActivity;
     private AsyncResponse mDelegate;
 
     public interface AsyncResponse {
         void processFinish(ArrayList<VatTu> output);
     }
 
-    public QueryDanhSachVatTuAsycn(MainActivity mainActivity, AsyncResponse delegate) {
-        this.mActivity = mainActivity;
+    public QueryDanhSachVatTuAsycn(Activity activity, AsyncResponse delegate) {
+        this.mActivity = activity;
         this.mDelegate = delegate;
     }
 
@@ -70,6 +70,7 @@ public class QueryDanhSachVatTuAsycn extends AsyncTask<Void, ArrayList<QueryDanh
                 Log.e("error", e.toString());
             } finally {
                 conn.disconnect();
+                publishProgress();
             }
         } catch (Exception e) {
             Log.e("ERROR", e.toString());
@@ -122,7 +123,10 @@ public class QueryDanhSachVatTuAsycn extends AsyncTask<Void, ArrayList<QueryDanh
     @Override
     protected void onProgressUpdate(ArrayList<VatTu>... values) {
         super.onProgressUpdate(values);
-        this.mDelegate.processFinish(values[0]);
+        if (values == null || values.length == 0)
+            this.mDelegate.processFinish(null);
+        else
+            this.mDelegate.processFinish(values[0]);
 
     }
 

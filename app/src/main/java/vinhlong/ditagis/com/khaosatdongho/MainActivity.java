@@ -66,8 +66,6 @@ import com.esri.arcgisruntime.mapping.view.LocationDisplay;
 import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.util.ListenableList;
 
-import org.w3c.dom.Text;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -75,7 +73,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import vinhlong.ditagis.com.khaosatdongho.Editing.EditingVatTu;
 import vinhlong.ditagis.com.khaosatdongho.adapter.DanhSachDongHoKHAdapter;
 import vinhlong.ditagis.com.khaosatdongho.async.PreparingAsycn;
 import vinhlong.ditagis.com.khaosatdongho.async.UpdateAttachmentAsync;
@@ -84,7 +81,6 @@ import vinhlong.ditagis.com.khaosatdongho.entities.entitiesDB.LayerInfoDTG;
 import vinhlong.ditagis.com.khaosatdongho.entities.entitiesDB.ListObjectDB;
 import vinhlong.ditagis.com.khaosatdongho.libs.Action;
 import vinhlong.ditagis.com.khaosatdongho.libs.FeatureLayerDTG;
-import vinhlong.ditagis.com.khaosatdongho.tools.TraCuu;
 import vinhlong.ditagis.com.khaosatdongho.utities.CheckConnectInternet;
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant;
 import vinhlong.ditagis.com.khaosatdongho.utities.LocationHelper;
@@ -110,7 +106,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private LinearLayout mLinnearDisplayLayerTaiSan, mLinnearDisplayLayerBaseMap;
     private FloatingActionButton mFloatButtonLayer, mFloatButtonLocation;
     private CheckBox cb_Layer_HanhChinh, cb_Layer_TaiSan;
-    private TraCuu traCuu;
     private int states[][];
     private int colors[];
     private boolean isChangingGeometry = false;
@@ -353,9 +348,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (ListObjectDB.getInstance().getLstFeatureLayerDTG().size() == 0) return;
         popup = new Popup(MainActivity.this, mMapView, mCallout);
         mMapViewHandler = new MapViewHandler(mMapView, this, popup);
-        EditingVatTu editingVatTu = new EditingVatTu(this, mMapView);
-        mApplication.setEditingVatTu(editingVatTu);
-        traCuu = new TraCuu(this, popup);
+
         for (LayerInfoDTG layerInfoDTG : ListObjectDB.getInstance().getLstFeatureLayerDTG()) {
             if (!layerInfoDTG.isView()) continue;
             String url = layerInfoDTG.getUrl();
@@ -411,15 +404,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     mApplication.setDongHoKHDTG(featureLayerDTG);
                     mMapViewHandler.setDongHoKHSFT(serviceFeatureTable);
                     mApplication.setDongHoKHSFT(serviceFeatureTable);
-                    mApplication.getEditingVatTu().setDongHoKHSFT(serviceFeatureTable);
-                }
+                 }
                 if (layerInfoDTG.getId() != null && layerInfoDTG.getId().equals(Constant.IDLayer.VATTUDONGHOTBL)) {
-                    mApplication.getEditingVatTu().setVatTuDTG(featureLayerDTG);
+                    mApplication.setVatTuDHDTG(featureLayerDTG);
+                    mApplication.setVatTuKHSFT(serviceFeatureTable);
                 }
                 if (layerInfoDTG.getId() != null && layerInfoDTG.getId().equals(Constant.IDLayer.DMVATTUTBL)) {
                     featureLayer.addDoneLoadingListener(() -> {
                         if (featureLayer.getLoadStatus().equals(LoadStatus.LOADED)) {
-                            mApplication.getEditingVatTu().setDmVatTuSFT(serviceFeatureTable);
+                           mApplication.setDmVatTuKHSFT(serviceFeatureTable);
                         }
                     });
                 }
@@ -567,8 +560,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             final Intent intent = new Intent(this, CongViecActivity.class);
             this.startActivityForResult(intent, requestCode);
         }  else if (id == R.id.nav_tracuu) {
-            traCuu.start();
-        } else if (id == R.id.nav_logOut) {
+            } else if (id == R.id.nav_logOut) {
             startSignIn();
         }
         DrawerLayout drawer = findViewById(R.id.drawer_layout);

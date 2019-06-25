@@ -1,5 +1,6 @@
 package vinhlong.ditagis.com.khaosatdongho.async.ServerAsync;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.support.design.widget.BottomSheetDialog;
 import android.util.Log;
@@ -23,14 +24,14 @@ import vinhlong.ditagis.com.khaosatdongho.utities.Preference;
 
 public class AddVatTuKHAsycn extends AsyncTask<ArrayList<VatTuApdapter.VatTu>, Void, Void> {
     private BottomSheetDialog mDialog;
-    private MainActivity mActivity;
+    private Activity mActivity;
     private AsyncResponse mDelegate;
 
     public interface AsyncResponse {
         void processFinish(String output);
     }
 
-    public AddVatTuKHAsycn(MainActivity activity) {
+    public AddVatTuKHAsycn(Activity activity) {
         this.mActivity = activity;
     }
 
