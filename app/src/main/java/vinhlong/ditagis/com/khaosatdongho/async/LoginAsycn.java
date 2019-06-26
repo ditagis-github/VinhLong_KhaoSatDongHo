@@ -60,10 +60,10 @@ public class LoginAsycn extends AsyncTask<String, Void, User> {
     @Override
     protected User doInBackground(String... params) {
         String userName = params[0];
-        String pin = params[1];
+        String passWord = params[1];
 //        String passEncoded = (new EncodeMD5()).encode(pin + "_DITAGIS");
         // Do some validation here
-        String urlParameters = String.format("Username=%s&Password=%s", userName, pin);
+        String urlParameters = String.format("Username=%s&Password=%s", userName, passWord);
         String urlWithParam = String.format("%s?%s", Constant.API_URL.LOGIN, urlParameters);
         try {
             URL url = new URL(urlWithParam);
@@ -72,7 +72,7 @@ public class LoginAsycn extends AsyncTask<String, Void, User> {
                 conn.setRequestMethod(Constant.METHOD.POST);
                 JSONObject cred = new JSONObject();
                 cred.put("Username", userName);
-                cred.put("Password", pin);
+                cred.put("Password", passWord);
 
                 conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
                 conn.setRequestProperty("Accept", "application/json");
@@ -99,10 +99,12 @@ public class LoginAsycn extends AsyncTask<String, Void, User> {
                 String token = stringBuilder.toString().replace("\"", "");
                 Preference.getInstance().savePreferences(mContext.getString(R.string.preference_login_api),token);
                 if (checkAccess()) {
-                    UserDangNhap.getInstance().setUser(new User());
-                    UserDangNhap.getInstance().getUser().setDisplayName(getDisplayName());
+                    User user = new User();
+                    user.setDisplayName(getDisplayName());
+                    user.setUserName(userName);
+                    user.setPassWord(passWord);
                     conn.disconnect();
-                    return UserDangNhap.getInstance().getUser();
+                    return user;
                 } else {
                     conn.disconnect();
                     return null;

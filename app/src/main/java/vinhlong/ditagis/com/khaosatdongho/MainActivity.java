@@ -387,6 +387,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } else {
                 ServiceFeatureTable serviceFeatureTable = new ServiceFeatureTable(url);
                 FeatureLayer featureLayer = new FeatureLayer(serviceFeatureTable);
+
                 featureLayer.setName(layerInfoDTG.getTitleLayer());
                 featureLayer.setId(layerInfoDTG.getId());
                 Action action = new Action(layerInfoDTG.isView(), layerInfoDTG.isCreate(), layerInfoDTG.isEdit(), layerInfoDTG.isDelete());
@@ -396,14 +397,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 featureLayerDTG.setUpdateFields(getFieldsDTG(layerInfoDTG.getOutField()));
                 if (layerInfoDTG.getId() != null && layerInfoDTG.getId().equals(Constant.IDLayer.DHKHLYR)) {
 //                    String userName = mApplication.getUser().getUserName();
-                    featureLayer.setDefinitionExpression("NVKhaoSat = 'khaosatdongho' and TinhTrang = 'DKS'");
+                    featureLayer.setDefinitionExpression(String.format("%s = '%s' and %s = '%s'", Constant.DongHoKhachHangFields.NGUOI_CAP_NHAT,
+                            mApplication.getUser().getUserName(), Constant.DongHoKhachHangFields.TINH_TRANG,
+                            Constant.TinhTrangDongHoKhachHang.DANG_KHAO_SAT));
                     popup.setDongHoKHDTG(featureLayerDTG);
                     featureLayer.addDoneLoadingListener(() -> {
                         addCheckBox_LayerDHKH(featureLayer);
+                        mMapView.setViewpointScaleAsync(featureLayer.getMinScale());
                     });
                     mApplication.setDongHoKHDTG(featureLayerDTG);
                     mMapViewHandler.setDongHoKHSFT(serviceFeatureTable);
                     mApplication.setDongHoKHSFT(serviceFeatureTable);
+
                  }
                 if (layerInfoDTG.getId() != null && layerInfoDTG.getId().equals(Constant.IDLayer.VATTUDONGHOTBL)) {
                     mApplication.setVatTuDHDTG(featureLayerDTG);
@@ -416,6 +421,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         }
                     });
                 }
+
                 mMap.getOperationalLayers().add(featureLayer);
             }
         }

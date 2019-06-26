@@ -7,6 +7,11 @@ public class User {
     public User() {
 
     }
+
+    public void setPassWord(String passWord) {
+        this.passWord = passWord;
+    }
+
     public String getUserName() {
         return userName;
     }

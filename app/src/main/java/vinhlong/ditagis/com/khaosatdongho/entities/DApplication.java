@@ -11,6 +11,8 @@ import vinhlong.ditagis.com.khaosatdongho.entities.entitiesDB.User;
 import vinhlong.ditagis.com.khaosatdongho.libs.FeatureLayerDTG;
 
 public class DApplication extends Application {
+
+
     private FeatureLayerDTG dongHoKHDTG;
     private FeatureLayerDTG vatTuDHDTG;
     private ServiceFeatureTable dongHoKHSFT;

@@ -33,10 +33,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         mTxtUsername = findViewById(R.id.txtUsername);
         mTxtPassword = findViewById(R.id.txtPassword);
-        mTxtUsername.setText("khaosatdongho");
-        mTxtPassword.setText("khaosatdongho");
-//        mTxtUsername.setText("cln");
-//        mTxtPassword.setText("ditagis@123");
         mTxtValidation = findViewById(R.id.txt_login_validation);
         create();
         login();
@@ -71,12 +67,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
         mTxtValidation.setVisibility(View.GONE);
 
-        String userName;
-        if (isLastLogin)
+        String userName, passWord;
+        if (isLastLogin) {
             userName = Preference.getInstance().loadPreference(getString(R.string.preference_username));
-        else
+            passWord = Preference.getInstance().loadPreference(getString(R.string.preference_password));
+        } else {
             userName = mTxtUsername.getText().toString().trim();
-        final String passWord = mTxtPassword.getText().toString().trim();
+            passWord = mTxtPassword.getText().toString().trim();
+        }
         if (userName.length() == 0 || passWord.length() == 0) {
             handleInfoLoginEmpty();
             return;
