@@ -16,22 +16,22 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
-import vinhlong.ditagis.com.khaosatdongho.MainActivity;
 import vinhlong.ditagis.com.khaosatdongho.R;
 import vinhlong.ditagis.com.khaosatdongho.adapter.VatTuApdapter;
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant;
 import vinhlong.ditagis.com.khaosatdongho.utities.Preference;
 
-public class AddVatTuKHAsycn extends AsyncTask<ArrayList<VatTuApdapter.VatTu>, Void, Void> {
+public class AddVatTuKHAsycn extends AsyncTask<ArrayList<VatTuApdapter.VatTu>, Void, Boolean> {
     private BottomSheetDialog mDialog;
     private Activity mActivity;
     private AsyncResponse mDelegate;
 
     public interface AsyncResponse {
-        void processFinish(String output);
+        void processFinish(Boolean success);
     }
 
-    public AddVatTuKHAsycn(Activity activity) {
+    public AddVatTuKHAsycn(Activity activity, AsyncResponse delegate) {
+        this.mDelegate = delegate;
         this.mActivity = activity;
     }
 
@@ -50,13 +50,14 @@ public class AddVatTuKHAsycn extends AsyncTask<ArrayList<VatTuApdapter.VatTu>, V
         JSONObject cred = new JSONObject();
         try {
             if (vatTu.getMaVatTu() != null) {
-                cred.put("MaVatTu", vatTu.getMaVatTu());
+                cred.put(Constant.VatTuFields.MaVatTu, vatTu.getMaVatTu());
             }
             if (vatTu.getSoLuongVatTu() != null) {
-                cred.put("SoLuong", vatTu.getSoLuong());
+                cred.put(Constant.VatTuFields.SoLuong, vatTu.getSoLuong());
             }
-            if (vatTu.getiDKhachHang() != null) {
-                cred.put("IDKhachHang", vatTu.getiDKhachHang());
+            if (vatTu.getiDKhachHang() != -1) {
+                cred.put(Constant.VatTuFields.ID, vatTu.getiDKhachHang());
+//                cred.put(Constant.VatTuFields.ID, 12345);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -65,8 +66,9 @@ public class AddVatTuKHAsycn extends AsyncTask<ArrayList<VatTuApdapter.VatTu>, V
     }
 
     @Override
-    protected Void doInBackground(ArrayList<VatTuApdapter.VatTu>... params) {
+    protected Boolean doInBackground(ArrayList<VatTuApdapter.VatTu>... params) {
         ArrayList<VatTuApdapter.VatTu> vatTus = params[0];
+        int countSuccess = 0;
         if (vatTus != null && vatTus.size()> 0) {
             try {
                 URL url = new URL(Constant.API_URL.INSERT_VATTU);
@@ -85,6 +87,9 @@ public class AddVatTuKHAsycn extends AsyncTask<ArrayList<VatTuApdapter.VatTu>, V
                         conn.getInputStream();
                         wr.close();
                         outputStream.close();
+                        countSuccess++;
+                    } catch (Exception e) {
+                        Log.e("Lỗi thêm vật tư", e.toString());
                     } finally {
                         conn.disconnect();
                     }
@@ -93,12 +98,14 @@ public class AddVatTuKHAsycn extends AsyncTask<ArrayList<VatTuApdapter.VatTu>, V
                 Log.e("ERROR", e.getMessage(), e);
             }
         }
-        return null;
+        return countSuccess == vatTus.size();
     }
 
 
     @Override
-    protected void onPostExecute(Void user) {
+    protected void onPostExecute(Boolean success) {
+
         mDialog.dismiss();
+        mDelegate.processFinish(success);
     }
 }

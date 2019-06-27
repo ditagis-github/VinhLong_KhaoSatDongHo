@@ -402,8 +402,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             Constant.TinhTrangDongHoKhachHang.DANG_KHAO_SAT));
                     popup.setDongHoKHDTG(featureLayerDTG);
                     featureLayer.addDoneLoadingListener(() -> {
-                        addCheckBox_LayerDHKH(featureLayer);
-                        mMapView.setViewpointScaleAsync(featureLayer.getMinScale());
+                        if (featureLayer.getLoadStatus() == LoadStatus.LOADED) {
+                            addCheckBox_LayerDHKH(featureLayer);
+                            mMapView.setViewpointScaleAsync(featureLayer.getMinScale());
+                        } else {
+                            Toast.makeText(MainActivity.this, "Không tải được lớp đồng hồ khách hàng, đang thử tải lại",
+                                    Toast.LENGTH_SHORT).show();
+                            setFeatureService();
+                        }
                     });
                     mApplication.setDongHoKHDTG(featureLayerDTG);
                     mMapViewHandler.setDongHoKHSFT(serviceFeatureTable);

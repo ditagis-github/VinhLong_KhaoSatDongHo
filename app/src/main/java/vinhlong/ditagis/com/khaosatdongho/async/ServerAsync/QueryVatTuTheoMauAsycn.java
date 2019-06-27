@@ -97,7 +97,7 @@ public class QueryVatTuTheoMauAsycn extends AsyncTask<String, ArrayList<QueryVat
                 }
                 Object soLuong = jsonObject.get("SoLuong");
                 if (soLuong != null) {
-                    vatTu.setSoLuong(soLuong.toString());
+                    vatTu.setSoLuong((Double) soLuong);
                 }
                 Object id = jsonObject.get("ID");
                 if (id != null) {
@@ -123,13 +123,13 @@ public class QueryVatTuTheoMauAsycn extends AsyncTask<String, ArrayList<QueryVat
     public class VatTu{
         private String maVatTu;
         private String tenMau;
-        private String soLuong;
+        private double soLuong;
         private String id;
 
         public VatTu() {
         }
 
-        public VatTu(String maVatTu, String tenMau, String soLuong, String id) {
+        public VatTu(String maVatTu, String tenMau, double soLuong, String id) {
             this.maVatTu = maVatTu;
             this.tenMau = tenMau;
             this.soLuong = soLuong;
@@ -152,11 +152,11 @@ public class QueryVatTuTheoMauAsycn extends AsyncTask<String, ArrayList<QueryVat
             this.tenMau = tenMau;
         }
 
-        public String getSoLuong() {
+        public double getSoLuong() {
             return soLuong;
         }
 
-        public void setSoLuong(String soLuong) {
+        public void setSoLuong(double soLuong) {
             this.soLuong = soLuong;
         }
 

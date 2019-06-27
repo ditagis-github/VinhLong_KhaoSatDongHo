@@ -77,7 +77,7 @@ public class DanhSachDongHoKHAdapter extends ArrayAdapter<DanhSachDongHoKHAdapte
     public static class Item{
         private String objectID;
         private String idDongHo;
-        private String maKhachHang;
+        private String cmnd;
         private String tenKhachHang;
         private String diaChi;
         private String soDienThoai;
@@ -106,12 +106,12 @@ public class DanhSachDongHoKHAdapter extends ArrayAdapter<DanhSachDongHoKHAdapte
             this.idDongHo = idDongHo;
         }
 
-        public String getMaKhachHang() {
-            return maKhachHang;
+        public String getCmnd() {
+            return cmnd;
         }
 
-        public void setMaKhachHang(String maKhachHang) {
-            this.maKhachHang = maKhachHang;
+        public void setCmnd(String cmnd) {
+            this.cmnd = cmnd;
         }
 
         public String getTenKhachHang() {

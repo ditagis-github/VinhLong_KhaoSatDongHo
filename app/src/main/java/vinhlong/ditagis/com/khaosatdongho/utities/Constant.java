@@ -33,7 +33,7 @@ public class Constant {
         public static final String VATTU_LIST = SERVER_API + "/odata/GMDH/VatTuThietKes";
         public static final String INSERT_VATTU = SERVER_API + "/odata/gmdh/HoSoGanMoiVatTuTKs";
         public static final String DELETE_VATTUS = SERVER_API + "/GMDH/HoSoGanMoiVatTu/XoaVatTuTheoIDKhachHang/%s";
-        public static final String VATTUS_DONGHO = SERVER_API + "/odata/GMDH/HoSoGanMoiVatTuTKs?$select=*&$filter=IDKhachHang eq '%s'";
+        public static final String VATTUS_DONGHO = SERVER_API + "/odata/GMDH/HoSoGanMoiVatTuTKs?$select=*&$filter=IDKhachHang eq %d";
     }
     public static class METHOD {
         public static final String DELETE = "DELETE";
@@ -82,9 +82,11 @@ public class Constant {
     public static class VatTuFields {
         public static final String DBDongHo = "DBDongHo";
         public static final String MaKhachHang = "CMND";
+        public static final String ID = "IDKhachHang";
         public static final String MaVatTu = "MaVatTu";
         public static final String SoLuong = "SoLuong";
         public static final String NgayCapNhat = "NgayCapNhat";
+        public static final String GIA_NC = "GiaNC";
     }
 
     public static class VatTuAlias {

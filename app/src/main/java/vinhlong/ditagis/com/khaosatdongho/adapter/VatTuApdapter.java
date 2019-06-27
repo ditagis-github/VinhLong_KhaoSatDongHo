@@ -75,17 +75,13 @@ public class VatTuApdapter extends ArrayAdapter<VatTuApdapter.VatTu> {
         private String donViTinh;
         private double giaNC;
         private double giaVT;
-        private String iDKhachHang;
+        private long iDKhachHang;
         public NumberFormat formatter = new DecimalFormat("###,###,###");
         public VatTu() {
         }
 
         public String getStt() {
             return String.valueOf(stt);
-        }
-
-        public void setStt(int stt) {
-            this.stt = stt;
         }
 
         public VatTu(int stt) {
@@ -107,22 +103,22 @@ public class VatTuApdapter extends ArrayAdapter<VatTuApdapter.VatTu> {
         public void setTenVatTu(String tenVatTu) {
             this.tenVatTu = tenVatTu;
         }
-        public String getSoLuong(){
-            return String.valueOf(soLuongVatTu);
+        public double getSoLuong(){
+            return soLuongVatTu;
         }
 
         public String  getSoLuongVatTu() {
             String soLuong;
             if ((soLuongVatTu == Math.floor(soLuongVatTu)) && !Double.isInfinite(soLuongVatTu)) {
-                soLuong = String.valueOf((int) this.soLuongVatTu);
+                soLuong = String.valueOf( this.soLuongVatTu);
             }
             else soLuong = String.valueOf(soLuongVatTu);
             return soLuong + " (" + this.donViTinh + ")";
         }
 
-        public void setSoLuongVatTu(String soLuongVatTu) {
+        public void setSoLuongVatTu(double soLuongVatTu) {
             try{
-                this.soLuongVatTu = Double.parseDouble(soLuongVatTu);
+                this.soLuongVatTu = soLuongVatTu;
             }catch (Exception e){
             }
         }
@@ -155,11 +151,11 @@ public class VatTuApdapter extends ArrayAdapter<VatTuApdapter.VatTu> {
             this.donViTinh = donViTinh;
         }
 
-        public String getiDKhachHang() {
+        public long getiDKhachHang() {
             return iDKhachHang;
         }
 
-        public void setiDKhachHang(String iDKhachHang) {
+        public void setiDKhachHang(long iDKhachHang) {
             this.iDKhachHang = iDKhachHang;
         }
     }

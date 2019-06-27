@@ -23,7 +23,7 @@ import vinhlong.ditagis.com.khaosatdongho.utities.Constant;
 import vinhlong.ditagis.com.khaosatdongho.utities.Preference;
 
 
-public class QueryVatTuDongHoAsycn extends AsyncTask<String, ArrayList<VatTuApdapter.VatTu>, Void> {
+public class QueryVatTuDongHoAsycn extends AsyncTask<Long, ArrayList<VatTuApdapter.VatTu>, Void> {
     private BottomSheetDialog mDialog;
     private Activity mActivity;
     private AsyncResponse mDelegate;
@@ -50,10 +50,10 @@ public class QueryVatTuDongHoAsycn extends AsyncTask<String, ArrayList<VatTuApda
     }
 
     @Override
-    protected Void doInBackground(String... params) {
+    protected Void doInBackground(Long... params) {
         try {
             if (params != null && params.length > 0) {
-                String maKhachHang = params[0];
+                long maKhachHang = params[0];
                 String urlAPI = String.format(Constant.API_URL.VATTUS_DONGHO, maKhachHang);
                 URL url = new URL(urlAPI);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -72,9 +72,10 @@ public class QueryVatTuDongHoAsycn extends AsyncTask<String, ArrayList<VatTuApda
                     publishProgress(vatTus);
                 } catch (Exception e) {
                     Log.e("error", e.toString());
+                    publishProgress();
                 } finally {
                     conn.disconnect();
-                    publishProgress();
+
                 }
             }
         } catch (Exception e) {
@@ -89,21 +90,21 @@ public class QueryVatTuDongHoAsycn extends AsyncTask<String, ArrayList<VatTuApda
             JSONObject jsonData = new JSONObject(data);
             JSONArray jsonArray = jsonData.getJSONArray("value");
             for (int i = 0; i < jsonArray.length(); i++) {
-                VatTuApdapter.VatTu vatTu = new VatTuApdapter.VatTu(i);
+                VatTuApdapter.VatTu vatTu = new VatTuApdapter.VatTu(i + 1);
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
-                Object maVatTu = jsonObject.get("MaVatTu");
+                Object maVatTu = jsonObject.get(Constant.VatTuFields.MaVatTu);
                 if (maVatTu != null) {
                     vatTu.setMaVatTu(maVatTu.toString());
                 }
-                Object soLuong = jsonObject.get("SoLuong");
+                Object soLuong = jsonObject.get(Constant.VatTuFields.SoLuong);
                 if (soLuong != null) {
-                    vatTu.setSoLuongVatTu(soLuong.toString());
+                    vatTu.setSoLuongVatTu((Double) soLuong);
                 }
-                Object dDKhachHang = jsonObject.get("IDKhachHang");
+                Object dDKhachHang = jsonObject.get(Constant.VatTuFields.ID);
                 if (dDKhachHang != null) {
-                    vatTu.setiDKhachHang(dDKhachHang.toString());
+                    vatTu.setiDKhachHang(((Integer) dDKhachHang).longValue());
                 }
-                Object giaNC = jsonObject.get("GiaNC");
+                Object giaNC = jsonObject.get(Constant.VatTuFields.GIA_NC);
                 if (giaNC != null) {
                     vatTu.setGiaNC(giaNC.toString());
                 }

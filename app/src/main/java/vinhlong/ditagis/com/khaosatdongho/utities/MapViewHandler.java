@@ -170,14 +170,14 @@ public class MapViewHandler extends Activity {
                     dongHoKH.setObjectID(attributes.get(Constant.LayerFields.OBJECTID).toString());
                     Object danhboDongHo = attributes.get(Constant.DongHoKhachHangFields.ID);
                     Object tenKH = attributes.get(Constant.DongHoKhachHangFields.TEN_KH);
-                    Object maKhachHang = attributes.get(Constant.DongHoKhachHangFields.CMND);
+                    Object cmnd = attributes.get(Constant.DongHoKhachHangFields.CMND);
                     if (danhboDongHo != null)
                         dongHoKH.setIdDongHo(danhboDongHo.toString());
                     if (tenKH != null) {
                         dongHoKH.setTenKhachHang(tenKH.toString());
                     }
-                    if (maKhachHang != null) {
-                        dongHoKH.setMaKhachHang(maKhachHang.toString());
+                    if (cmnd != null) {
+                        dongHoKH.setCmnd(cmnd.toString());
                     }
                     adapter.add(dongHoKH);
                     adapter.notifyDataSetChanged();

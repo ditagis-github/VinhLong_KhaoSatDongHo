@@ -27,7 +27,7 @@ import vinhlong.ditagis.com.khaosatdongho.utities.Constant;
  * Created by ThanLe on 4/16/2018.
  */
 
-public class RefreshVatTuAsync extends AsyncTask<String, List<VatTuApdapter.VatTu>, Void> {
+public class RefreshVatTuAsync extends AsyncTask<Long, List<VatTuApdapter.VatTu>, Void> {
     private BottomSheetDialog mDialog;
     private Activity mActivity;
     private ServiceFeatureTable vatTuTable;
@@ -64,7 +64,7 @@ public class RefreshVatTuAsync extends AsyncTask<String, List<VatTuApdapter.VatT
     }
 
     @Override
-    protected Void doInBackground(String... params) {
+    protected Void doInBackground(Long... params) {
         final List<Feature> features = new ArrayList<>();
         final List<VatTuApdapter.VatTu> vatTus = new ArrayList<>();
         QueryParameters queryParameters = new QueryParameters();
@@ -84,7 +84,7 @@ public class RefreshVatTuAsync extends AsyncTask<String, List<VatTuApdapter.VatT
                     Object objectID = feature.getAttributes().get(Constant.LayerFields.OBJECTID);
                     vatTu.setMaVatTu(objectID.toString());
                     if (soLuong != null) {
-                        vatTu.setSoLuongVatTu(soLuong.toString());
+                        vatTu.setSoLuongVatTu((double)soLuong);
                     }
                     if (maVatTu != null) {
                         Feature loaiVatTu = getLoaiVatTu(maVatTu.toString());

@@ -115,7 +115,7 @@ public class CongViecActivity extends AppCompatActivity {
             }
         }
 
-//        layout.addView(getLayoutInfo("Mã khách hàng", dongHo.getMaKhachHang()));
+//        layout.addView(getLayoutInfo("Mã khách hàng", dongHo.getCmnd()));
 //        layout.addView(getLayoutInfo("Tên khách hàng", dongHo.getTenKhachHang()));
 //        layout.addView(getLayoutInfo("Số điện thoại", dongHo.getSoDienThoai()));
 //        layout.addView(getLayoutInfo("Địa chỉ", dongHo.getDiaChi()));
@@ -165,7 +165,7 @@ public class CongViecActivity extends AppCompatActivity {
                         }
                         Object maKH = attributes.get(Constant.DongHoKhachHangFields.CMND);
                         if (maKH != null) {
-                            item.setMaKhachHang(maKH.toString());
+                            item.setCmnd(maKH.toString());
                         }
                         Object soDienThoai = attributes.get(Constant.DongHoKhachHangFields.SO_DIEN_THOAI);
                         if (soDienThoai != null) {

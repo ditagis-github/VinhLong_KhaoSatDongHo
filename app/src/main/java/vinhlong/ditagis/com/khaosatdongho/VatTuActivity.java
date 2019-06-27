@@ -2,6 +2,7 @@ package vinhlong.ditagis.com.khaosatdongho;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -12,7 +13,6 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -105,16 +105,25 @@ public class VatTuActivity extends AppCompatActivity {
         }).execute();
     }
 
-    private void getVatTu(String maKhachHang) {
+    private void getVatTu(long maKhachHang) {
         new QueryVatTuDongHoAsycn(VatTuActivity.this, vatTus -> {
             if (vatTus != null) {
+                for (VatTuApdapter.VatTu vatTu : vatTus) {
+                    for (QueryDanhSachVatTuAsycn.VatTu vatTu1 : danhSachVatTu) {
+                        if (vatTu.getMaVatTu().equals(vatTu1.getMaVatTu())) {
+                            vatTu.setTenVatTu(vatTu1.getTenVatTu());
+                            vatTu.setDonViTinh(vatTu1.getDonViTinh());
+                            break;
+                        }
+                    }
+                }
                 vatTuApdapter.setVatTus(vatTus);
                 vatTuApdapter.notifyDataSetChanged();
             }
         }).execute(maKhachHang);
     }
 
-    private void getVatTuTheoMau(String tenThietLapMau, String maKhachHang) {
+    private void getVatTuTheoMau(String tenThietLapMau, Long idDongHo) {
         ArrayList<VatTuApdapter.VatTu> vatTusAdapter = new ArrayList<>();
         new QueryVatTuTheoMauAsycn(VatTuActivity.this, vatTuTheoMau -> {
             if (vatTuTheoMau != null) {
@@ -130,7 +139,7 @@ public class VatTuActivity extends AppCompatActivity {
                         vatTuAdapter.setGiaNC(loaiVatTu.getnC());
                         vatTuAdapter.setGiaVT(loaiVatTu.getvT());
                         vatTuAdapter.setDonViTinh(loaiVatTu.getDonViTinh());
-                        vatTuAdapter.setiDKhachHang(maKhachHang);
+                        vatTuAdapter.setiDKhachHang(idDongHo);
                         vatTusAdapter.add(vatTuAdapter);
                     }
                 }
@@ -159,33 +168,20 @@ public class VatTuActivity extends AppCompatActivity {
         }).execute();
     }
 
-    public void deleteDanhSachMauDanhGia(ArcGISFeature featureDHKH) {
-        this.feature = featureDHKH;
-        final Map<String, Object> attributes = featureDHKH.getAttributes();
-        Object maKhachHang = attributes.get(Constant.DongHoKhachHangFields.CMND);
-        if (maKhachHang != null) {
-            List<VatTuApdapter.VatTu> vatTus = new ArrayList<>();
-//            vatTuApdapter = new VatTuApdapter(VatTuActivity.this, vatTus);
-            getRefreshTableVatTuAsync();
-            if (table_feature != null && table_feature.size() > 0) {
-                for (Feature feature : table_feature) {
-                    deleteFeature(feature);
-                }
-            }
-        }
-    }
 
     public void showDanhSachVatTu(ArcGISFeature featureDHKH) {
         this.feature = featureDHKH;
         final Map<String, Object> attributes = featureDHKH.getAttributes();
-        Object maKhachHang = attributes.get(Constant.DongHoKhachHangFields.CMND);
-        if (maKhachHang != null) {
-            getVatTu(maKhachHang.toString());
+        Object idDongHo = attributes.get(Constant.DongHoKhachHangFields.ID);
+//        idDongHo = 12345;
+        if (idDongHo != null) {
+
             Spinner spin_thietlapmau = findViewById(R.id.spin_thietlapmau);
             mAdapter = new ArrayAdapter<>(VatTuActivity.this, android.R.layout.simple_spinner_dropdown_item, tenMaus);
             spin_thietlapmau.setAdapter(mAdapter);
             TextView txtAdd = findViewById(R.id.txtAccept);
             spin_thietlapmau.setSelection(0);
+            Object finalIdDongHo = idDongHo;
             spin_thietlapmau.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
@@ -193,10 +189,10 @@ public class VatTuActivity extends AppCompatActivity {
                     if (itemAtPosition != null) {
                         String tenThietLapMau = itemAtPosition.toString();
                         if (!tenThietLapMau.equals(Constant.TENMAU.SELECT)) {
-                            txtAdd.setEnabled(true);
-                            getVatTuTheoMau(tenThietLapMau, maKhachHang.toString());
+                            getVatTuTheoMau(tenThietLapMau, ((Integer) finalIdDongHo).longValue());
                         } else {
-                            txtAdd.setEnabled(false);
+                            vatTuApdapter.clear();
+                            vatTuApdapter.notifyDataSetChanged();
                         }
                     }
                 }
@@ -212,7 +208,7 @@ public class VatTuActivity extends AppCompatActivity {
             if (!mApplication.getVatTuDHDTG().getAction().isCreate()) {
                 txtAdd.setVisibility(View.INVISIBLE);
             }
-            txtAdd.setOnClickListener(v -> addTableVatTu());
+            txtAdd.setOnClickListener(v -> addTableVatTu(v, (String) spin_thietlapmau.getSelectedItem()));
             listView.setOnItemClickListener((parent, view, position, id) -> {
                 if (mApplication.getVatTuDHDTG().getAction().isView()) {
 //                    final VatTuApdapter.VatTu itemAtPosition = vatTuApdapter.getVatTus().get(position);
@@ -245,7 +241,8 @@ public class VatTuActivity extends AppCompatActivity {
             ArrayList<VatTuApdapter.VatTu> vatTus = new ArrayList<>();
             vatTuApdapter = new VatTuApdapter(VatTuActivity.this, vatTus);
             listView.setAdapter(vatTuApdapter);
-            getRefreshTableVatTuAsync();
+//            getRefreshTableVatTuAsync();
+            getVatTu(((Integer) idDongHo).longValue());
 
         } else {
             MySnackBar.make(mapView, VatTuActivity.this.getString(R.string.DATA_NOT_FOUND), true);
@@ -423,7 +420,7 @@ public class VatTuActivity extends AppCompatActivity {
 
     private void getRefreshTableVatTuAsync() {
         final Map<String, Object> attributes = this.feature.getAttributes();
-        String maKhachHang = attributes.get(Constant.DongHoKhachHangFields.CMND).toString();
+        long idDongHo = (Integer) attributes.get(Constant.DongHoKhachHangFields.ID);
         new RefreshVatTuAsync(VatTuActivity.this, mApplication.getVatTuKHSFT(), this.dmVatTuFeatures, vatTuApdapter, this.mApplication.getVatTuDHDTG().getAction(), features -> {
             table_feature = features;
             if (this.titlePopup != null && features != null) {
@@ -448,7 +445,7 @@ public class VatTuActivity extends AppCompatActivity {
                 }
                 titlePopup.setText(formatter.format(sum) + Constant.DefineST.DonViTien);
             }
-        }).execute(maKhachHang);
+        }).execute(idDongHo);
     }
 
     private Feature getLoaiVatTu12(String maVatTu) {
@@ -499,12 +496,24 @@ public class VatTuActivity extends AppCompatActivity {
         return value;
     }
 
-    private void addTableVatTu() {
-        new DeleteVatTuKHAsycn(VatTuActivity.this, output -> {
-            if (output) {
-                new AddVatTuKHAsycn(VatTuActivity.this).execute(vatTuApdapter.getVatTus());
-            }
-        }).execute(vatTuApdapter.getVatTus().get(0).getiDKhachHang());
+    private void addTableVatTu(View v, String item) {
+        if (item.equals(Constant.TENMAU.SELECT)) {
+            Snackbar.make(v, "Vui lòng chọn mẫu!", 2000).show();
+        } else {
+            new DeleteVatTuKHAsycn(VatTuActivity.this, output -> {
+                if (output) {
+                    new AddVatTuKHAsycn(VatTuActivity.this, new AddVatTuKHAsycn.AsyncResponse() {
+                        @Override
+                        public void processFinish(Boolean success) {
+                            if (success) {
+                                Toast.makeText(VatTuActivity.this, "Cập nhật thành công!", Toast.LENGTH_SHORT).show();
+                            } else Snackbar.make(v, "Cật nhật thất bại!", 2000).show();
+                        }
+                    }).execute(vatTuApdapter.getVatTus());
+                }
+            }).execute(vatTuApdapter.getVatTus().get(0).getiDKhachHang());
+
+        }
 
     }
 
