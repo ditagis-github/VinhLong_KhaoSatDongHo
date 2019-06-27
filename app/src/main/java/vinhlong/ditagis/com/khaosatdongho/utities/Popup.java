@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -235,7 +236,7 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
     }
 
     private void hoanTatKhaoSat() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity, android.R.style.Theme_Material_Dialog_Alert);
+        AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity, android.R.style.Theme_Material_Light_Dialog_Alert);
         builder.setTitle("Xác nhận");
         builder.setMessage(String.format("Bạn có chắc muốn hoàn tất đồng hồ %s", Popup.this.featureDHKH.getAttributes().get(Constant.DongHoKhachHangFields.ID)));
         builder.setNegativeButton("Hoàn tất", new DialogInterface.OnClickListener() {
@@ -261,7 +262,9 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
                 dialog.dismiss();
             }
         }).setCancelable(false);
-
+        AlertDialog dialog = builder.create();
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.show();
     }
     private void editLocation(ArcGISFeature feature) {
         mMainActivity.setChangingGeometry(true, feature);
@@ -311,7 +314,7 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.txtAccept:
+            case R.id.txtAdd:
 //            @Override
 //
                 break;

@@ -136,7 +136,7 @@ public class CongViecActivity extends AppCompatActivity {
     }
 
     private void getQueryDiemDanhGiaAsync(String whereClause) {
-        ListView listView = findViewById(R.id.listview);
+        ListView listView = findViewById(R.id.vattu_listview);
 
         if (serviceFeatureTable != null)
             new QueryDongHoKhachHangAsync(this, serviceFeatureTable, txtTongItem, features -> {

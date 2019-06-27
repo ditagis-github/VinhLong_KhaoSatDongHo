@@ -55,6 +55,9 @@ public class DeleteVatTuKHAsycn extends AsyncTask<Long, Void, Boolean> {
                     conn.setRequestProperty("Authorization", Preference.getInstance().loadPreference(mContext.getString(R.string.preference_login_api)));
                     conn.connect();
                     conn.getInputStream();
+                } catch (Exception e) {
+                    Log.e("Lỗi xóa vật tư", e.toString());
+                    return false;
                 } finally {
                     conn.disconnect();
                     mDialog.dismiss();

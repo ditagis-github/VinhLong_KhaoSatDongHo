@@ -12,7 +12,13 @@
     <style name="MyTextAppearance.Prime.Big" parent="MyTextAppearance.Prime">
         <item name="android:textSize">20sp</item>
     </style>
-
+    <style name="MyTextAppearance.Gray" parent="@android:style/TextAppearance">
+        <item name="android:textSize">17sp</item>
+        <item name="android:textColor">@android:color/darker_gray</item>
+    </style>
+    <style name="MyTextAppearance.Gray.Big" parent="MyTextAppearance.Gray">
+        <item name="android:textSize">20sp</item>
+    </style>
     <style name="MyTextAppearance.Black" parent="@android:style/TextAppearance">
         <item name="android:textColor">@android:color/black</item>
 
