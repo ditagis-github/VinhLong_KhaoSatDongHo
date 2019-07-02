@@ -9,9 +9,15 @@ import com.esri.arcgisruntime.data.ServiceFeatureTable;
 import vinhlong.ditagis.com.khaosatdongho.MainActivity;
 import vinhlong.ditagis.com.khaosatdongho.entities.entitiesDB.User;
 import vinhlong.ditagis.com.khaosatdongho.libs.FeatureLayerDTG;
+import vinhlong.ditagis.com.khaosatdongho.utities.Constant;
 
 public class DApplication extends Application {
 
+    public String getDefinitionFeature() {
+        return String.format("%s = '%s' and %s = '%s'", Constant.DongHoKhachHangFields.NGUOI_CAP_NHAT,
+                getUser().getUserName(), Constant.DongHoKhachHangFields.TINH_TRANG,
+                Constant.TinhTrangDongHoKhachHang.DANG_KHAO_SAT);
+    }
 
     private FeatureLayerDTG dongHoKHDTG;
     private FeatureLayerDTG vatTuDHDTG;

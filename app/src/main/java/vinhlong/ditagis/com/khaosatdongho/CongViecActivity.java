@@ -32,11 +32,12 @@ public class CongViecActivity extends AppCompatActivity {
     private TextView txtTongItem;
     private ServiceFeatureTable serviceFeatureTable;
     private ThongKeAdapter thongKeAdapter;
-    private DApplication dApplication;
+    private DApplication mApplication;
     private LinearLayout mBottomLayout;
     private BottomSheetDialog mBottomSheetDialog;
     private List<Feature> mFeatures;
     private Feature mSelectedFeature;
+
 //    private DanhSachDongHoKHAdapter.Item mSelectedDongHo;
 
     @Override
@@ -46,13 +47,13 @@ public class CongViecActivity extends AppCompatActivity {
         init();
 
 
-        serviceFeatureTable = (ServiceFeatureTable) dApplication.getDongHoKHDTG().getFeatureLayer().getFeatureTable();
-        String whereClause = "1 = 1";
-        getQueryDiemDanhGiaAsync(whereClause);
+        serviceFeatureTable = (ServiceFeatureTable) mApplication.getDongHoKHDTG().getFeatureLayer().getFeatureTable();
+
+        getQueryDiemDanhGiaAsync(mApplication.getDefinitionFeature());
     }
 
     private void init() {
-        dApplication = (DApplication) getApplication();
+        mApplication = (DApplication) getApplication();
         initBottomSheet();
 
     }

@@ -19,6 +19,7 @@ import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -36,6 +37,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -74,6 +76,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import vinhlong.ditagis.com.khaosatdongho.adapter.DanhSachDongHoKHAdapter;
+import vinhlong.ditagis.com.khaosatdongho.async.LoginAsycn;
 import vinhlong.ditagis.com.khaosatdongho.async.PreparingAsycn;
 import vinhlong.ditagis.com.khaosatdongho.async.UpdateAttachmentAsync;
 import vinhlong.ditagis.com.khaosatdongho.entities.DApplication;
@@ -87,6 +90,7 @@ import vinhlong.ditagis.com.khaosatdongho.utities.LocationHelper;
 import vinhlong.ditagis.com.khaosatdongho.utities.MapViewHandler;
 import vinhlong.ditagis.com.khaosatdongho.utities.MySnackBar;
 import vinhlong.ditagis.com.khaosatdongho.utities.Popup;
+import vinhlong.ditagis.com.khaosatdongho.utities.Preference;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
 
@@ -133,6 +137,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+
+
         setLicense();
         mApplication = (DApplication) getApplication();
         setUp();
@@ -198,9 +206,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void startSignIn() {
-        Intent intent = new Intent(this, LoginActivity.class);
-        startActivityForResult(intent, Constant.
-                REQUEST_LOGIN);
+        //check login before
+        Preference.getInstance().setContext(this);
+        String userName = Preference.getInstance().loadPreference(getString(R.string.preference_username));
+        String passWord = Preference.getInstance().loadPreference(getString(R.string.preference_password));
+        LoginAsycn loginAsycn = new LoginAsycn(MainActivity.this, output -> {
+            if (output != null) {
+                mApplication.setUser(output);
+                handleLoginSuccess();
+            } else {
+                Intent intent = new Intent(this, LoginActivity.class);
+                startActivityForResult(intent, Constant.
+                        REQUEST_LOGIN);
+            }
+        });
+        loginAsycn.execute(userName, passWord);
+
+
     }
 
     private void setOnClickListener() {
@@ -397,9 +419,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 featureLayerDTG.setUpdateFields(getFieldsDTG(layerInfoDTG.getOutField()));
                 if (layerInfoDTG.getId() != null && layerInfoDTG.getId().equals(Constant.IDLayer.DHKHLYR)) {
 //                    String userName = mApplication.getUser().getUserName();
-                    featureLayer.setDefinitionExpression(String.format("%s = '%s' and %s = '%s'", Constant.DongHoKhachHangFields.NGUOI_CAP_NHAT,
-                            mApplication.getUser().getUserName(), Constant.DongHoKhachHangFields.TINH_TRANG,
-                            Constant.TinhTrangDongHoKhachHang.DANG_KHAO_SAT));
+                    featureLayer.setDefinitionExpression(mApplication.getDefinitionFeature());
                     popup.setDongHoKHDTG(featureLayerDTG);
                     featureLayer.addDoneLoadingListener(() -> {
                         if (featureLayer.getLoadStatus() == LoadStatus.LOADED) {
@@ -784,14 +804,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case Constant.REQUEST_LOGIN:
                 if (Activity.RESULT_OK != resultCode) {
-                    finish();
-
-                    return;
+                    handleLoginFail();
                 } else {
-                    setLoginInfos();
-                    initMapView();
+                    handleLoginSuccess();
                 }
                 break;
         }
+    }
+
+    private void handleLoginFail() {
+        finish();
+
+    }
+
+    private void handleLoginSuccess() {
+        setLoginInfos();
+        initMapView();
     }
 }

@@ -39,7 +39,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void create() {
-        Preference.getInstance().setContext(this);
+
         String preference_userName = Preference.getInstance().loadPreference(getString(R.string.preference_username));
 
         //nếu chưa từng đăng nhập thành công trước đó

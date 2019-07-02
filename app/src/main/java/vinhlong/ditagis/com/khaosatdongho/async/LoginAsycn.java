@@ -2,6 +2,7 @@ package vinhlong.ditagis.com.khaosatdongho.async;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.support.design.widget.BottomSheetDialog;
 import android.util.Log;
@@ -52,7 +53,6 @@ public class LoginAsycn extends AsyncTask<String, Void, User> {
         ((TextView) view.findViewById(R.id.txt_progress_dialog_title)).setText("Đang kiểm tra thông tin đăng nhập...");
         mDialog.setContentView(view);
         mDialog.setCancelable(false);
-
         mDialog.show();
 
     }

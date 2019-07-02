@@ -1,6 +1,7 @@
 package vinhlong.ditagis.com.khaosatdongho.async.ServerAsync;
 
 import android.app.Activity;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.support.design.widget.BottomSheetDialog;
 import android.util.Log;
@@ -43,7 +44,6 @@ public class QueryDanhSachVatTuAsycn extends AsyncTask<Void, ArrayList<QueryDanh
         ((TextView) view.findViewById(R.id.txt_progress_dialog_title)).setText("Đang lấy danh sách vật tư...");
         mDialog.setContentView(view);
         mDialog.setCancelable(false);
-
         mDialog.show();
     }
 

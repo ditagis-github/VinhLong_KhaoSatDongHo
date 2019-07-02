@@ -4,6 +4,7 @@
     <color name="spiner_border_color">#ccc</color>
     <color name="spiner_color">#333</color>
 
+    <color name="colorTransparent">#43000000</color>
     <color name="colorPrimary">#06610F</color>
     <color name="colorPrimaryLight">#058412</color>
     <color name="colorPrimaryDark">#04440B</color>
