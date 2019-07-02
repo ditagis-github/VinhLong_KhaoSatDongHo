@@ -24,15 +24,21 @@ import vinhlong.ditagis.com.khaosatdongho.utities.Constant;
  * Created by ThanLe on 4/16/2018.
  */
 
-public class UpdateAttachmentAsync extends AsyncTask<Void, Void, Void> {
+public class UpdateAttachmentAsync extends AsyncTask<Void, Boolean, Void> {
     private BottomSheetDialog mDialog;
     private MainActivity mActivity;
     private ServiceFeatureTable mServiceFeatureTable;
     private ArcGISFeature mSelectedArcGISFeature = null;
     private byte[] mImage;
     private DApplication dApplication;
+    private AsyncResponse mDelegate;
 
-    public UpdateAttachmentAsync(MainActivity mainActivity, ArcGISFeature selectedArcGISFeature, byte[] image) {
+    public interface AsyncResponse {
+        void processFinish(Boolean success);
+    }
+
+    public UpdateAttachmentAsync(MainActivity mainActivity, ArcGISFeature selectedArcGISFeature, byte[] image, AsyncResponse delegate) {
+        this.mDelegate = delegate;
         this.mActivity = mainActivity;
         mServiceFeatureTable = (ServiceFeatureTable) selectedArcGISFeature.getFeatureTable();
         mSelectedArcGISFeature = selectedArcGISFeature;
@@ -72,21 +78,21 @@ public class UpdateAttachmentAsync extends AsyncTask<Void, Void, Void> {
                                 List<FeatureEditResult> featureEditResults = applyEditsAsync.get();
                                 if (featureEditResults.size() > 0) {
                                     if (!featureEditResults.get(0).hasCompletedWithErrors()) {
-                                        //attachmentList.add(fileName);
-                                        String s = mSelectedArcGISFeature.getAttributes().get("objectid").toString();
-                                        // update the attachment list view/ on the control panel
+                                        publishProgress(true);
                                     } else {
+                                        publishProgress();
                                     }
                                 } else {
+                                    publishProgress();
                                 }
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
+                                publishProgress();
                             } catch (ExecutionException e) {
                                 e.printStackTrace();
+                                publishProgress();
                             }
-                            if (mDialog != null && mDialog.isShowing()) {
-                                mDialog.dismiss();
-                            }
+
 
                         });
 
@@ -96,25 +102,27 @@ public class UpdateAttachmentAsync extends AsyncTask<Void, Void, Void> {
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                publishProgress();
             } catch (ExecutionException e) {
                 e.printStackTrace();
+                publishProgress();
             }
         });
         return null;
     }
 
     @Override
-    protected void onProgressUpdate(Void... values) {
+    protected void onProgressUpdate(Boolean... values) {
         super.onProgressUpdate(values);
+        if (mDialog != null && mDialog.isShowing()) {
+            mDialog.dismiss();
+        }
+        if (values != null && values.length > 0 && values[0]) {
+            mDelegate.processFinish(true);
+        } else mDelegate.processFinish(false);
 
     }
 
-
-    @Override
-    protected void onPostExecute(Void result) {
-        super.onPostExecute(result);
-
-    }
 
 }
 

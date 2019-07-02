@@ -2,7 +2,6 @@ package vinhlong.ditagis.com.khaosatdongho.async;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.support.design.widget.BottomSheetDialog;
 import android.util.Log;
@@ -28,7 +27,7 @@ import vinhlong.ditagis.com.khaosatdongho.entities.entitiesDB.UserDangNhap;
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant;
 import vinhlong.ditagis.com.khaosatdongho.utities.Preference;
 
-public class LoginAsycn extends AsyncTask<String, Void, User> {
+public class LoginAsycn extends AsyncTask<String, Void, Object> {
     private Exception exception;
     private BottomSheetDialog mDialog;
     private Context mContext;
@@ -36,7 +35,7 @@ public class LoginAsycn extends AsyncTask<String, Void, User> {
     private DApplication mApplication;
     private Activity mActivity;
     public interface AsyncResponse {
-        void processFinish(User output);
+        void processFinish(Object output);
     }
 
     public LoginAsycn(Activity activity, AsyncResponse delegate) {
@@ -50,7 +49,7 @@ public class LoginAsycn extends AsyncTask<String, Void, User> {
         super.onPreExecute();
         mDialog = new BottomSheetDialog(this.mContext);
         LinearLayout view = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.layout_progress_dialog, null, false);
-        ((TextView) view.findViewById(R.id.txt_progress_dialog_title)).setText("Đang kiểm tra thông tin đăng nhập...");
+        ((TextView) view.findViewById(R.id.txt_progress_dialog_title)).setText("Đang đăng nhập...");
         mDialog.setContentView(view);
         mDialog.setCancelable(false);
         mDialog.show();
@@ -58,7 +57,7 @@ public class LoginAsycn extends AsyncTask<String, Void, User> {
     }
 
     @Override
-    protected User doInBackground(String... params) {
+    protected Object doInBackground(String... params) {
         String userName = params[0];
         String passWord = params[1];
 //        String passEncoded = (new EncodeMD5()).encode(pin + "_DITAGIS");
@@ -107,23 +106,27 @@ public class LoginAsycn extends AsyncTask<String, Void, User> {
                     return user;
                 } else {
                     conn.disconnect();
-                    return null;
+                    return "Không có quyền truy cập ứng dụng này";
                 }
+            } catch (Exception e) {
+                Log.e("ERROR", e.getMessage(), e);
+                return e.toString();
             } finally {
                 conn.disconnect();
             }
         } catch (Exception e) {
             Log.e("ERROR", e.getMessage(), e);
-            return null;
+            return e.toString();
         }
+
     }
 
 
     @Override
-    protected void onPostExecute(User user) {
+    protected void onPostExecute(Object o) {
 //        if (user != null) {
         mDialog.dismiss();
-        this.mDelegate.processFinish(user);
+        this.mDelegate.processFinish(o);
 //        }
     }
 

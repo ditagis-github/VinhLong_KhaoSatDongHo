@@ -80,12 +80,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             return;
         }
         LoginAsycn loginAsycn = new LoginAsycn(LoginActivity.this, output -> {
-            if (output != null) {
-                handleLoginSuccess(output);
-                dApplication.setUser(output);
+            if (output instanceof User) {
+                User user = (User) output;
+                dApplication.setUser(user);
+                handleLoginSuccess(user);
+            } else if (output instanceof String) {
+                String s = (String) output;
+                handleLoginFail(s);
             }
-            else
-                handleLoginFail();
         });
         loginAsycn.execute(userName, passWord);
     }
@@ -95,8 +97,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mTxtValidation.setVisibility(View.VISIBLE);
     }
 
-    private void handleLoginFail() {
-        mTxtValidation.setText(R.string.validate_login_fail);
+    private void handleLoginFail(String message) {
+        mTxtValidation.setText(message);
         mTxtValidation.setVisibility(View.VISIBLE);
     }
 

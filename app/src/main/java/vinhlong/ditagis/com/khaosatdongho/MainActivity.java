@@ -19,7 +19,6 @@ import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
-import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -37,7 +36,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -82,6 +80,7 @@ import vinhlong.ditagis.com.khaosatdongho.async.UpdateAttachmentAsync;
 import vinhlong.ditagis.com.khaosatdongho.entities.DApplication;
 import vinhlong.ditagis.com.khaosatdongho.entities.entitiesDB.LayerInfoDTG;
 import vinhlong.ditagis.com.khaosatdongho.entities.entitiesDB.ListObjectDB;
+import vinhlong.ditagis.com.khaosatdongho.entities.entitiesDB.User;
 import vinhlong.ditagis.com.khaosatdongho.libs.Action;
 import vinhlong.ditagis.com.khaosatdongho.libs.FeatureLayerDTG;
 import vinhlong.ditagis.com.khaosatdongho.utities.CheckConnectInternet;
@@ -148,7 +147,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         initLayerListView();
         setOnClickListener();
         startGPS();
-        startSignIn();
+        logIn();
         mApplication.setMainActivity(this);
     }
 
@@ -205,24 +204,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         locationManager.requestLocationUpdates("gps", 5000, 0, listener);
     }
 
-    private void startSignIn() {
+    private void showLogInActivity() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivityForResult(intent, Constant.
+                REQUEST_LOGIN);
+    }
+
+    private void logIn() {
         //check login before
         Preference.getInstance().setContext(this);
         String userName = Preference.getInstance().loadPreference(getString(R.string.preference_username));
         String passWord = Preference.getInstance().loadPreference(getString(R.string.preference_password));
-        LoginAsycn loginAsycn = new LoginAsycn(MainActivity.this, output -> {
-            if (output != null) {
-                mApplication.setUser(output);
-                handleLoginSuccess();
-            } else {
-                Intent intent = new Intent(this, LoginActivity.class);
-                startActivityForResult(intent, Constant.
-                        REQUEST_LOGIN);
-            }
-        });
-        loginAsycn.execute(userName, passWord);
+        if (userName != null && !userName.isEmpty() && passWord != null && !passWord.isEmpty())
+            new LoginAsycn(MainActivity.this, output -> {
+                if (output instanceof User) {
+                    User user = (User) output;
+                    mApplication.setUser(user);
+                    handleLoginSuccess();
+                } else {
+                    showLogInActivity();
+                }
+            }).execute(userName, passWord);
 
-
+        else showLogInActivity();
     }
 
     private void setOnClickListener() {
@@ -593,7 +597,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             this.startActivityForResult(intent, requestCode);
         }  else if (id == R.id.nav_tracuu) {
             } else if (id == R.id.nav_logOut) {
-            startSignIn();
+            logIn();
         }
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -789,8 +793,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 rotatedBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
                                 byte[] image = outputStream.toByteArray();
                                 outputStream.close();
-                                Toast.makeText(this, "Đã lưu ảnh", Toast.LENGTH_SHORT).show();
-                                UpdateAttachmentAsync updateAttachmentAsync = new UpdateAttachmentAsync(this, mApplication.getSelectedFeature(), image);
+
+                                UpdateAttachmentAsync updateAttachmentAsync = new UpdateAttachmentAsync(this, mApplication.getSelectedFeature(), image,
+                                        new UpdateAttachmentAsync.AsyncResponse() {
+                                            @Override
+                                            public void processFinish(Boolean success) {
+                                                if (success) {
+                                                    Toast.makeText(MainActivity.this, "Đã lưu ảnh", Toast.LENGTH_SHORT).show();
+                                                } else
+                                                    Toast.makeText(MainActivity.this, "Có lỗi xảy ra", Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
                                 updateAttachmentAsync.execute();
                             }
                         } catch (Exception ignored) {
