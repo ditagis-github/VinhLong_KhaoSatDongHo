@@ -30,7 +30,7 @@ public class UpdateAttachmentAsync extends AsyncTask<Void, Boolean, Void> {
     private ServiceFeatureTable mServiceFeatureTable;
     private ArcGISFeature mSelectedArcGISFeature = null;
     private byte[] mImage;
-    private DApplication dApplication;
+    private DApplication mApplication;
     private AsyncResponse mDelegate;
 
     public interface AsyncResponse {
@@ -43,7 +43,7 @@ public class UpdateAttachmentAsync extends AsyncTask<Void, Boolean, Void> {
         mServiceFeatureTable = (ServiceFeatureTable) selectedArcGISFeature.getFeatureTable();
         mSelectedArcGISFeature = selectedArcGISFeature;
         this.mImage = image;
-        this.dApplication = (DApplication) mainActivity.getApplication();
+        this.mApplication = (DApplication) mainActivity.getApplication();
     }
 
     @Override
@@ -61,12 +61,9 @@ public class UpdateAttachmentAsync extends AsyncTask<Void, Boolean, Void> {
     @Override
     protected Void doInBackground(Void... params) {
         final String attachmentName = String.format(Constant.AttachmentName.UPDATE,
-                dApplication.getUser().getUserName(), System.currentTimeMillis());
+                mApplication.getUser().getUserName(), System.currentTimeMillis());
         final ListenableFuture<Attachment> addResult = mSelectedArcGISFeature.addAttachmentAsync(mImage, Bitmap.CompressFormat.PNG.toString(), attachmentName);
         addResult.addDoneListener(() -> {
-            if (mDialog != null && mDialog.isShowing()) {
-                mDialog.dismiss();
-            }
             try {
                 Attachment attachment = addResult.get();
                 if (attachment.getSize() > 0) {
