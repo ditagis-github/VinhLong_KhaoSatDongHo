@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.support.design.widget.BottomSheetDialog;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -15,11 +16,13 @@ import com.esri.arcgisruntime.data.CodedValueDomain;
 import com.esri.arcgisruntime.data.Domain;
 import com.esri.arcgisruntime.data.FeatureEditResult;
 import com.esri.arcgisruntime.data.FeatureType;
+import com.esri.arcgisruntime.data.Field;
 import com.esri.arcgisruntime.data.ServiceFeatureTable;
 
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -33,7 +36,7 @@ import vinhlong.ditagis.com.khaosatdongho.utities.MySnackBar;
  * Created by ThanLe on 4/16/2018.
  */
 
-public class EditAsync extends AsyncTask<FeatureViewMoreInfoAdapter, Boolean, Void> {
+public class EditAsync extends AsyncTask<HashMap<String, Object>, Boolean, Void> {
     private BottomSheetDialog mDialog;
     private Activity mainActivity;
     private ServiceFeatureTable mServiceFeatureTable;
@@ -70,46 +73,44 @@ public class EditAsync extends AsyncTask<FeatureViewMoreInfoAdapter, Boolean, Vo
     }
 
     @Override
-    protected Void doInBackground(FeatureViewMoreInfoAdapter... params) {
+    protected Void doInBackground(HashMap<String, Object>... params) {
         if (params != null && params.length > 0) {
-            FeatureViewMoreInfoAdapter adapter = params[0];
-            for (FeatureViewMoreInfoAdapter.Item item : adapter.getItems()) {
-                if (item.getValue() == null || !item.isEdit()) continue;
-                Domain domain = mSelectedArcGISFeature.getFeatureTable().getField(item.getFieldName()).getDomain();
-                Object codeDomain = null;
-                if (domain != null) {
-                    List<CodedValue> codedValues = ((CodedValueDomain) this.mSelectedArcGISFeature.getFeatureTable().getField(item.getFieldName()).getDomain()).getCodedValues();
-                    codeDomain = getCodeDomain(codedValues, item.getValue());
-                }
-                if (item.getFieldName().equals(mSelectedArcGISFeature.getFeatureTable().getTypeIdField())) {
-                    List<FeatureType> featureTypes = mSelectedArcGISFeature.getFeatureTable().getFeatureTypes();
-                    Object idFeatureTypes = getIdFeatureTypes(featureTypes, item.getValue());
-                    mSelectedArcGISFeature.getAttributes().put(item.getFieldName(), Short.parseShort(idFeatureTypes.toString()));
-
-                } else switch (item.getFieldType()) {
-                    case DATE:
-                        Date date = null;
+            HashMap<String, Object> attributes = params[0];
+            for (String alias : attributes.keySet()) {
+                for (Field field : mServiceFeatureTable.getFields()) {
+                    if (field.getAlias().equals(alias)) {
                         try {
-                            date = Constant.DATE_FORMAT.parse(item.getValue());
-                            Calendar c = Calendar.getInstance();
-                            c.setTime(date);
-                            mSelectedArcGISFeature.getAttributes().put(item.getFieldName(), c);
-                        } catch (ParseException e) {
-                        }
-                        break;
+                            Object value = attributes.get(alias);
+                            if (value == null)
+                                mSelectedArcGISFeature.getAttributes().put(field.getName(), null);
+                            else {
+                                String valueString = value.toString().trim();
 
-                    case TEXT:
-                        if (codeDomain != null) {
-                            mSelectedArcGISFeature.getAttributes().put(item.getFieldName(), codeDomain.toString());
-                        } else
-                            mSelectedArcGISFeature.getAttributes().put(item.getFieldName(), item.getValue());
+                                switch (field.getFieldType()) {
+                                    case TEXT:
+                                        mSelectedArcGISFeature.getAttributes().put(field.getName(), valueString);
+                                        break;
+                                    case DOUBLE:
+                                        mSelectedArcGISFeature.getAttributes().put(field.getName(), java.lang.Double.parseDouble(valueString));
+                                    case FLOAT:
+                                        mSelectedArcGISFeature.getAttributes().put(field.getName(), java.lang.Float.parseFloat(valueString));
+                                    case INTEGER:
+                                        mSelectedArcGISFeature.getAttributes().put(field.getName(), Integer.parseInt(valueString));
+                                    case SHORT:
+                                        mSelectedArcGISFeature.getAttributes().put(field.getName(), java.lang.Short.parseShort(valueString));
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+
+                        } catch (Exception e) {
+                            mSelectedArcGISFeature.getAttributes().put(field.getName(), null);
+                            Log.e("Lỗi thêm điểm", e.toString());
+                        }
+
                         break;
-                    case SHORT:
-                        if (codeDomain != null) {
-                            mSelectedArcGISFeature.getAttributes().put(item.getFieldName(), Short.parseShort(codeDomain.toString()));
-                        } else
-                            mSelectedArcGISFeature.getAttributes().put(item.getFieldName(), Short.parseShort(item.getValue()));
-                        break;
+                    }
                 }
             }
         }
@@ -123,16 +124,24 @@ public class EditAsync extends AsyncTask<FeatureViewMoreInfoAdapter, Boolean, Vo
                 ListenableFuture<List<FeatureEditResult>> listListenableFuture = mServiceFeatureTable.applyEditsAsync();
                 listListenableFuture.addDoneListener(() -> {
                     try {
-                        listListenableFuture.get();
-                        publishProgress(true);
+                        List<FeatureEditResult> featureEditResults = listListenableFuture.get();
+                        if (featureEditResults.size() > 0) {
+                            if (!featureEditResults.get(0).hasCompletedWithErrors()) {
+                                publishProgress(true);
+                            } else {
+                                publishProgress();
+                            }
+                        } else {
+                            publishProgress();
+                        }
                     } catch (InterruptedException | ExecutionException e) {
-                        notifyError();
+                        publishProgress();
                         e.printStackTrace();
                     }
 
                 });
             } catch (InterruptedException | ExecutionException e) {
-                notifyError();
+                publishProgress();
                 e.printStackTrace();
             }
         });
@@ -170,7 +179,10 @@ public class EditAsync extends AsyncTask<FeatureViewMoreInfoAdapter, Boolean, Vo
         super.onProgressUpdate(values);
         if (values != null && values[0]) {
             mDelegate.processFinish(true);
-        } else mDelegate.processFinish(false);
+        } else {
+            notifyError();
+            mDelegate.processFinish(false);
+        }
         if (mDialog != null && mDialog.isShowing()) {
             mDialog.dismiss();
         }

@@ -65,6 +65,7 @@ import com.esri.arcgisruntime.mapping.view.DefaultMapViewOnTouchListener;
 import com.esri.arcgisruntime.mapping.view.LocationDisplay;
 import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.util.ListenableList;
+import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -91,7 +92,8 @@ import vinhlong.ditagis.com.khaosatdongho.utities.MySnackBar;
 import vinhlong.ditagis.com.khaosatdongho.utities.Popup;
 import vinhlong.ditagis.com.khaosatdongho.utities.Preference;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks
+        , NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
 
     private Uri mUri;
     private Popup popup;
@@ -833,5 +835,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void handleLoginSuccess() {
         setLoginInfos();
         initMapView();
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
     }
 }

@@ -1,5 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-
+    <style name="DTextInputLayout.Prime" parent="Widget.Design.TextInputLayout">
+        <item name="android:textSize">17sp</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+    </style>
     <style name="MyTextAppearance.Prime" parent="@android:style/TextAppearance">
         <item name="android:textSize">17sp</item>
         <item name="android:textColor">@color/colorPrimary</item>
