@@ -13,6 +13,7 @@ public class Constant {
     public static final String DIACHI = "DiaChi";
     public static final String EMPTY = "";
     public static final String NGAY_CAP_NHAT = "NgayCapNhat";
+    public static final String PATH = "vlong_ksatdongho";
     public static final int REQUEST_LOGIN = 0;
     private static final String SERVER_API = "http://vwa.ditagis.com/api";
 

@@ -8,7 +8,6 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -725,7 +724,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Uri uri = Uri.fromFile(new File(path));
         InputStream in;
         try {
-            final int IMAGE_MAX_SIZE = 1200000; // 1.2MP
+            final int IMAGE_MAX_SIZE = 120000; // 1.2MP
             in = getContentResolver().openInputStream(uri);
 
             // Decode image size
@@ -772,6 +771,27 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
     }
 
+    private Bitmap getBitmap(Uri uri) {
+
+        File imgFile = new File(uri.getPath());
+        if (imgFile.exists()) {
+            Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+            return myBitmap;
+        }
+        return null;
+    }
+
+    private byte[] getByteArrayFromBitmap(Bitmap bitmap) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+        byte[] image = outputStream.toByteArray();
+        try {
+            outputStream.close();
+        } catch (IOException e) {
+
+        }
+        return image;
+    }
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         try {
             String returnedResult = data.getExtras().get(getString(R.string.ket_qua_objectid)).toString();
@@ -787,16 +807,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     Uri uri = mApplication.getUri();
                     if (uri != null) {
                         Bitmap bitmap = getBitmap(uri.getPath());
+//                        Bitmap bitmap = getBitmap(uri);
                         try {
                             if (bitmap != null) {
-                                Matrix matrix = new Matrix();
-                                Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-                                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                                rotatedBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-                                byte[] image = outputStream.toByteArray();
-                                outputStream.close();
 
-                                UpdateAttachmentAsync updateAttachmentAsync = new UpdateAttachmentAsync(this, mApplication.getSelectedFeature(), image,
+
+                                UpdateAttachmentAsync updateAttachmentAsync = new UpdateAttachmentAsync(this, mApplication.getSelectedFeature(), getByteArrayFromBitmap(bitmap),
                                         new UpdateAttachmentAsync.AsyncResponse() {
                                             @Override
                                             public void processFinish(Boolean success) {

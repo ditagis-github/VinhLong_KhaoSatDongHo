@@ -274,12 +274,14 @@ public class Popup extends AppCompatActivity implements View.OnClickListener {
 
     public void updateAttachment(ArcGISFeature featureDHKH) {
         Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        File photo = ImageFile.getFile(mMainActivity);
-        Uri uri = Uri.fromFile(photo);
-        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-        dApplication.setSelectedFeature(featureDHKH);
-        dApplication.setUri(uri);
-        mMainActivity.startActivityForResult(cameraIntent, Constant.REQUEST.ID_UPDATE_ATTACHMENT);
+        if (cameraIntent.resolveActivity(mMainActivity.getPackageManager()) != null) {
+            File photo = ImageFile.getFile(mMainActivity);
+            Uri uri = Uri.fromFile(photo);
+            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+            dApplication.setSelectedFeature(featureDHKH);
+            dApplication.setUri(uri);
+            mMainActivity.startActivityForResult(cameraIntent, Constant.REQUEST.ID_UPDATE_ATTACHMENT);
+        }
     }
 
     private void viewAttachment(ArcGISFeature featureDHKH) {
