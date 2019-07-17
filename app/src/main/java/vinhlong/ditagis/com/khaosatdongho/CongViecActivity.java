@@ -17,15 +17,12 @@ import com.esri.arcgisruntime.data.Field;
 import com.esri.arcgisruntime.data.ServiceFeatureTable;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.Map;
 
 import vinhlong.ditagis.com.khaosatdongho.adapter.DanhSachDongHoKHAdapter;
 import vinhlong.ditagis.com.khaosatdongho.adapter.ThongKeAdapter;
 import vinhlong.ditagis.com.khaosatdongho.async.QueryDongHoKhachHangAsync;
 import vinhlong.ditagis.com.khaosatdongho.entities.DApplication;
-import vinhlong.ditagis.com.khaosatdongho.libs.TimeAgo;
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant;
 
 public class CongViecActivity extends AppCompatActivity {
@@ -95,13 +92,13 @@ public class CongViecActivity extends AppCompatActivity {
         mBottomSheetDialog.setContentView(mBottomLayout);
     }
 
-    private void setBottomLayout(int id) {
+    private void setBottomLayout(Feature f) {
         LinearLayout layout = mBottomLayout.findViewById(R.id.llayout__handle_item_cong_viec__info);
 
         layout.removeAllViews();
 
         for (Feature feature : mFeatures) {
-            if ((int) feature.getAttributes().get(Constant.DongHoKhachHangFields.ID) == id) {
+            if (feature.getAttributes().get(Constant.DongHoKhachHangFields.ID) == f.getAttributes().get(Constant.DongHoKhachHangFields.OBJECT_ID)) {
                 mSelectedFeature = feature;
                 for (Field field : feature.getFeatureTable().getFields()) {
                     if (Constant.DongHoKhachHangFields.OutFields.contains(field.getName())) {
@@ -144,46 +141,46 @@ public class CongViecActivity extends AppCompatActivity {
                 mFeatures = features;
                 if (features != null && features.size() > 0) {
 
-                    final List<DanhSachDongHoKHAdapter.Item> items = new ArrayList<>();
+                    final List<Feature> items = new ArrayList<>();
                     for (Feature feature : features) {
-                        Map<String, Object> attributes = feature.getAttributes();
-                        String objectID = attributes.get(Constant.LayerFields.OBJECTID).toString();
-                        DanhSachDongHoKHAdapter.Item item = new DanhSachDongHoKHAdapter.Item(objectID);
-                        Object idDongHo = attributes.get(Constant.DongHoKhachHangFields.ID);
-                        if (idDongHo != null) {
-                            item.setIdDongHo(idDongHo.toString());
-                        }
-                        Object ngayCapNhat = attributes.get(Constant.DongHoKhachHangFields.NGAY_CAP_NHAT);
-                        if (ngayCapNhat != null) {
-                            long endTime = Calendar.getInstance().getTimeInMillis();
-                            long startTime = ((Calendar) ngayCapNhat).getTimeInMillis();
-                            String time = TimeAgo.DateDifference(endTime - startTime);
-                            item.setThoiGian(time);
-                        }
-                        Object tenKH = attributes.get(Constant.DongHoKhachHangFields.TEN_KH);
-                        if (tenKH != null) {
-                            item.setTenKhachHang(tenKH.toString());
-                        }
-                        Object maKH = attributes.get(Constant.DongHoKhachHangFields.CMND);
-                        if (maKH != null) {
-                            item.setCmnd(maKH.toString());
-                        }
-                        Object soDienThoai = attributes.get(Constant.DongHoKhachHangFields.SO_DIEN_THOAI);
-                        if (soDienThoai != null) {
-                            item.setSoDienThoai(soDienThoai.toString());
-                        }
-                        Object diaChi = attributes.get(Constant.DongHoKhachHangFields.DIA_CHI);
-                        if (diaChi != null) {
-                            item.setDiaChi(diaChi.toString());
-                        }
-                        items.add(item);
+//                        Map<String, Object> attributes = feature.getAttributes();
+//                        String objectID = attributes.get(Constant.LayerFields.OBJECTID).toString();
+//                        DanhSachDongHoKHAdapter.Item item = new DanhSachDongHoKHAdapter.Item(objectID);
+//                        Object idDongHo = attributes.get(Constant.DongHoKhachHangFields.ID);
+//                        if (idDongHo != null) {
+//                            item.setIdDongHo(idDongHo.toString());
+//                        }
+//                        Object ngayCapNhat = attributes.get(Constant.DongHoKhachHangFields.NGAY_CAP_NHAT);
+//                        if (ngayCapNhat != null) {
+//                            long endTime = Calendar.getInstance().getTimeInMillis();
+//                            long startTime = ((Calendar) ngayCapNhat).getTimeInMillis();
+//                            String time = TimeAgo.DateDifference(endTime - startTime);
+//                            item.setThoiGian(time);
+//                        }
+//                        Object tenKH = attributes.get(Constant.DongHoKhachHangFields.TEN_KH);
+//                        if (tenKH != null) {
+//                            item.setTenKhachHang(tenKH.toString());
+//                        }
+//                        Object maKH = attributes.get(Constant.DongHoKhachHangFields.CMND);
+//                        if (maKH != null) {
+//                            item.setCmnd(maKH.toString());
+//                        }
+//                        Object soDienThoai = attributes.get(Constant.DongHoKhachHangFields.SO_DIEN_THOAI);
+//                        if (soDienThoai != null) {
+//                            item.setSoDienThoai(soDienThoai.toString());
+//                        }
+//                        Object diaChi = attributes.get(Constant.DongHoKhachHangFields.DIA_CHI);
+//                        if (diaChi != null) {
+//                            item.setDiaChi(diaChi.toString());
+//                        }
+                        items.add(feature);
                     }
 
                     final DanhSachDongHoKHAdapter adapter = new DanhSachDongHoKHAdapter(this, items);
                     listView.setAdapter(adapter);
                     listView.setOnItemClickListener((parent, view, position, id) -> {
 
-                        setBottomLayout(Integer.parseInt(adapter.getItems().get(position).getIdDongHo()));
+                        setBottomLayout((adapter.getItems().get(position)));
                         mBottomSheetDialog.show();
                     });
                 }
