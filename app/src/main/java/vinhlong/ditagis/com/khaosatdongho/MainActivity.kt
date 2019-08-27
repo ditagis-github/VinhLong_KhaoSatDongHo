@@ -16,7 +16,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.StrictMode
-import android.support.annotation.RequiresApi
 import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.NavigationView
 import android.support.v4.app.ActivityCompat
@@ -49,6 +48,9 @@ import com.esri.arcgisruntime.mapping.view.DefaultMapViewOnTouchListener
 import com.esri.arcgisruntime.mapping.view.LocationDisplay
 import com.esri.arcgisruntime.mapping.view.MapView
 import com.google.android.gms.common.api.GoogleApiClient
+import ditagis.binhduong.utities.DAlertDialog
+import ditagis.binhduong.utities.DProgressDialog
+import kotlinx.android.synthetic.main.activity_main.*
 import vinhlong.ditagis.com.khaosatdongho.adapter.DanhSachDongHoKHAdapter
 import vinhlong.ditagis.com.khaosatdongho.async.LoginAsycn
 import vinhlong.ditagis.com.khaosatdongho.async.PreparingAsycn
@@ -93,7 +95,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
 
     private var mLocationHelper: LocationHelper? = null
     private var mLocation: Location? = null
-    private var mApplication: DApplication? = null
+    private lateinit var mApplication: DApplication
     private var selectedFeature: ArcGISFeature? = null
 
     fun setChangingGeometry(changingGeometry: Boolean, feature: ArcGISFeature?) {
@@ -106,36 +108,63 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    @RequiresApi(api = Build.VERSION_CODES.M)
+//    @RequiresApi(api = Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-
-
-
-        setLicense()
-        mApplication = application as DApplication
-        setUp()
-        initListViewSearch()
-        initLayerListView()
-        setOnClickListener()
-        startGPS()
-        logIn()
-        mApplication!!.mainActivity = this
+        try {
+            setLicense()
+            mApplication = application as DApplication
+            mApplication.progressDialog = DProgressDialog()
+            mApplication.alertDialog = DAlertDialog()
+            mApplication.progressDialog.show(this@MainActivity, container_main, "Đang khởi tạo ứng dụng...")
+            setUp()
+            initListViewSearch()
+            initLayerListView()
+            setOnClickListener()
+            startGPS()
+            mApplication.mainActivity = this
+            logIn()
+        } catch (e: Exception) {
+            mApplication.progressDialog.dismiss()
+            mApplication.alertDialog.show(this@MainActivity, "Có lỗi xảy ra", e.toString())
+        }
     }
 
+    private fun setUp() {
+        try {
+            states = arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf())
+            colors = intArrayOf(R.color.colorTextColor_1, R.color.colorTextColor_1)
+            val builder = StrictMode.VmPolicy.Builder()
+            StrictMode.setVmPolicy(builder.build())
+            val toolbar = findViewById<View>(R.id.toolbar) as Toolbar
+            setSupportActionBar(toolbar)
+            requestPermisson()
+            val drawer = findViewById<DrawerLayout>(R.id.container_main)
+            val toggle = ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+            drawer.addDrawerListener(toggle)
+            toggle.syncState()
+        } catch (e: Exception) {
+            mApplication.progressDialog.dismiss()
+            mApplication.alertDialog.show(this@MainActivity, "Có lỗi xảy ra", e.toString())
+        }
+    }
     private fun setLoginInfos() {
-        val displayName = mApplication!!.user!!.displayName
+        try {
+            val displayName = mApplication.user!!.displayName
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
         navigationView.setNavigationItemSelectedListener(this@MainActivity)
         val headerLayout = navigationView.getHeaderView(0)
         val namenv = headerLayout.findViewById<TextView>(R.id.namenv)
-        namenv.text = displayName
+            namenv.text = displayName
+        } catch (e: Exception) {
+            mApplication.progressDialog.dismiss()
+            mApplication.alertDialog.show(this@MainActivity, "Có lỗi xảy ra", e.toString())
+        }
     }
 
     private fun startGPS() {
-
+        try {
         val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         mLocationHelper = LocationHelper(this, object : LocationHelper.AsyncResponse {
@@ -171,35 +200,53 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
                         android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return
         }
-        locationManager.requestLocationUpdates("gps", 5000, 0f, listener)
+            locationManager.requestLocationUpdates("gps", 5000, 0f, listener)
+        } catch (e: Exception) {
+            mApplication.progressDialog.dismiss()
+            mApplication.alertDialog.show(this@MainActivity, "Có lỗi xảy ra", e.toString())
+        }
     }
 
     private fun showLogInActivity() {
-        val intent = Intent(this, LoginActivity::class.java)
-        startActivityForResult(intent, Constant.REQUEST_LOGIN)
+        try {
+            mApplication.progressDialog.dismiss()
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivityForResult(intent, Constant.REQUEST_LOGIN)
+        } catch (e: Exception) {
+            mApplication.progressDialog.dismiss()
+            mApplication.alertDialog.show(this@MainActivity, "Có lỗi xảy ra", e.toString())
+        }
     }
 
     private fun logIn() {
         //check login before
-        Preference.instance.setContext(this)
-        val userName = Preference.instance.loadPreference(getString(R.string.preference_username))
-        val passWord = Preference.instance.loadPreference(getString(R.string.preference_password))
-        if (userName != null && !userName.isEmpty() && passWord != null && !passWord.isEmpty())
-            LoginAsycn(this@MainActivity, object : LoginAsycn.AsyncResponse {
-                override fun processFinish(output: Any) {
+        try {
+            mApplication.progressDialog.changeTitle(this@MainActivity, container_main, "Đang đăng nhập...")
+            DPreference.instance.setContext(this)
+            val userName = DPreference.instance.loadPreference(Constant.PreferenceKey.USERNAME)
+            val passWord = DPreference.instance.loadPreference(Constant.PreferenceKey.PASSWORD)
+            if (userName != null && !userName.isEmpty() && passWord != null && !passWord.isEmpty())
+                LoginAsycn(this@MainActivity, object : LoginAsycn.AsyncResponse {
+                    override fun processFinish(output: Any) {
 
-                    if (output is User) {
-                        val user = output as User
-                        mApplication!!.user = user
-                        handleLoginSuccess()
-                    } else {
-                        showLogInActivity()
+                        if (output is User) {
+                            val user = output as User
+                            mApplication.user = user
+                            handleLoginSuccess()
+                        } else {
+                            showLogInActivity()
+                        }
                     }
-                }
 
-            }).execute(userName, passWord)
-        else
-            showLogInActivity()
+                }).execute(userName, passWord)
+            else {
+
+                showLogInActivity()
+            }
+        } catch (e: Exception) {
+            mApplication.progressDialog.dismiss()
+            mApplication.alertDialog.show(this@MainActivity, "Có lỗi xảy ra", e.toString())
+        }
     }
 
     private fun setOnClickListener() {
@@ -230,21 +277,8 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
         }
     }
 
-    private fun setUp() {
-        states = arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf())
-        colors = intArrayOf(R.color.colorTextColor_1, R.color.colorTextColor_1)
-        val builder = StrictMode.VmPolicy.Builder()
-        StrictMode.setVmPolicy(builder.build())
-        val toolbar = findViewById<View>(R.id.toolbar) as Toolbar
-        setSupportActionBar(toolbar)
-        requestPermisson()
-        val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
-        val toggle = ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-        drawer.addDrawerListener(toggle)
-        toggle.syncState()
-    }
 
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
     private fun initMapView() {
         mMapView = findViewById(R.id.mapView)
         mMap = ArcGISMap(Basemap.Type.OPEN_STREET_MAP, LATITUDE, LONGTITUDE, LEVEL_OF_DETAIL)
@@ -252,7 +286,8 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
         mCallout = mMapView!!.callout
         val preparingAsycn = PreparingAsycn(this@MainActivity, object : PreparingAsycn.AsyncResponse {
             override fun processFinish(layerInfoDTGs: ArrayList<LayerInfoDTG>?) {
-                mApplication?.lstFeatureLayerDTG = layerInfoDTGs
+                mApplication.progressDialog.changeTitle(this@MainActivity, container_main, "Đang tải các lớp dữ liệu...")
+                mApplication.lstFeatureLayerDTG = layerInfoDTGs
                 setFeatureService()
             }
 
@@ -318,10 +353,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
             for (i in 0 until mLinnearDisplayLayerTaiSan!!.childCount) {
                 val view = mLinnearDisplayLayerTaiSan!!.getChildAt(i)
                 if (view is CheckBox) {
-                    if (isChecked)
-                        view.isChecked = true
-                    else
-                        view.isChecked = false
+                    view.isChecked = isChecked
                 }
             }
         }
@@ -329,98 +361,118 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
             for (i in 0 until mLinnearDisplayLayerBaseMap!!.childCount) {
                 val view = mLinnearDisplayLayerBaseMap!!.getChildAt(i)
                 if (view is CheckBox) {
-                    if (isChecked)
-                        view.isChecked = true
-                    else
-                        view.isChecked = false
+                    view.isChecked = isChecked
                 }
             }
         }
     }
 
     private fun setFeatureService() {
-        if (mApplication?.lstFeatureLayerDTG!!.isEmpty()) return
+        if (mApplication.lstFeatureLayerDTG!!.isEmpty()) return
         popup = Popup(this@MainActivity, mMapView!!, mCallout)
         mMapViewHandler = MapViewHandler(mMapView!!, this, popup!!)
-
-        for (layerInfoDTG in mApplication?.lstFeatureLayerDTG!!) {
-            if (!layerInfoDTG.isView) continue
+        var numberLoadedLayer = 0
+        val layerSize = mApplication.lstFeatureLayerDTG!!.size
+        for (layerInfoDTG in mApplication.lstFeatureLayerDTG!!) {
+            if (!layerInfoDTG.isView) {
+                numberLoadedLayer -= -1
+                if (numberLoadedLayer == layerSize) mApplication.progressDialog.dismiss()
+                continue
+            }
             val url = layerInfoDTG.url
-            if (layerInfoDTG.id!!.toUpperCase() == Constant.IDLayer.BASEMAP) {
-                hanhChinhImageLayers = ArcGISMapImageLayer(url!!)
-                hanhChinhImageLayers!!.id = layerInfoDTG.id!!
-                mMapView!!.map.operationalLayers.add(hanhChinhImageLayers)
-                hanhChinhImageLayers!!.addDoneLoadingListener {
-                    if (hanhChinhImageLayers!!.loadStatus == LoadStatus.LOADED) {
-                        val sublayerList = hanhChinhImageLayers!!.sublayers
-                        for (sublayer in sublayerList) {
-                            addCheckBox_SubLayer(sublayer as ArcGISMapImageSublayer, mLinnearDisplayLayerBaseMap!!)
+            val id = layerInfoDTG.id
+            if (id != null) {
+                if (id.toUpperCase() == Constant.IDLayer.BASEMAP) {
+                    hanhChinhImageLayers = ArcGISMapImageLayer(url!!)
+                    hanhChinhImageLayers!!.id = id
+                    mMapView!!.map.operationalLayers.add(hanhChinhImageLayers)
+                    hanhChinhImageLayers!!.addDoneLoadingListener {
+
+                        if (hanhChinhImageLayers!!.loadStatus == LoadStatus.LOADED) {
+                            val sublayerList = hanhChinhImageLayers!!.sublayers
+                            for (sublayer in sublayerList) {
+                                addCheckBox_SubLayer(sublayer as ArcGISMapImageSublayer, mLinnearDisplayLayerBaseMap!!)
+                            }
+                            val url_HanhChinh = "$url/5"
+                            val serviceFeatureTable = ServiceFeatureTable(url_HanhChinh)
+                            popup!!.setmSFTHanhChinh(serviceFeatureTable)
                         }
-                        val url_HanhChinh = "$url/5"
-                        val serviceFeatureTable = ServiceFeatureTable(url_HanhChinh)
-                        popup!!.setmSFTHanhChinh(serviceFeatureTable)
+                        numberLoadedLayer -= -1
+                        if (numberLoadedLayer == layerSize) mApplication.progressDialog.dismiss()
                     }
-                }
-                hanhChinhImageLayers!!.loadAsync()
-            } else if (layerInfoDTG.id!!.toUpperCase() == Constant.IDLayer.CHUYENDE && layerInfoDTG.isView) {
-                taiSanImageLayers = ArcGISMapImageLayer(url!!)
-                taiSanImageLayers!!.name = layerInfoDTG.titleLayer
-                taiSanImageLayers!!.id = layerInfoDTG.id!!
-                mMapView!!.map.operationalLayers.add(taiSanImageLayers)
-                taiSanImageLayers!!.addDoneLoadingListener {
-                    if (taiSanImageLayers!!.loadStatus == LoadStatus.LOADED) {
-                        val sublayerList = taiSanImageLayers!!.sublayers
-                        for (sublayer in sublayerList) {
-                            if (sublayer.id != Constant.idDongHoKhachHang.toLong()) {
-                                addCheckBox_SubLayer(sublayer as ArcGISMapImageSublayer, mLinnearDisplayLayerTaiSan!!)
+                    hanhChinhImageLayers!!.loadAsync()
+                } else if (id.toUpperCase() == Constant.IDLayer.CHUYENDE && layerInfoDTG.isView) {
+                    taiSanImageLayers = ArcGISMapImageLayer(url!!)
+                    taiSanImageLayers!!.name = layerInfoDTG.titleLayer
+                    taiSanImageLayers!!.id = id
+                    mMapView!!.map.operationalLayers.add(taiSanImageLayers)
+                    taiSanImageLayers!!.addDoneLoadingListener {
+                        if (taiSanImageLayers!!.loadStatus == LoadStatus.LOADED) {
+                            val sublayerList = taiSanImageLayers!!.sublayers
+                            for (sublayer in sublayerList) {
+                                if (sublayer.id != Constant.idDongHoKhachHang.toLong()) {
+                                    addCheckBox_SubLayer(sublayer as ArcGISMapImageSublayer, mLinnearDisplayLayerTaiSan!!)
+                                }
                             }
                         }
+                        numberLoadedLayer -= -1
+                        if (numberLoadedLayer == layerSize) mApplication.progressDialog.dismiss()
                     }
+                    taiSanImageLayers!!.loadAsync()
+                } else {
+                    val serviceFeatureTable = ServiceFeatureTable(url!!)
+                    val featureLayer = FeatureLayer(serviceFeatureTable)
+
+                    featureLayer.name = layerInfoDTG.titleLayer
+                    featureLayer.id = id
+                    val action = Action(layerInfoDTG.isView, layerInfoDTG.isCreate, layerInfoDTG.isEdit, layerInfoDTG.isDelete)
+                    val featureLayerDTG = FeatureLayerDTG(featureLayer, layerInfoDTG.titleLayer, action)
+                    featureLayerDTG.outFields = getFieldsDTG(layerInfoDTG.outField)
+                    featureLayerDTG.queryFields = getFieldsDTG(layerInfoDTG.outField)
+                    featureLayerDTG.updateFields = getFieldsDTG(layerInfoDTG.outField)
+                    if (id == Constant.IDLayer.DHKHLYR) {
+                        //                    String userName = mApplication.getUser().getUserName();
+                        featureLayer.definitionExpression = mApplication.definitionFeature
+                        popup!!.setDongHoKHDTG(featureLayerDTG)
+                        featureLayer.addDoneLoadingListener {
+                            if (featureLayer.loadStatus == LoadStatus.LOADED) {
+                                addCheckBox_LayerDHKH(featureLayer)
+                                mMapView!!.setViewpointScaleAsync(featureLayer.minScale)
+                            } else {
+                                Toast.makeText(this@MainActivity, "Không tải được lớp đồng hồ khách hàng, đang thử tải lại",
+                                        Toast.LENGTH_SHORT).show()
+//                            setFeatureService()
+                            }
+                            numberLoadedLayer -= -1
+                            if (numberLoadedLayer == layerSize) mApplication.progressDialog.dismiss()
+                        }
+                        mApplication.dongHoKHDTG = featureLayerDTG
+                        mMapViewHandler!!.setDongHoKHSFT(serviceFeatureTable)
+                        mApplication.dongHoKHSFT = serviceFeatureTable
+
+                    } else if (id == Constant.IDLayer.VATTUDONGHOTBL) {
+                        mApplication.vatTuDHDTG = featureLayerDTG
+                        mApplication.vatTuKHSFT = serviceFeatureTable
+                        numberLoadedLayer -= -1
+                        if (numberLoadedLayer == layerSize) mApplication.progressDialog.dismiss()
+                    } else if (id == Constant.IDLayer.DMVATTUTBL) {
+                        featureLayer.addDoneLoadingListener {
+                            if (featureLayer.loadStatus == LoadStatus.LOADED) {
+                                mApplication.dmVatTuKHSFT = serviceFeatureTable
+                            }
+                            numberLoadedLayer -= -1
+                            if (numberLoadedLayer == layerSize) mApplication.progressDialog.dismiss()
+                        }
+                    } else {
+                        numberLoadedLayer -= -1
+                        if (numberLoadedLayer == layerSize) mApplication.progressDialog.dismiss()
+                    }
+
+                    mMap!!.operationalLayers.add(featureLayer)
                 }
-                taiSanImageLayers!!.loadAsync()
             } else {
-                val serviceFeatureTable = ServiceFeatureTable(url!!)
-                val featureLayer = FeatureLayer(serviceFeatureTable)
-
-                featureLayer.name = layerInfoDTG.titleLayer
-                featureLayer.id = layerInfoDTG.id!!
-                val action = Action(layerInfoDTG.isView, layerInfoDTG.isCreate, layerInfoDTG.isEdit, layerInfoDTG.isDelete)
-                val featureLayerDTG = FeatureLayerDTG(featureLayer, layerInfoDTG.titleLayer, action)
-                featureLayerDTG.outFields = getFieldsDTG(layerInfoDTG.outField)
-                featureLayerDTG.queryFields = getFieldsDTG(layerInfoDTG.outField)
-                featureLayerDTG.updateFields = getFieldsDTG(layerInfoDTG.outField)
-                if (layerInfoDTG.id != null && layerInfoDTG.id == Constant.IDLayer.DHKHLYR) {
-                    //                    String userName = mApplication.getUser().getUserName();
-                    featureLayer.definitionExpression = mApplication!!.definitionFeature
-                    popup!!.setDongHoKHDTG(featureLayerDTG)
-                    featureLayer.addDoneLoadingListener {
-                        if (featureLayer.loadStatus == LoadStatus.LOADED) {
-                            addCheckBox_LayerDHKH(featureLayer)
-                            mMapView!!.setViewpointScaleAsync(featureLayer.minScale)
-                        } else {
-                            Toast.makeText(this@MainActivity, "Không tải được lớp đồng hồ khách hàng, đang thử tải lại",
-                                    Toast.LENGTH_SHORT).show()
-                            setFeatureService()
-                        }
-                    }
-                    mApplication!!.dongHoKHDTG = featureLayerDTG
-                    mMapViewHandler!!.setDongHoKHSFT(serviceFeatureTable)
-                    mApplication!!.dongHoKHSFT = serviceFeatureTable
-
-                }
-                if (layerInfoDTG.id != null && layerInfoDTG.id == Constant.IDLayer.VATTUDONGHOTBL) {
-                    mApplication!!.vatTuDHDTG = featureLayerDTG
-                    mApplication!!.vatTuKHSFT = serviceFeatureTable
-                }
-                if (layerInfoDTG.id != null && layerInfoDTG.id == Constant.IDLayer.DMVATTUTBL) {
-                    featureLayer.addDoneLoadingListener {
-                        if (featureLayer.loadStatus == LoadStatus.LOADED) {
-                            mApplication!!.dmVatTuKHSFT = serviceFeatureTable
-                        }
-                    }
-                }
-
-                mMap!!.operationalLayers.add(featureLayer)
+                numberLoadedLayer -= -1
+                if (numberLoadedLayer == layerSize) mApplication.progressDialog.dismiss()
             }
         }
     }
@@ -501,7 +553,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
     }
 
     override fun onBackPressed() {
-        val drawer = findViewById<View>(R.id.drawer_layout) as DrawerLayout
+        val drawer = findViewById<View>(R.id.container_main) as DrawerLayout
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START)
         } else {
@@ -556,7 +608,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
         } else if (id == R.id.nav_logOut) {
             logIn()
         }
-        val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
+        val drawer = findViewById<DrawerLayout>(R.id.container_main)
         drawer.closeDrawer(GravityCompat.START)
         return true
     }
@@ -565,16 +617,13 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CALL_PHONE, Manifest.permission.READ_PHONE_STATE), REQUEST_ID_IMAGE_CAPTURE)
         }
-        return if (Build.VERSION.SDK_INT >= 23 && ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            false
-        } else
-            true
+        return !(Build.VERSION.SDK_INT >= 23 && ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED)
     }
 
     private fun goHome() {}
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             mLocationDisplay!!.startAsync()
 
         } else {
@@ -582,7 +631,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
         }
     }
 
-    fun showPinToAdd() {
+    private fun showPinToAdd() {
         findViewById<View>(R.id.linear_addfeature).visibility = View.VISIBLE
         findViewById<View>(R.id.img_map_pin).visibility = View.VISIBLE
         findViewById<View>(R.id.floatBtnAdd).visibility = View.GONE
@@ -740,28 +789,29 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         try {
             if (resultCode == Activity.RESULT_OK) {
-                mMapViewHandler!!.showPopup(mApplication!!.selectedFeature)
+                mMapViewHandler!!.showPopup(mApplication.selectedFeature)
             }
         } catch (e: Exception) {
         }
 
         when (requestCode) {
             Constant.REQUEST.ID_UPDATE_ATTACHMENT -> if (resultCode == Activity.RESULT_OK) {
-                val uri = mApplication!!.uri
+                val uri = mApplication.uri
                 if (uri != null) {
                     val bitmap = getBitmap(uri.path)
                     //                        Bitmap bitmap = getBitmap(uri);
                     try {
                         if (bitmap != null) {
 
-
-                            val updateAttachmentAsync = UpdateAttachmentAsync(this, mApplication!!.selectedFeature!!, getByteArrayFromBitmap(bitmap),
+                            mApplication.progressDialog.show(this@MainActivity, container_main, "Đang cập nhật hình ảnh...")
+                            val updateAttachmentAsync = UpdateAttachmentAsync(this, mApplication.selectedFeature!!, getByteArrayFromBitmap(bitmap),
                                     object : UpdateAttachmentAsync.AsyncResponse {
                                         override fun processFinish(isSuccess: Boolean?) {
+                                            mApplication.progressDialog.dismiss()
                                             if (isSuccess!!) {
-                                                Toast.makeText(this@MainActivity, "Đã lưu ảnh", Toast.LENGTH_SHORT).show()
+                                                mApplication.alertDialog.show(this@MainActivity, "Lưu thành công")
                                             } else
-                                                Toast.makeText(this@MainActivity, "Có lỗi xảy ra", Toast.LENGTH_SHORT).show()
+                                                mApplication.alertDialog.show(this@MainActivity, "Có lỗi xảy ra")
                                         }
                                     })
                             updateAttachmentAsync.execute()
@@ -789,6 +839,16 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
     }
 
     private fun handleLoginSuccess() {
+        //lưu tài khoản
+        DPreference.instance.savePreferences(
+                Constant.PreferenceKey.USERNAME,
+                mApplication.user?.userName!!
+        )
+        DPreference.instance.savePreferences(
+                Constant.PreferenceKey.PASSWORD,
+                mApplication.user?.passWord!!
+        )
+        mApplication.progressDialog.changeTitle(this@MainActivity, container_main, "Đang khởi tạo bản đồ...")
         setLoginInfos()
         initMapView()
     }

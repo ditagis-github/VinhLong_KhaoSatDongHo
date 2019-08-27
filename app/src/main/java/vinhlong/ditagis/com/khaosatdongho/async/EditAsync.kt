@@ -2,44 +2,24 @@ package vinhlong.ditagis.com.khaosatdongho.async
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.ProgressDialog
 import android.os.AsyncTask
-import android.support.design.widget.BottomSheetDialog
 import android.util.Log
 import android.view.View
-import android.widget.LinearLayout
-import android.widget.TextView
-
-import com.esri.arcgisruntime.concurrent.ListenableFuture
-import com.esri.arcgisruntime.data.ArcGISFeature
-import com.esri.arcgisruntime.data.CodedValue
-import com.esri.arcgisruntime.data.CodedValueDomain
-import com.esri.arcgisruntime.data.Domain
-import com.esri.arcgisruntime.data.FeatureEditResult
-import com.esri.arcgisruntime.data.FeatureType
-import com.esri.arcgisruntime.data.Field
-import com.esri.arcgisruntime.data.ServiceFeatureTable
-
-import java.text.ParseException
-import java.util.Calendar
-import java.util.Date
-import java.util.HashMap
-import java.util.concurrent.ExecutionException
-
-import vinhlong.ditagis.com.khaosatdongho.R
-import vinhlong.ditagis.com.khaosatdongho.adapter.FeatureViewMoreInfoAdapter
+import android.view.ViewGroup
+import com.esri.arcgisruntime.data.*
 import vinhlong.ditagis.com.khaosatdongho.entities.DApplication
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant
 import vinhlong.ditagis.com.khaosatdongho.utities.MySnackBar
+import java.util.*
+import java.util.concurrent.ExecutionException
 
 /**
  * Created by ThanLe on 4/16/2018.
  */
 @SuppressLint("StaticFieldLeak")
-class EditAsync( private val mapView: View, private val mainActivity: Activity, private val mServiceFeatureTable: ServiceFeatureTable, selectedArcGISFeature: ArcGISFeature, private val mDelegate: AsyncResponse) : AsyncTask<HashMap<String, Any>, Boolean, Void>() {
-    private var mDialog: BottomSheetDialog? = null
+class EditAsync(private val mRootView: ViewGroup, private val mActivity: Activity, private val mServiceFeatureTable: ServiceFeatureTable, selectedArcGISFeature: ArcGISFeature, private val mDelegate: AsyncResponse) : AsyncTask<HashMap<String, Any>, Boolean, Void>() {
     private var mSelectedArcGISFeature: ArcGISFeature? = null
-    private val dApplication: DApplication
+    private val mApplication: DApplication
 
     interface AsyncResponse {
         fun processFinish(isSuccess: Boolean?)
@@ -47,23 +27,15 @@ class EditAsync( private val mapView: View, private val mainActivity: Activity, 
 
     init {
         mSelectedArcGISFeature = selectedArcGISFeature
-        this.dApplication = mainActivity.application as DApplication
+        this.mApplication = mActivity.application as DApplication
     }
 
     override fun onPreExecute() {
         super.onPreExecute()
-        mDialog = BottomSheetDialog(this.mainActivity)
-        val view = mainActivity.layoutInflater.inflate(R.layout.layout_progress_dialog, null, false) as LinearLayout
-        (view.findViewById<View>(R.id.txt_progress_dialog_title) as TextView).text = "Đang cập nhật thông tin..."
-        mDialog!!.setContentView(view)
-        mDialog!!.setCancelable(false)
-
-        mDialog!!.show()
-
+        mApplication.progressDialog.show(mActivity, mRootView, "Đang cập nhật...")
     }
-
     override fun doInBackground(vararg params: HashMap<String, Any>): Void? {
-        if (params != null && params.size > 0) {
+        if (params != null && params.isNotEmpty()) {
             val attributes = params[0]
             for (alias in attributes.keys) {
                 for (field in mServiceFeatureTable.fields) {
@@ -110,7 +82,7 @@ class EditAsync( private val mapView: View, private val mainActivity: Activity, 
         }
         val currentTime = Calendar.getInstance()
         mSelectedArcGISFeature!!.attributes[Constant.DongHoKhachHangFields.NGAY_CAP_NHAT] = currentTime
-        mSelectedArcGISFeature!!.attributes[Constant.DongHoKhachHangFields.NGUOI_CAP_NHAT] = this.dApplication.user?.userName
+        mSelectedArcGISFeature!!.attributes[Constant.DongHoKhachHangFields.NGUOI_CAP_NHAT] = this.mApplication.user?.userName
         val voidListenableFuture = mServiceFeatureTable.updateFeatureAsync(mSelectedArcGISFeature!!)
         voidListenableFuture.addDoneListener {
             try {
@@ -151,7 +123,7 @@ class EditAsync( private val mapView: View, private val mainActivity: Activity, 
 
     private fun notifyError() {
         publishProgress()
-        MySnackBar.make(mapView, "Đã xảy ra lỗi", false)
+        mApplication.alertDialog.show(mActivity, "Có lỗi xả ra")
     }
 
     private fun getIdFeatureTypes(featureTypes: List<FeatureType>, value: String): Any? {
@@ -179,14 +151,12 @@ class EditAsync( private val mapView: View, private val mainActivity: Activity, 
 
      override fun onProgressUpdate(vararg values: Boolean?) {
         super.onProgressUpdate(*values)
+         mApplication.progressDialog.dismiss()
         if (values != null && values[0]!!) {
             mDelegate.processFinish(true)
         } else {
             notifyError()
             mDelegate.processFinish(false)
-        }
-        if (mDialog != null && mDialog!!.isShowing) {
-            mDialog!!.dismiss()
         }
     }
 

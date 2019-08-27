@@ -85,12 +85,6 @@
     <string name="PROCESSING">Đang xử lý...</string>
     <string name="name_nhanvien">Nhân viên A</string>
 
-    <!--preference begin-->
-    <string name="preference_username">username</string>
-    <string name="preference_password">pasword</string>
-    <string name="preference_displayname">displayname</string>
-    <!--preference end-->
-
     <string name="validate_no_connect">Không có kết nối internet</string>
     <string name="info_login_empty">Danh bạ hoặc mật khẩu không được để trống</string>
     <string name="validate_login_fail">Sai danh bạ hoặc mật khẩu</string>

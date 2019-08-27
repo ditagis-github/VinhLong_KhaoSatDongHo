@@ -3,13 +3,9 @@ package vinhlong.ditagis.com.khaosatdongho.async.ServerAsync
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.AsyncTask
-import android.support.design.widget.BottomSheetDialog
 import android.util.Log
-import android.widget.LinearLayout
-import kotlinx.android.synthetic.main.layout_progress_dialog.view.*
 import org.json.JSONException
 import org.json.JSONObject
-import vinhlong.ditagis.com.khaosatdongho.R
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -18,22 +14,10 @@ import java.net.URL
 import java.util.*
 
 @SuppressLint("StaticFieldLeak")
-class QueryDanhSachVatTuAsycn( private val mActivity: Activity, private val mDelegate: AsyncResponse) : AsyncTask<Void, ArrayList<QueryDanhSachVatTuAsycn.VatTu>, Void>() {
-    private var mDialog: BottomSheetDialog? = null
+class GetDanhSachVatTuAsycn(private val mActivity: Activity, private val mDelegate: AsyncResponse) : AsyncTask<Void, ArrayList<GetDanhSachVatTuAsycn.VatTu>, Void>() {
 
     interface AsyncResponse {
         fun processFinish(vatTus: ArrayList<VatTu>?)
-    }
-
-    @SuppressLint("SetTextI18n")
-    override fun onPreExecute() {
-        super.onPreExecute()
-        mDialog = BottomSheetDialog(this.mActivity)
-        val view = mActivity.layoutInflater.inflate(R.layout.layout_progress_dialog, null, false) as LinearLayout
-        view.txt_progress_dialog_title.text = "Đang lấy danh sách vật tư..."
-        mDialog!!.setContentView(view)
-        mDialog!!.setCancelable(false)
-        mDialog!!.show()
     }
 
     override fun doInBackground(vararg params: Void): Void? {
@@ -43,7 +27,7 @@ class QueryDanhSachVatTuAsycn( private val mActivity: Activity, private val mDel
             try {
                 conn.doOutput = false
                 conn.requestMethod = Constant.METHOD.GET
-                //                conn.setRequestProperty("Authorization", Preference.getInstance().loadPreference(mContext.getString(R.string.preference_login_api)));
+                //                conn.setRequestProperty("Authorization", DPreference.getInstance().loadPreference(mContext.getString(R.string.preference_login_api)));
                 conn.connect()
                 val bufferedReader = BufferedReader(InputStreamReader(conn.inputStream))
                 val buffer = StringBuffer()
@@ -56,7 +40,6 @@ class QueryDanhSachVatTuAsycn( private val mActivity: Activity, private val mDel
                 }
                 val vatTus = getVatTus(buffer.toString())
                 publishProgress(vatTus)
-                this.mDialog!!.dismiss()
             } catch (e: Exception) {
                 Log.e("error", e.toString())
             } finally {

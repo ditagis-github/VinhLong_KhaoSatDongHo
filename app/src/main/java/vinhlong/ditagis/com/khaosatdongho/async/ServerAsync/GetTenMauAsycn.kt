@@ -3,13 +3,7 @@ package vinhlong.ditagis.com.khaosatdongho.async.ServerAsync
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.AsyncTask
-import android.support.design.widget.BottomSheetDialog
 import android.util.Log
-import android.view.View
-import android.widget.LinearLayout
-import android.widget.TextView
-import vinhlong.ditagis.com.khaosatdongho.R
-import vinhlong.ditagis.com.khaosatdongho.entities.DApplication
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -17,29 +11,12 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 @SuppressLint("StaticFieldLeak")
-class QueryTenMauAsycn(private val mActivity: Activity, private val mDelegate: AsyncResponse) : AsyncTask<Void, String, Void>() {
-    private var mDialog: BottomSheetDialog? = null
+class GetTenMauAsycn(private val mActivity: Activity, private val mDelegate: AsyncResponse) : AsyncTask<Void, String, Void>() {
 
     interface AsyncResponse {
         fun processFinish(tenMaus: String?)
     }
 
-    init {
-        val dApplication = mActivity.application as DApplication
-
-    }
-
-    @SuppressLint("SetTextI18n")
-    override fun onPreExecute() {
-        super.onPreExecute()
-        mDialog = BottomSheetDialog(this.mActivity)
-        val view = mActivity.layoutInflater.inflate(R.layout.layout_progress_dialog, null, false) as LinearLayout
-        (view.findViewById<View>(R.id.txt_progress_dialog_title) as TextView).text = "Đang lấy danh sách tên mẫu..."
-        mDialog!!.setContentView(view)
-        mDialog!!.setCancelable(false)
-
-        mDialog!!.show()
-    }
 
     override fun doInBackground(vararg params: Void): Void? {
         try {
@@ -48,7 +25,7 @@ class QueryTenMauAsycn(private val mActivity: Activity, private val mDelegate: A
             try {
                 conn.doOutput = false
                 conn.requestMethod = Constant.METHOD.GET
-                //                conn.setRequestProperty("Authorization", Preference.getInstance().loadPreference(mContext.getString(R.string.preference_login_api)));
+                //                conn.setRequestProperty("Authorization", DPreference.getInstance().loadPreference(mContext.getString(R.string.preference_login_api)));
                 conn.connect()
                 val bufferedReader = BufferedReader(InputStreamReader(conn.inputStream))
                 val buffer = StringBuffer()
@@ -59,7 +36,6 @@ class QueryTenMauAsycn(private val mActivity: Activity, private val mDelegate: A
                     buffer.append(line)
                 }
                 publishProgress(buffer.toString())
-                this.mDialog!!.dismiss()
             } catch (e: Exception) {
                 Log.e("error", e.toString())
             } finally {

@@ -15,7 +15,14 @@ class Constant private constructor() {
         val ADD = "img_%s_%d.png"
         val UPDATE = "img_%s_%d.png"
     }
-
+    object PreferenceKey {
+        const val USERNAME = "hovaten"
+        const val FULL_NAME = "ten"
+        const val EMAIL = "email"
+        const val PASSWORD = "sdt"
+        const val USER_MANUAL = "user_manual"
+        const val LOGIN_API = "preference_login_api"
+    }
     object API_URL {
         val LOGIN = "$SERVER_API/Login"
         val DISPLAY_NAME = "$SERVER_API/Account/Profile"

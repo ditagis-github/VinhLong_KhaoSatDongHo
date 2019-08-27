@@ -3,19 +3,10 @@ package vinhlong.ditagis.com.khaosatdongho.async
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.AsyncTask
-import android.support.design.widget.BottomSheetDialog
-import android.widget.LinearLayout
-import android.widget.TextView
-
-import com.esri.arcgisruntime.concurrent.ListenableFuture
 import com.esri.arcgisruntime.data.ArcGISFeature
-import com.esri.arcgisruntime.data.FeatureEditResult
 import com.esri.arcgisruntime.data.ServiceFeatureTable
 import com.esri.arcgisruntime.geometry.Point
-import kotlinx.android.synthetic.main.layout_progress_dialog.view.*
 import java.util.concurrent.ExecutionException
-
-import vinhlong.ditagis.com.khaosatdongho.R
 
 /**
  * Created by ThanLe on 4/16/2018.
@@ -24,19 +15,7 @@ import vinhlong.ditagis.com.khaosatdongho.R
 class EditGeometryAsync(@field:SuppressLint("StaticFieldLeak")
                         private val mActivity: Activity, private val mServiceFeatureTable: ServiceFeatureTable,
                         private val mSelectedArcGISFeature: ArcGISFeature, private val mDelegate: AsyncResponse) : AsyncTask<Point, Boolean, Void>() {
-    private var mDialog: BottomSheetDialog? = null
 
-    @SuppressLint("SetTextI18n")
-    override fun onPreExecute() {
-        super.onPreExecute()
-        mDialog = BottomSheetDialog(this.mActivity)
-        val view = mActivity.layoutInflater.inflate(R.layout.layout_progress_dialog, null, false) as LinearLayout
-        view.txt_progress_dialog_title.text = "Đang cập nhật vị trí..."
-        mDialog!!.setContentView(view)
-        mDialog!!.setCancelable(false)
-
-        mDialog!!.show()
-    }
 
     override fun doInBackground(vararg params: Point): Void? {
         if (params != null && params.isNotEmpty()) {
@@ -85,11 +64,7 @@ class EditGeometryAsync(@field:SuppressLint("StaticFieldLeak")
 
     override fun onProgressUpdate(vararg values: Boolean?) {
         super.onProgressUpdate(*values)
-        if (mDialog != null && mDialog!!.isShowing) {
-            mDialog!!.dismiss()
-
-        }
-        if (values != null && values.size > 0)
+        if (values != null && values.isNotEmpty())
             mDelegate.processFinish(values[0])
         else
             mDelegate.processFinish(null)

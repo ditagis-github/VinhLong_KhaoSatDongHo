@@ -1,5 +1,6 @@
 package vinhlong.ditagis.com.khaosatdongho.utities
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 
@@ -9,10 +10,10 @@ import android.content.Context.MODE_PRIVATE
  * Created by ThanLe on 4/11/2018.
  */
 
-class Preference private constructor() {
+class DPreference private constructor() {
     private var mContext: Context? = null
 
-    val preferences: SharedPreferences
+    private val preferences: SharedPreferences
         get() = mContext!!.getSharedPreferences("LOGGED_IN", MODE_PRIVATE)
 
     fun setContext(context: Context) {
@@ -26,25 +27,25 @@ class Preference private constructor() {
         val sharedPreferences = preferences
         val editor = sharedPreferences.edit()
         editor.putString(key, value)
-        editor.commit()
+        editor.apply()
     }
 
     fun savePreferences(key: String, values: Set<String>) {
         val sharedPreferences = preferences
         val editor = sharedPreferences.edit()
         editor.putStringSet(key, values)
-        editor.commit()
+        editor.apply()
     }
 
     fun deletePreferences(key: String): Boolean {
         val editor = preferences.edit()
-        editor.remove(key).commit()
+        editor.remove(key).apply()
         return false
     }
 
     fun deletePreferences(): Boolean {
         val editor = preferences.edit()
-        editor.clear().commit()
+        editor.clear().apply()
         return false
     }
 
@@ -72,13 +73,14 @@ class Preference private constructor() {
     }
 
     companion object {
-        private var mInstance: Preference? = null
+        @SuppressLint("StaticFieldLeak")
+        private var mInstance: DPreference? = null
 
-        val instance: Preference
+        val instance: DPreference
             get() {
                 if (mInstance == null)
-                    mInstance = Preference()
-                return mInstance as Preference
+                    mInstance = DPreference()
+                return mInstance as DPreference
             }
     }
 }

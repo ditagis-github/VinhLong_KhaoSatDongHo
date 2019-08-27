@@ -2,16 +2,13 @@ package vinhlong.ditagis.com.khaosatdongho.async.ServerAsync
 
 import android.app.Activity
 import android.os.AsyncTask
-import android.support.design.widget.BottomSheetDialog
 import android.util.Log
-import android.widget.LinearLayout
-import kotlinx.android.synthetic.main.layout_progress_dialog.view.*
 import org.json.JSONException
 import org.json.JSONObject
 import vinhlong.ditagis.com.khaosatdongho.R
 import vinhlong.ditagis.com.khaosatdongho.adapter.VatTuApdapter
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant
-import vinhlong.ditagis.com.khaosatdongho.utities.Preference
+import vinhlong.ditagis.com.khaosatdongho.utities.DPreference
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
@@ -20,24 +17,12 @@ import java.util.*
 
 
 class QueryVatTuDongHoAsycn(private val mActivity: Activity, private val mDelegate: AsyncResponse) : AsyncTask<Long, ArrayList<VatTuApdapter.VatTu>, Void>() {
-    private var mDialog: BottomSheetDialog? = null
 
     interface AsyncResponse {
         fun processFinish(vatTus: ArrayList<VatTuApdapter.VatTu>?)
     }
 
-    override fun onPreExecute() {
-        super.onPreExecute()
-        mDialog = BottomSheetDialog(this.mActivity)
-        val view = mActivity.layoutInflater.inflate(R.layout.layout_progress_dialog, null, false) as LinearLayout
-        view.txt_progress_dialog_title.text = "Đang lấy danh sách vật tư..."
-        mDialog!!.setContentView(view)
-        mDialog!!.setCancelable(false)
-
-        mDialog!!.show()
-    }
-
-    protected override fun doInBackground(vararg params: Long?): Void? {
+     override fun doInBackground(vararg params: Long?): Void? {
         try {
             if (params != null && params.isNotEmpty()) {
                 val maKhachHang = params[0]
@@ -47,7 +32,7 @@ class QueryVatTuDongHoAsycn(private val mActivity: Activity, private val mDelega
                 try {
                     conn.doOutput = false
                     conn.requestMethod = Constant.METHOD.GET
-                    conn.setRequestProperty("Authorization", Preference.instance.loadPreference(mActivity.getString(R.string.preference_login_api)))
+                    conn.setRequestProperty("Authorization", DPreference.instance.loadPreference(mActivity.getString(R.string.preference_login_api)))
                     conn.connect()
                     val bufferedReader = BufferedReader(InputStreamReader(conn.inputStream))
                     val buffer = StringBuffer()
@@ -107,8 +92,7 @@ class QueryVatTuDongHoAsycn(private val mActivity: Activity, private val mDelega
 
     override fun onProgressUpdate(vararg values: ArrayList<VatTuApdapter.VatTu>) {
         super.onProgressUpdate(*values)
-        this.mDialog!!.dismiss()
-        if (values == null || values.size == 0)
+        if (values == null || values.isEmpty())
             this.mDelegate.processFinish(null)
         else
             this.mDelegate.processFinish(values[0])

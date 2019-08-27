@@ -10,13 +10,14 @@ import android.widget.*
 import com.esri.arcgisruntime.data.ArcGISFeature
 import com.esri.arcgisruntime.data.CodedValue
 import com.esri.arcgisruntime.data.CodedValueDomain
+import kotlinx.android.synthetic.main.activity_update.*
 import vinhlong.ditagis.com.khaosatdongho.async.EditAsync
 import vinhlong.ditagis.com.khaosatdongho.async.LoadingDataFeatureAsync
 import vinhlong.ditagis.com.khaosatdongho.entities.DApplication
 import java.util.*
 
 class UpdateActivity : AppCompatActivity() {
-    private var mApplication: DApplication? = null
+    private lateinit var mApplication: DApplication
 
 
     private var mmSwipe: SwipeRefreshLayout? = null
@@ -85,7 +86,7 @@ class UpdateActivity : AppCompatActivity() {
         (this@UpdateActivity.findViewById<View>(R.id.llayout_update_feature_progress) as LinearLayout).visibility = View.VISIBLE
         (this@UpdateActivity.findViewById<View>(R.id.llayout_update_feature_main) as LinearLayout).visibility = View.GONE
         (this@UpdateActivity.findViewById<View>(R.id.txt_update_feature_progress) as TextView).text = "Đang lưu..."
-        EditAsync(this@UpdateActivity.findViewById<View>(R.id.txt_update_feature_progress) as TextView, this@UpdateActivity, mApplication!!.dongHoKHSFT!!,
+        EditAsync(container_update, this@UpdateActivity, mApplication!!.dongHoKHSFT!!,
                 mApplication!!.selectedFeature!!, object : EditAsync.AsyncResponse {
             override fun processFinish(isSuccess: Boolean?) {
                 this@UpdateActivity.findViewById<View>(R.id.llayout_update_feature_progress).visibility = View.GONE
@@ -135,6 +136,7 @@ class UpdateActivity : AppCompatActivity() {
         findViewById<View>(R.id.llayout_update_feature_progress).visibility = View.VISIBLE
         findViewById<View>(R.id.llayout_update_feature_main).visibility = View.GONE
 
+        mApplication.progressDialog.show(this@UpdateActivity, container_update, "Đang lấy thông tin...")
         LoadingDataFeatureAsync(this@UpdateActivity, mApplication!!.selectedFeature, object : LoadingDataFeatureAsync.AsyncResponse {
             override fun processFinish(views: List<View>?) {
                 if (views != null) {
@@ -144,6 +146,7 @@ class UpdateActivity : AppCompatActivity() {
                     (this@UpdateActivity.findViewById<View>(R.id.llayout_update_feature_progress) as LinearLayout).visibility = View.GONE
                     (this@UpdateActivity.findViewById<View>(R.id.llayout_update_feature_main) as LinearLayout).visibility = View.VISIBLE
                 }
+                mApplication.progressDialog.dismiss()
             }
 
 

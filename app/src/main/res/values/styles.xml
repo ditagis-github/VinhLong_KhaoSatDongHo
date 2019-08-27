@@ -15,6 +15,9 @@
     <style name="MyTextAppearance.Prime.Big" parent="MyTextAppearance.Prime">
         <item name="android:textSize">20sp</item>
     </style>
+    <style name="MyTextAppearance.Prime.Big.Bold" parent="MyTextAppearance.Prime.Big">
+        <item name="android:textStyle">bold</item>
+    </style>
     <style name="MyTextAppearance.Gray" parent="@android:style/TextAppearance">
         <item name="android:textSize">17sp</item>
         <item name="android:textColor">@android:color/darker_gray</item>
@@ -95,6 +98,8 @@
         </item>
 
     </style>
-
+    <style name="DDialogBuilder" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorAccent">@color/colorPrimary</item>
+    </style>
 
 </resources>

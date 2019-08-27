@@ -2,42 +2,21 @@ package vinhlong.ditagis.com.khaosatdongho.async.ServerAsync
 
 import android.app.Activity
 import android.os.AsyncTask
-import android.support.design.widget.BottomSheetDialog
 import android.util.Log
-import android.widget.LinearLayout
-import android.widget.TextView
-import kotlinx.android.synthetic.main.layout_progress_dialog.view.*
-
-import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-
+import vinhlong.ditagis.com.khaosatdongho.utities.Constant
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
-import java.util.ArrayList
-
-import vinhlong.ditagis.com.khaosatdongho.R
-import vinhlong.ditagis.com.khaosatdongho.utities.Constant
+import java.util.*
 
 
 class QueryVatTuTheoMauAsycn(private val mActivity: Activity, private val mDelegate: AsyncResponse) : AsyncTask<String, ArrayList<QueryVatTuTheoMauAsycn.VatTu>, Void>() {
-    private var mDialog: BottomSheetDialog? = null
 
     interface AsyncResponse {
         fun processFinish(vatTus: ArrayList<VatTu>?)
-    }
-
-    override fun onPreExecute() {
-        super.onPreExecute()
-        mDialog = BottomSheetDialog(this.mActivity)
-        val view = mActivity.layoutInflater.inflate(R.layout.layout_progress_dialog, null, false) as LinearLayout
-        view.txt_progress_dialog_title.text = "Đang lấy danh sách tên mẫu..."
-        mDialog!!.setContentView(view)
-        mDialog!!.setCancelable(false)
-
-        mDialog!!.show()
     }
 
     override fun doInBackground(vararg params: String): Void? {
@@ -61,7 +40,6 @@ class QueryVatTuTheoMauAsycn(private val mActivity: Activity, private val mDeleg
                     }
                     val vatTus = getVatTus(buffer.toString())
                     publishProgress(vatTus)
-                    this.mDialog!!.dismiss()
                 } catch (e: Exception) {
                     Log.e("error", e.toString())
                 } finally {
@@ -121,13 +99,6 @@ class QueryVatTuTheoMauAsycn(private val mActivity: Activity, private val mDeleg
         var soLuong: Double = 0.toDouble()
         var id: String? = null
 
-        constructor() {}
-
-        constructor(maVatTu: String, tenMau: String, soLuong: Double, id: String) {
-            this.maVatTu = maVatTu
-            this.tenMau = tenMau
-            this.soLuong = soLuong
-            this.id = id
-        }
+        constructor()
     }
 }

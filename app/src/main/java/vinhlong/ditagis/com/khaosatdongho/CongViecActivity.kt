@@ -14,6 +14,7 @@ import android.widget.Toast
 import com.esri.arcgisruntime.data.ArcGISFeature
 import com.esri.arcgisruntime.data.Feature
 import com.esri.arcgisruntime.data.ServiceFeatureTable
+import kotlinx.android.synthetic.main.activity_congviec.*
 import vinhlong.ditagis.com.khaosatdongho.adapter.DanhSachDongHoKHAdapter
 import vinhlong.ditagis.com.khaosatdongho.adapter.ThongKeAdapter
 import vinhlong.ditagis.com.khaosatdongho.async.QueryDongHoKhachHangAsync
@@ -25,7 +26,7 @@ class CongViecActivity : AppCompatActivity() {
     private val txtTongItem: TextView? = null
     private var serviceFeatureTable: ServiceFeatureTable? = null
     private val thongKeAdapter: ThongKeAdapter? = null
-    private var mApplication: DApplication? = null
+    private lateinit var mApplication: DApplication
     private var mBottomLayout: LinearLayout? = null
     private var mBottomSheetDialog: BottomSheetDialog? = null
     private var mSelectedFeature: Feature? = null
@@ -36,7 +37,7 @@ class CongViecActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_congviec)
         init()
-        mListView = findViewById(R.id.vattu_listview)
+        mListView = vattu_listview
 
 
         serviceFeatureTable = mApplication!!.dongHoKHDTG!!.featureLayer.featureTable as ServiceFeatureTable
@@ -116,7 +117,7 @@ class CongViecActivity : AppCompatActivity() {
     }
 
     private fun getQueryDiemDanhGiaAsync(whereClause: String) {
-
+        mApplication.progressDialog.show(this@CongViecActivity, container_cong_viec, "Đang lấy danh sách công việc...")
         if (serviceFeatureTable != null)
             QueryDongHoKhachHangAsync(this, serviceFeatureTable!!, txtTongItem, object : QueryDongHoKhachHangAsync.AsyncResponse {
                 override fun processFinish(features: List<Feature>?) {
@@ -135,6 +136,7 @@ class CongViecActivity : AppCompatActivity() {
                             mBottomSheetDialog!!.show()
                         }
                     }
+                    mApplication.progressDialog.dismiss()
                 }
 
 

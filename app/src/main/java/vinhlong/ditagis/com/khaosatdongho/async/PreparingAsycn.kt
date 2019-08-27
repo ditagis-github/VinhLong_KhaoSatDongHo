@@ -3,17 +3,13 @@ package vinhlong.ditagis.com.khaosatdongho.async
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.AsyncTask
-import android.support.design.widget.BottomSheetDialog
 import android.util.Log
-import android.view.View
-import android.widget.LinearLayout
-import android.widget.TextView
 import org.json.JSONException
 import org.json.JSONObject
 import vinhlong.ditagis.com.khaosatdongho.R
 import vinhlong.ditagis.com.khaosatdongho.entities.entitiesDB.LayerInfoDTG
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant
-import vinhlong.ditagis.com.khaosatdongho.utities.Preference
+import vinhlong.ditagis.com.khaosatdongho.utities.DPreference
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
@@ -22,21 +18,9 @@ import java.util.*
 
 @SuppressLint("StaticFieldLeak")
 class PreparingAsycn(private val mActivity: Activity, private val mDelegate: AsyncResponse) : AsyncTask<Void, Void, ArrayList<LayerInfoDTG>?>() {
-    private var mDialog: BottomSheetDialog? = null
 
     interface AsyncResponse {
         fun processFinish(layerInfoDTGs: ArrayList<LayerInfoDTG>?)
-    }
-
-    override fun onPreExecute() {
-        super.onPreExecute()
-        mDialog = BottomSheetDialog(this.mActivity)
-        val view = mActivity.layoutInflater.inflate(R.layout.layout_progress_dialog, null, false) as LinearLayout
-        (view.findViewById<View>(R.id.txt_progress_dialog_title) as TextView).text = "Đang khởi tạo bản đồ..."
-        mDialog!!.setContentView(view)
-        mDialog!!.setCancelable(false)
-
-        mDialog!!.show()
     }
 
     override fun doInBackground(vararg params: Void): ArrayList<LayerInfoDTG>? {
@@ -46,7 +30,7 @@ class PreparingAsycn(private val mActivity: Activity, private val mDelegate: Asy
             try {
                 conn.doOutput = false
                 conn.requestMethod = Constant.METHOD.GET
-                conn.setRequestProperty("Authorization", Preference.instance.loadPreference(mActivity.getString(R.string.preference_login_api)))
+                conn.setRequestProperty("Authorization", DPreference.instance.loadPreference(mActivity.getString(R.string.preference_login_api)))
                 conn.connect()
 
                 val bufferedReader = BufferedReader(InputStreamReader(conn.inputStream))
@@ -64,7 +48,7 @@ class PreparingAsycn(private val mActivity: Activity, private val mDelegate: Asy
                 conn.disconnect()
             }
             //            ListFeatureLayerDTGDB listFeatureLayerDTGDB = new ListFeatureLayerDTGDB(mActivity);
-            //            ListObjectDB.getInstance().setLstFeatureLayerDTG(listFeatureLayerDTGDB.find(Preference.getInstance().loadPreference(
+            //            ListObjectDB.getInstance().setLstFeatureLayerDTG(listFeatureLayerDTGDB.find(DPreference.getInstance().loadPreference(
             //                    mActivity.getString(R.string.preference_username)
             //            )));
         } catch (e: Exception) {
@@ -82,7 +66,6 @@ class PreparingAsycn(private val mActivity: Activity, private val mDelegate: Asy
 
     override fun onPostExecute(value: ArrayList<LayerInfoDTG>?) {
         //        if (khachHang != null) {
-        mDialog!!.dismiss()
         this.mDelegate.processFinish(value)
         //        }
     }

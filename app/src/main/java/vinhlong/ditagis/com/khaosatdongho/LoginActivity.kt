@@ -8,12 +8,14 @@ import android.view.KeyEvent
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import kotlinx.android.synthetic.main.activity_login.*
 
 import vinhlong.ditagis.com.khaosatdongho.async.LoginAsycn
 import vinhlong.ditagis.com.khaosatdongho.entities.DApplication
 import vinhlong.ditagis.com.khaosatdongho.entities.entitiesDB.User
 import vinhlong.ditagis.com.khaosatdongho.utities.CheckConnectInternet
-import vinhlong.ditagis.com.khaosatdongho.utities.Preference
+import vinhlong.ditagis.com.khaosatdongho.utities.Constant
+import vinhlong.ditagis.com.khaosatdongho.utities.DPreference
 
 
 class LoginActivity : AppCompatActivity(), View.OnClickListener {
@@ -21,12 +23,12 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
     private var mTxtPassword: TextView? = null
     private var isLastLogin: Boolean = false
     private var mTxtValidation: TextView? = null
-    private var dApplication: DApplication? = null
+    private lateinit var mApplication: DApplication
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-        dApplication = application as DApplication
+        mApplication = application as DApplication
         val btnLogin = findViewById<Button>(R.id.btnLogin)
         btnLogin.setOnClickListener(this)
         findViewById<View>(R.id.txt_login_changeAccount).setOnClickListener(this)
@@ -40,7 +42,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun create() {
 
-        val preference_userName = Preference.instance.loadPreference(getString(R.string.preference_username))
+        val preference_userName = DPreference.instance.loadPreference(Constant.PreferenceKey.USERNAME)
 
         //nếu chưa từng đăng nhập thành công trước đó
         //nhập username và password bình thường
@@ -68,24 +70,26 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
         val userName: String?
         val passWord: String?
         if (isLastLogin) {
-            userName = Preference.instance.loadPreference(getString(R.string.preference_username))
-            passWord = Preference.instance.loadPreference(getString(R.string.preference_password))
+            userName = DPreference.instance.loadPreference(Constant.PreferenceKey.USERNAME)
+            passWord = DPreference.instance.loadPreference(Constant.PreferenceKey.PASSWORD)
         } else {
             userName = mTxtUsername!!.text.toString().trim { it <= ' ' }
             passWord = mTxtPassword!!.text.toString().trim { it <= ' ' }
         }
-        if (userName!!.length == 0 || passWord!!.length == 0) {
+        if (userName!!.isEmpty() || passWord!!.isEmpty()) {
             handleInfoLoginEmpty()
             return
         }
+        mApplication.progressDialog.show(this@LoginActivity, container_login, "Đang đăng nhập...")
         val loginAsycn = LoginAsycn(this@LoginActivity, object : LoginAsycn.AsyncResponse {
             override fun processFinish(output: Any) {
                 if (output is User) {
-                    dApplication!!.user = output
+                    mApplication!!.user = output
                     handleLoginSuccess(output)
                 } else if (output is String) {
                     handleLoginFail(output)
                 }
+                mApplication.progressDialog.dismiss()
             }
 
 
@@ -104,9 +108,8 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun handleLoginSuccess(user: User) {
-        Preference.instance.savePreferences(getString(R.string.preference_username), user.userName!!)
-        Preference.instance.savePreferences(getString(R.string.preference_password), user.passWord!!)
-        Preference.instance.savePreferences(getString(R.string.preference_displayname), user.displayName!!)
+        DPreference.instance.savePreferences(Constant.PreferenceKey.USERNAME, user.userName!!)
+        DPreference.instance.savePreferences(Constant.PreferenceKey.PASSWORD, user.passWord!!)
         mTxtUsername!!.text = ""
         mTxtPassword!!.text = ""
         val intent = Intent()
@@ -118,7 +121,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
         mTxtUsername!!.text = ""
         mTxtPassword!!.text = ""
 
-        Preference.instance.savePreferences(getString(R.string.preference_username), "")
+        DPreference.instance.savePreferences(Constant.PreferenceKey.USERNAME, "")
         create()
     }
 

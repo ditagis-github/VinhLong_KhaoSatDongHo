@@ -4,31 +4,24 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.os.AsyncTask
-import android.support.design.widget.BottomSheetDialog
 import android.util.Log
-import android.widget.LinearLayout
-import android.widget.TextView
-import kotlinx.android.synthetic.main.layout_progress_dialog.view.*
 import org.json.JSONException
 import org.json.JSONObject
 import vinhlong.ditagis.com.khaosatdongho.R
-import vinhlong.ditagis.com.khaosatdongho.entities.DApplication
 import vinhlong.ditagis.com.khaosatdongho.entities.entitiesDB.User
 import vinhlong.ditagis.com.khaosatdongho.entities.entitiesDB.UserDangNhap
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant
-import vinhlong.ditagis.com.khaosatdongho.utities.Preference
+import vinhlong.ditagis.com.khaosatdongho.utities.DPreference
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
+
 @SuppressLint("StaticFieldLeak")
 class LoginAsycn(activity: Activity, private val mDelegate: AsyncResponse) : AsyncTask<String, Void, Any>() {
-    private val exception: Exception? = null
-    private var mDialog: BottomSheetDialog? = null
 
     private val mContext: Context
-    private val mApplication: DApplication = activity.application as DApplication
     private val mActivity: Activity
 
     private val displayName: String
@@ -40,7 +33,7 @@ class LoginAsycn(activity: Activity, private val mDelegate: AsyncResponse) : Asy
                 try {
                     conn.doOutput = false
                     conn.requestMethod = Constant.METHOD.GET
-                    conn.setRequestProperty("Authorization", Preference.instance.loadPreference(mContext.getString(R.string.preference_login_api)))
+                    conn.setRequestProperty("Authorization", DPreference.instance.loadPreference(mContext.getString(R.string.preference_login_api)))
                     conn.connect()
 
                     val bufferedReader = BufferedReader(InputStreamReader(conn.inputStream))
@@ -66,18 +59,6 @@ class LoginAsycn(activity: Activity, private val mDelegate: AsyncResponse) : Asy
     init {
         this.mContext = activity
         this.mActivity = activity
-    }
-
-    @SuppressLint("SetTextI18n")
-    override fun onPreExecute() {
-        super.onPreExecute()
-        mDialog = BottomSheetDialog(this.mContext)
-        val view = mActivity.layoutInflater.inflate(R.layout.layout_progress_dialog, null, false) as LinearLayout
-        view.txt_progress_dialog_title.text = "Đang đăng nhập..."
-        mDialog!!.setContentView(view)
-        mDialog!!.setCancelable(false)
-        mDialog!!.show()
-
     }
 
     override fun doInBackground(vararg params: String): Any {
@@ -118,7 +99,7 @@ class LoginAsycn(activity: Activity, private val mDelegate: AsyncResponse) : Asy
                 inputStreamReader.close()
                 inputStream.close()
                 val token = stringBuilder.toString().replace("\"", "")
-                Preference.instance.savePreferences(mContext.getString(R.string.preference_login_api), token)
+                DPreference.instance.savePreferences(mContext.getString(R.string.preference_login_api), token)
                 if (checkAccess()!!) {
                     val user = User()
                     user.displayName = displayName
@@ -146,7 +127,6 @@ class LoginAsycn(activity: Activity, private val mDelegate: AsyncResponse) : Asy
 
     override fun onPostExecute(o: Any) {
         //        if (user != null) {
-        mDialog!!.dismiss()
         this.mDelegate.processFinish(o)
         //        }
     }
@@ -159,7 +139,7 @@ class LoginAsycn(activity: Activity, private val mDelegate: AsyncResponse) : Asy
             try {
                 conn.doOutput = false
                 conn.requestMethod = Constant.METHOD.GET
-                conn.setRequestProperty("Authorization", Preference.instance.loadPreference(mContext.getString(R.string.preference_login_api)))
+                conn.setRequestProperty("Authorization", DPreference.instance.loadPreference(mContext.getString(R.string.preference_login_api)))
                 conn.connect()
 
                 val bufferedReader = BufferedReader(InputStreamReader(conn.inputStream))

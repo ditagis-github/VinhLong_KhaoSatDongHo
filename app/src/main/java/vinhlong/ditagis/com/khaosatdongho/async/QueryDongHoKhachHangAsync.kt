@@ -1,30 +1,20 @@
 package vinhlong.ditagis.com.khaosatdongho.async
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.AsyncTask
-import android.support.design.widget.BottomSheetDialog
-import android.widget.LinearLayout
 import android.widget.TextView
-
-import com.esri.arcgisruntime.concurrent.ListenableFuture
 import com.esri.arcgisruntime.data.Feature
-import com.esri.arcgisruntime.data.FeatureQueryResult
 import com.esri.arcgisruntime.data.QueryParameters
 import com.esri.arcgisruntime.data.ServiceFeatureTable
-import kotlinx.android.synthetic.main.layout_progress_dialog.view.*
-
-import java.util.ArrayList
-import java.util.concurrent.ExecutionException
-
 import vinhlong.ditagis.com.khaosatdongho.R
+import java.util.*
+import java.util.concurrent.ExecutionException
 
 /**
  * Created by ThanLe on 4/16/2018.
  */
 
 class QueryDongHoKhachHangAsync(private val mActivity: Activity, private val serviceFeatureTable: ServiceFeatureTable, private val txtTongItem: TextView?, asyncResponse: AsyncResponse) : AsyncTask<String, List<Feature>, Void>() {
-    private var mDialog: BottomSheetDialog? = null
 
     private var mDelegate: AsyncResponse? = null
 
@@ -38,19 +28,6 @@ class QueryDongHoKhachHangAsync(private val mActivity: Activity, private val ser
     }
 
 
-    @SuppressLint("SetTextI18n")
-    override fun onPreExecute() {
-        super.onPreExecute()
-        mDialog = BottomSheetDialog(this.mActivity)
-        val view = mActivity.layoutInflater.inflate(R.layout.layout_progress_dialog, null, false) as LinearLayout
-        view.txt_progress_dialog_title.text = "Đang lấy danh sách công việc..."
-        mDialog!!.setContentView(view)
-        mDialog!!.setCancelable(false)
-
-        mDialog!!.show()
-
-
-    }
 
     override fun doInBackground(vararg params: String): Void? {
 
@@ -87,8 +64,7 @@ class QueryDongHoKhachHangAsync(private val mActivity: Activity, private val ser
 
         if (txtTongItem != null)
             txtTongItem.text = mActivity.getString(R.string.nav_thong_ke_tong_diem) + values[0].size
-        if (mDialog != null && mDialog!!.isShowing) mDialog!!.dismiss()
-        if (values == null || values.size == 0)
+        if (values == null || values.isEmpty())
             mDelegate!!.processFinish(null)
         else
             mDelegate!!.processFinish(values[0])

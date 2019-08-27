@@ -5,6 +5,8 @@ import android.net.Uri
 
 import com.esri.arcgisruntime.data.ArcGISFeature
 import com.esri.arcgisruntime.data.ServiceFeatureTable
+import ditagis.binhduong.utities.DAlertDialog
+import ditagis.binhduong.utities.DProgressDialog
 
 import vinhlong.ditagis.com.khaosatdongho.MainActivity
 import vinhlong.ditagis.com.khaosatdongho.entities.entitiesDB.LayerInfoDTG
@@ -13,6 +15,8 @@ import vinhlong.ditagis.com.khaosatdongho.libs.FeatureLayerDTG
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant
 
 class DApplication : Application() {
+    lateinit var progressDialog: DProgressDialog
+    lateinit var alertDialog: DAlertDialog
     var lstFeatureLayerDTG: List<LayerInfoDTG>? = null
     val definitionFeature: String
         get() = String.format("%s = '%s' and %s = '%s'", Constant.DongHoKhachHangFields.NGUOI_CAP_NHAT,

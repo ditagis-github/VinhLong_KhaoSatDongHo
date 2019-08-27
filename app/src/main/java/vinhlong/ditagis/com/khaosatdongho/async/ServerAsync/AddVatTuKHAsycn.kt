@@ -3,44 +3,26 @@ package vinhlong.ditagis.com.khaosatdongho.async.ServerAsync
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.AsyncTask
-import android.support.design.widget.BottomSheetDialog
 import android.util.Log
-import android.widget.LinearLayout
-import android.widget.TextView
-import kotlinx.android.synthetic.main.layout_progress_dialog.view.*
-
 import org.json.JSONException
 import org.json.JSONObject
-
-import java.io.OutputStream
-import java.io.OutputStreamWriter
-import java.net.HttpURLConnection
-import java.net.URL
-import java.util.ArrayList
-
 import vinhlong.ditagis.com.khaosatdongho.R
 import vinhlong.ditagis.com.khaosatdongho.adapter.VatTuApdapter
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant
-import vinhlong.ditagis.com.khaosatdongho.utities.Preference
+import vinhlong.ditagis.com.khaosatdongho.utities.DPreference
+import java.io.OutputStreamWriter
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.*
+
 @SuppressLint("StaticFieldLeak")
 class AddVatTuKHAsycn( private val mActivity: Activity, private val mDelegate: AsyncResponse) : AsyncTask<ArrayList<VatTuApdapter.VatTu>, Void, Boolean>() {
-    private var mDialog: BottomSheetDialog? = null
 
     interface AsyncResponse {
         fun processFinish(isSuccess: Boolean?)
     }
 
-    @SuppressLint("SetTextI18n")
-    override fun onPreExecute() {
-        super.onPreExecute()
-        mDialog = BottomSheetDialog(this.mActivity)
-        val view = mActivity.layoutInflater.inflate(R.layout.layout_progress_dialog, null, false) as LinearLayout
-        view.txt_progress_dialog_title.text = "Đang thêm vật tư..."
-        mDialog!!.setContentView(view)
-        mDialog!!.setCancelable(false)
 
-        mDialog!!.show()
-    }
 
     private fun getCred(vatTu: VatTuApdapter.VatTu): JSONObject {
         val cred = JSONObject()
@@ -72,7 +54,7 @@ class AddVatTuKHAsycn( private val mActivity: Activity, private val mDelegate: A
                     val conn = url.openConnection() as HttpURLConnection
                     try {
                         conn.requestMethod = Constant.METHOD.POST
-                        conn.setRequestProperty("Authorization", Preference.instance.loadPreference(mActivity.getString(R.string.preference_login_api)))
+                        conn.setRequestProperty("Authorization", DPreference.instance.loadPreference(mActivity.getString(R.string.preference_login_api)))
                         conn.setRequestProperty("Content-Type", "application/json")
                         val outputStream = conn.outputStream
                         val wr = OutputStreamWriter(outputStream)
@@ -101,7 +83,6 @@ class AddVatTuKHAsycn( private val mActivity: Activity, private val mDelegate: A
 
     override fun onPostExecute(success: Boolean?) {
 
-        mDialog!!.dismiss()
         mDelegate.processFinish(success)
     }
 }

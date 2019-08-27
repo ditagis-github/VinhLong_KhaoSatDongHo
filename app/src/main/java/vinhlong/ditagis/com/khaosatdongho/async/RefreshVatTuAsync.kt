@@ -3,50 +3,26 @@ package vinhlong.ditagis.com.khaosatdongho.async
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.AsyncTask
-import android.support.design.widget.BottomSheetDialog
-import android.widget.LinearLayout
-import android.widget.TextView
-
-import com.esri.arcgisruntime.concurrent.ListenableFuture
 import com.esri.arcgisruntime.data.Feature
-import com.esri.arcgisruntime.data.FeatureQueryResult
 import com.esri.arcgisruntime.data.QueryParameters
 import com.esri.arcgisruntime.data.ServiceFeatureTable
-import kotlinx.android.synthetic.main.layout_progress_dialog.view.*
-
-import java.util.ArrayList
-import java.util.concurrent.ExecutionException
-
-import vinhlong.ditagis.com.khaosatdongho.R
 import vinhlong.ditagis.com.khaosatdongho.adapter.VatTuApdapter
 import vinhlong.ditagis.com.khaosatdongho.libs.Action
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant
+import java.util.*
+import java.util.concurrent.ExecutionException
 
 /**
  * Created by ThanLe on 4/16/2018.
  */
 @SuppressLint("StaticFieldLeak")
 class RefreshVatTuAsync( private val mActivity: Activity, private val vatTuTable: ServiceFeatureTable, private val dmVatTuFeatures: ArrayList<Feature>, private val vatTuApdapter: VatTuApdapter, private val action: Action, private val delegate: AsyncResponse) : AsyncTask<Long, List<VatTuApdapter.VatTu>, Void>() {
-    private var mDialog: BottomSheetDialog? = null
 
     interface AsyncResponse {
         fun processFinish(features: List<Feature>?)
     }
 
-    @SuppressLint("SetTextI18n")
-    override fun onPreExecute() {
-        super.onPreExecute()
-        mDialog = BottomSheetDialog(this.mActivity)
-        val view = mActivity.layoutInflater.inflate(R.layout.layout_progress_dialog, null, false) as LinearLayout
-        view.txt_progress_dialog_title.text = "Đang xử lý..."
-        mDialog!!.setContentView(view)
-        mDialog!!.setCancelable(false)
-
-        mDialog!!.show()
-
-    }
-
-    protected override fun doInBackground(vararg params: Long?): Void? {
+     override fun doInBackground(vararg params: Long?): Void? {
         val features = ArrayList<Feature>()
         val vatTus = ArrayList<VatTuApdapter.VatTu>()
         val queryParameters = QueryParameters()
@@ -115,14 +91,7 @@ class RefreshVatTuAsync( private val mActivity: Activity, private val vatTuTable
         vatTuApdapter.clear()
         //        vatTuApdapter.setVatTus(values[0]);
         vatTuApdapter.notifyDataSetChanged()
-        if (mDialog != null && mDialog!!.isShowing) mDialog!!.dismiss()
         super.onProgressUpdate(*values)
-
-    }
-
-
-    override fun onPostExecute(result: Void) {
-        super.onPostExecute(result)
 
     }
 

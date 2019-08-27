@@ -16,6 +16,7 @@ import android.widget.Toast
 import com.esri.arcgisruntime.data.*
 import com.esri.arcgisruntime.mapping.view.Callout
 import com.esri.arcgisruntime.mapping.view.MapView
+import kotlinx.android.synthetic.main.activity_main.*
 import vinhlong.ditagis.com.khaosatdongho.MainActivity
 import vinhlong.ditagis.com.khaosatdongho.R
 import vinhlong.ditagis.com.khaosatdongho.UpdateActivity
@@ -213,7 +214,7 @@ class Popup(private val mMainActivity: MainActivity, private val mMapView: MapVi
         builder.setMessage(String.format("Bạn có chắc muốn hoàn tất đồng hồ %s", this@Popup.featureDHKH!!.attributes[Constant.DongHoKhachHangFields.ID]))
         builder.setNegativeButton("Hoàn tất") { dialog, which ->
             this@Popup.featureDHKH!!.attributes[Constant.DongHoKhachHangFields.TINH_TRANG] = Constant.TinhTrangDongHoKhachHang.DANG_THIET_KE
-            EditAsync(mMapView, mMainActivity, dongHoKHSFT!!, featureDHKH!!, object : EditAsync.AsyncResponse {
+            EditAsync(mMainActivity.container_main, mMainActivity, dongHoKHSFT!!, featureDHKH!!, object : EditAsync.AsyncResponse {
                 override fun processFinish(isSuccess: Boolean?) {
                     if (isSuccess!!) {
                         Toast.makeText(mMainActivity, "Đã hoàn tất khảo sát", Toast.LENGTH_SHORT).show()
@@ -249,7 +250,7 @@ class Popup(private val mMainActivity: MainActivity, private val mMapView: MapVi
     }
 
     private fun viewAttachment(featureDHKH: ArcGISFeature) {
-        val viewAttachmentAsync = ViewAttachmentAsync(mMainActivity, featureDHKH)
+        val viewAttachmentAsync = ViewAttachmentAsync(mMainActivity,mMainActivity.container_main, featureDHKH)
         viewAttachmentAsync.execute()
     }
 

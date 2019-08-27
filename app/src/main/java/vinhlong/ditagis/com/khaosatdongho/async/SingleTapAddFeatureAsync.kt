@@ -1,54 +1,29 @@
 package vinhlong.ditagis.com.khaosatdongho.async
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.os.AsyncTask
-import android.support.design.widget.BottomSheetDialog
-import android.widget.LinearLayout
-import android.widget.TextView
-
-import com.esri.arcgisruntime.concurrent.ListenableFuture
 import com.esri.arcgisruntime.data.ArcGISFeature
 import com.esri.arcgisruntime.data.Feature
-import com.esri.arcgisruntime.data.FeatureEditResult
-import com.esri.arcgisruntime.data.FeatureQueryResult
 import com.esri.arcgisruntime.data.QueryParameters
 import com.esri.arcgisruntime.data.ServiceFeatureTable
 import com.esri.arcgisruntime.geometry.Point
 import com.esri.arcgisruntime.mapping.view.MapView
-import com.esri.arcgisruntime.tasks.geocode.GeocodeResult
 import com.esri.arcgisruntime.tasks.geocode.LocatorTask
-import kotlinx.android.synthetic.main.layout_progress_dialog.view.*
-
-import java.util.Calendar
-import java.util.HashMap
-import java.util.concurrent.ExecutionException
-
 import vinhlong.ditagis.com.khaosatdongho.MainActivity
 import vinhlong.ditagis.com.khaosatdongho.R
 import vinhlong.ditagis.com.khaosatdongho.entities.DApplication
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant
 import vinhlong.ditagis.com.khaosatdongho.utities.MySnackBar
+import java.util.*
+import java.util.concurrent.ExecutionException
+
 @SuppressLint("StaticFieldLeak")
-class SingleTapAdddFeatureAsync( private val mActivity: MainActivity, private val mapView: MapView, private val dongHoKHSFT: ServiceFeatureTable, private val delegate: SingleTapAdddFeatureAsync.AsyncResponse) : AsyncTask<Point, ArcGISFeature, Void>() {
-    private var mDialog: BottomSheetDialog? = null
+class SingleTapAddFeatureAsync(private val mActivity: MainActivity, private val mapView: MapView, private val dongHoKHSFT: ServiceFeatureTable, private val delegate: SingleTapAddFeatureAsync.AsyncResponse) : AsyncTask<Point, ArcGISFeature, Void>() {
     private val locatorTask = LocatorTask("http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer")
     private val dApplication: DApplication = mActivity.application as DApplication
 
     interface AsyncResponse {
         fun processFinish(feature: ArcGISFeature?)
-    }
-
-    @SuppressLint("SetTextI18n")
-    override fun onPreExecute() {
-        super.onPreExecute()
-        mDialog = BottomSheetDialog(this.mActivity)
-        val view = mActivity.layoutInflater.inflate(R.layout.layout_progress_dialog, null, false) as LinearLayout
-        view.txt_progress_dialog_title.text = "Đang xử lý..."
-        mDialog!!.setContentView(view)
-        mDialog!!.setCancelable(false)
-
-        mDialog!!.show()
     }
 
     override fun doInBackground(vararg params: Point): Void? {
@@ -144,17 +119,8 @@ class SingleTapAdddFeatureAsync( private val mActivity: MainActivity, private va
     }
 
     override fun onProgressUpdate(vararg values: ArcGISFeature) {
-        if (mDialog != null && mDialog!!.isShowing) {
-            mDialog!!.dismiss()
-        }
         mActivity.dismissPin()
         super.onProgressUpdate(*values)
-
-    }
-
-
-    override fun onPostExecute(result: Void) {
-        super.onPostExecute(result)
 
     }
 

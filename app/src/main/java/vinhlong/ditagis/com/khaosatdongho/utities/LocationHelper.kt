@@ -3,7 +3,6 @@ package vinhlong.ditagis.com.khaosatdongho.utities
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
@@ -50,7 +49,6 @@ class LocationHelper(private val mContext: Context, delegate: AsyncResponse) : A
 
     private val permissions = ArrayList<String>()
     private val permissionUtils: PermissionUtils? = null
-    private val mDialog: ProgressDialog? = null
 
     var delegate: AsyncResponse? = null
 

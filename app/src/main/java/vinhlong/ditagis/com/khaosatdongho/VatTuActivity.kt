@@ -11,11 +11,11 @@ import android.view.View
 import android.view.Window
 import android.widget.*
 import com.esri.arcgisruntime.data.*
+import kotlinx.android.synthetic.main.activity_vat_tu.*
 import org.json.JSONArray
 import org.json.JSONException
 import vinhlong.ditagis.com.khaosatdongho.adapter.ChiTietVatTuAdapter
 import vinhlong.ditagis.com.khaosatdongho.adapter.VatTuApdapter
-import vinhlong.ditagis.com.khaosatdongho.async.NotifyVatTuDongHoAdapterChangeAsync
 import vinhlong.ditagis.com.khaosatdongho.async.QueryDMVatTuAsync
 import vinhlong.ditagis.com.khaosatdongho.async.RefreshVatTuAsync
 import vinhlong.ditagis.com.khaosatdongho.async.ServerAsync.*
@@ -34,8 +34,8 @@ class VatTuActivity : AppCompatActivity() {
     private var dmVatTuFeatures: ArrayList<Feature>? = null
     private var mAdapter: ArrayAdapter<*>? = null
     internal lateinit var tenMaus: MutableList<String>
-    internal var danhSachVatTu: ArrayList<QueryDanhSachVatTuAsycn.VatTu>? = null
-    private var mApplication: DApplication? = null
+    internal var danhSachVatTu: ArrayList<GetDanhSachVatTuAsycn.VatTu>? = null
+    private lateinit var mApplication: DApplication
     var formatter: NumberFormat = DecimalFormat("###,###,###")
     private var mListView: ListView? = null
     private var mSpin_thietlapmau: Spinner? = null
@@ -51,22 +51,25 @@ class VatTuActivity : AppCompatActivity() {
 
         vatTuApdapter = VatTuApdapter(this@VatTuActivity, ArrayList())
         mListView!!.adapter = vatTuApdapter
-        QueryDMVatTuAsync(this@VatTuActivity, mApplication!!.dmVatTuKHSFT!!, object : QueryDMVatTuAsync.AsyncResponse {
+        mApplication.progressDialog.show(this@VatTuActivity, container_vat_tu, "Đang lấy danh sách vật tư...")
+        QueryDMVatTuAsync(this@VatTuActivity, mApplication.dmVatTuKHSFT!!, object : QueryDMVatTuAsync.AsyncResponse {
             override fun processFinish(dmVatTus: ArrayList<Feature>?) {
                 this@VatTuActivity.dmVatTuFeatures = dmVatTus
+                getDanhSachVatTu()
             }
         }).execute()
-        this.getDanhSachVatTu()
-        this.getMauThietLaps()
 
 
     }
 
     private fun getDanhSachVatTu() {
-        QueryDanhSachVatTuAsycn(this@VatTuActivity, object : QueryDanhSachVatTuAsycn.AsyncResponse {
-            override fun processFinish(vatTus: ArrayList<QueryDanhSachVatTuAsycn.VatTu>?) {
+        GetDanhSachVatTuAsycn(this@VatTuActivity, object : GetDanhSachVatTuAsycn.AsyncResponse {
+            override fun processFinish(vatTus: ArrayList<GetDanhSachVatTuAsycn.VatTu>?) {
                 if (danhSachVatTu != null) {
                     this@VatTuActivity.danhSachVatTu = danhSachVatTu
+                    getMauThietLaps()
+                } else {
+                    mApplication.progressDialog.dismiss()
                 }
             }
         }
@@ -75,7 +78,7 @@ class VatTuActivity : AppCompatActivity() {
 
     private fun getMauThietLaps() {
         tenMaus = ArrayList()
-        QueryTenMauAsycn(this@VatTuActivity, object : QueryTenMauAsycn.AsyncResponse {
+        GetTenMauAsycn(this@VatTuActivity, object : GetTenMauAsycn.AsyncResponse {
             override fun processFinish(tenMaus: String?) {
 
                 val jsonArray: JSONArray
@@ -85,9 +88,10 @@ class VatTuActivity : AppCompatActivity() {
                     for (i in 0 until jsonArray.length()) {
                         this@VatTuActivity.tenMaus.add(jsonArray.get(i).toString())
                     }
-                    showDanhSachVatTu(mApplication!!.selectedFeature)
+                    showDanhSachVatTu(mApplication.selectedFeature)
                 } catch (e: JSONException) {
-                    e.printStackTrace()
+                    mApplication.progressDialog.dismiss()
+                    mApplication.alertDialog.show(this@VatTuActivity, "Có lỗi xảy ra", e.toString())
                 }
 
 
@@ -97,6 +101,7 @@ class VatTuActivity : AppCompatActivity() {
     }
 
     private fun getVatTu(v: View?, maKhachHang: Long) {
+        mApplication.progressDialog.show(this@VatTuActivity, container_vat_tu, "Đang lấy vật tư...")
         QueryVatTuDongHoAsycn(this@VatTuActivity, object : QueryVatTuDongHoAsycn.AsyncResponse {
             override fun processFinish(vatTus: ArrayList<VatTuApdapter.VatTu>?) {
                 if (vatTus != null) {
@@ -115,7 +120,8 @@ class VatTuActivity : AppCompatActivity() {
                     Snackbar.make(v!!, "Chưa có vật tư!", 1500).show()
                     vatTuApdapter!!.clear()
                 }
-                vatTuApdapter!!.notifyDataSetChanged()
+                this@VatTuActivity.runOnUiThread { vatTuApdapter!!.notifyDataSetChanged() }
+                mApplication.progressDialog.dismiss()
             }
         }
         ).execute(maKhachHang)
@@ -123,6 +129,7 @@ class VatTuActivity : AppCompatActivity() {
 
     private fun getVatTuTheoMau(tenThietLapMau: String, idDongHo: Long?) {
         val vatTusAdapter = ArrayList<VatTuApdapter.VatTu>()
+        mApplication.progressDialog.show(this@VatTuActivity, container_vat_tu, "Đang lấy vật tư...")
         QueryVatTuTheoMauAsycn(this@VatTuActivity, object : QueryVatTuTheoMauAsycn.AsyncResponse {
             override fun processFinish(vatTus: ArrayList<QueryVatTuTheoMauAsycn.VatTu>?) {
                 if (vatTus != null) {
@@ -143,14 +150,15 @@ class VatTuActivity : AppCompatActivity() {
                         }
                     }
                     vatTuApdapter!!.vatTus = vatTusAdapter
-                    vatTuApdapter!!.notifyDataSetChanged()
+                    this@VatTuActivity.runOnUiThread { vatTuApdapter!!.notifyDataSetChanged() }
+                    mApplication.progressDialog.dismiss()
                 }
             }
         }
         ).execute(tenThietLapMau)
     }
 
-    private fun getLoaiVatTu(maVatTu: String?): QueryDanhSachVatTuAsycn.VatTu? {
+    private fun getLoaiVatTu(maVatTu: String?): GetDanhSachVatTuAsycn.VatTu? {
         if (maVatTu != null) {
             for (vatTu in this.danhSachVatTu!!) {
                 if (vatTu.maVatTu == maVatTu) {
@@ -163,6 +171,7 @@ class VatTuActivity : AppCompatActivity() {
 
 
     fun showDanhSachVatTu(featureDHKH: ArcGISFeature?) {
+        mApplication.progressDialog.dismiss()
         this.feature = featureDHKH
         val attributes = featureDHKH!!.attributes
         val idDongHo = attributes[Constant.DongHoKhachHangFields.ID]
@@ -171,7 +180,7 @@ class VatTuActivity : AppCompatActivity() {
 
 
             mAdapter = ArrayAdapter(this@VatTuActivity, android.R.layout.simple_spinner_dropdown_item, tenMaus)
-            mSpin_thietlapmau!!.adapter = mAdapter
+            this@VatTuActivity.runOnUiThread { mSpin_thietlapmau!!.adapter = mAdapter }
 
             mSpin_thietlapmau!!.setSelection(0)
             mSpin_thietlapmau!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -375,6 +384,7 @@ class VatTuActivity : AppCompatActivity() {
     private fun getRefreshTableVatTuAsync() {
         val attributes = this.feature!!.attributes
         val idDongHo = (attributes[Constant.DongHoKhachHangFields.ID] as Int).toLong()
+        mApplication.progressDialog.show(this@VatTuActivity, container_vat_tu, "Đang làm mới danh sách...")
         RefreshVatTuAsync(this@VatTuActivity, mApplication!!.vatTuKHSFT!!, this.dmVatTuFeatures!!, vatTuApdapter!!, this.mApplication!!.vatTuDHDTG!!.action!!,
                 object : RefreshVatTuAsync.AsyncResponse {
                     override fun processFinish(features: List<Feature>?) {
@@ -383,8 +393,8 @@ class VatTuActivity : AppCompatActivity() {
                         var sum = 0.0
                         if (features != null)
                             for (feature in features) {
-                                val maVatTu = feature.getAttributes().get(Constant.VatTuFields.MaVatTu)
-                                val soLuong = feature.getAttributes().get(Constant.VatTuFields.SoLuong)
+                                val maVatTu = feature.attributes.get(Constant.VatTuFields.MaVatTu)
+                                val soLuong = feature.attributes.get(Constant.VatTuFields.SoLuong)
                                 if (maVatTu != null && soLuong != null) {
                                     val loaiVatTu = getLoaiVatTu12(maVatTu!!.toString())
                                     if (loaiVatTu != null) {
@@ -401,6 +411,7 @@ class VatTuActivity : AppCompatActivity() {
                                     }
                                 }
                             }
+                        mApplication.progressDialog.dismiss()
                     }
                 }
         ).execute(idDongHo)
@@ -455,7 +466,8 @@ class VatTuActivity : AppCompatActivity() {
     }
 
     private fun addTableVatTu(v: View, item: String) {
-        if (!mApplication!!.vatTuDHDTG!!.action!!.isCreate) {
+        mApplication.progressDialog.show(this@VatTuActivity, container_vat_tu, "Đang cập nhật vật tư...")
+        if (!mApplication.vatTuDHDTG!!.action!!.isCreate) {
             Snackbar.make(v, "Không thể Cập nhật vật tư!", 2000).show()
         } else if (item == Constant.TENMAU.SELECT) {
             Snackbar.make(v, "Vui lòng chọn mẫu!", 2000).show()
@@ -466,14 +478,17 @@ class VatTuActivity : AppCompatActivity() {
                     if (isSuccess!!) {
                         AddVatTuKHAsycn(this@VatTuActivity, object : AddVatTuKHAsycn.AsyncResponse {
                             override fun processFinish(isSuccess: Boolean?) {
+                                mApplication.progressDialog.dismiss()
                                 if (isSuccess!!) {
                                     Toast.makeText(this@VatTuActivity, "Cập nhật thành công!", Toast.LENGTH_SHORT).show()
                                 } else
                                     Snackbar.make(v, "Cật nhật thất bại!", 2000).show()
                             }
                         }).execute(vatTuApdapter!!.vatTus)
-                    } else
+                    } else {
+                        mApplication.progressDialog.dismiss()
                         Snackbar.make(v, "Cật nhật thất bại!", 2000).show()
+                    }
                 }
             }
             ).execute(vatTuApdapter!!.vatTus!![0].getiDKhachHang())
@@ -683,7 +698,7 @@ class VatTuActivity : AppCompatActivity() {
                     }
                 }
                 val adapter = parent.adapter as ChiTietVatTuAdapter
-                NotifyVatTuDongHoAdapterChangeAsync(this@VatTuActivity).execute(adapter)
+                this@VatTuActivity.runOnUiThread { adapter.notifyDataSetChanged() }
             }
             builder.setView(layout)
             val dialog = builder.create()
