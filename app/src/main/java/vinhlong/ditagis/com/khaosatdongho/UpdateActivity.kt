@@ -1,5 +1,7 @@
 package vinhlong.ditagis.com.khaosatdongho
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.TextInputEditText
 import android.support.design.widget.TextInputLayout
@@ -79,6 +81,10 @@ class UpdateActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_update)
         mApplication = application as DApplication
+        if (supportActionBar != null) {
+            supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+            supportActionBar!!.setDisplayShowHomeEnabled(true)
+        }
         initViews()
     }
 
@@ -153,5 +159,18 @@ class UpdateActivity : AppCompatActivity() {
         }).execute()
 
 
+    }
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
+    }
+
+    override fun onBackPressed() {
+        try {
+            val intent = Intent()
+            setResult(Activity.RESULT_CANCELED, intent)
+            finish()
+        } catch (ex: Exception) {
+        }
     }
 }

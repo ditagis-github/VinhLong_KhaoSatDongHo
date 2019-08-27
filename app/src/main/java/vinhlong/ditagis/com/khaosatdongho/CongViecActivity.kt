@@ -47,6 +47,10 @@ class CongViecActivity : AppCompatActivity() {
 
     private fun init() {
         mApplication = application as DApplication
+        if (supportActionBar != null) {
+            supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+            supportActionBar!!.setDisplayShowHomeEnabled(true)
+        }
         initBottomSheet()
 
     }
@@ -145,5 +149,17 @@ class CongViecActivity : AppCompatActivity() {
 
     }
 
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
+    }
+
+    override fun onBackPressed() = try {
+        val intent = Intent()
+        mApplication!! .selectedFeature = null
+        setResult(Activity.RESULT_CANCELED, intent)
+        finish()
+    } catch (ex: Exception) {
+    }
 
 }

@@ -1,5 +1,7 @@
 package vinhlong.ditagis.com.khaosatdongho
 
+import android.app.Activity
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -47,7 +49,10 @@ class VatTuActivity : AppCompatActivity() {
         mListView = findViewById(R.id.vattu_listview)
         mSpin_thietlapmau = findViewById(R.id.spin_thietlapmau)
         mTxtAdd = findViewById(R.id.txtAdd)
-
+        if (supportActionBar != null) {
+            supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+            supportActionBar!!.setDisplayShowHomeEnabled(true)
+        }
 
         vatTuApdapter = VatTuApdapter(this@VatTuActivity, ArrayList())
         mListView!!.adapter = vatTuApdapter
@@ -706,5 +711,17 @@ class VatTuActivity : AppCompatActivity() {
 
         }
     }
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
+    }
 
+    override fun onBackPressed() {
+        try {
+            val intent = Intent()
+            setResult(Activity.RESULT_CANCELED, intent)
+            finish()
+        } catch (ex: Exception) {
+        }
+    }
 }
