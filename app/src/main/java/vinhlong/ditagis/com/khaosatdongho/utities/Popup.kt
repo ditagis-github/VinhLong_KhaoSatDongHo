@@ -2,21 +2,21 @@ package vinhlong.ditagis.com.khaosatdongho.utities
 
 import android.content.Intent
 import android.net.Uri
-import android.os.Bundle
 import android.provider.MediaStore
+import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
-import android.support.v7.app.AppCompatActivity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.widget.LinearLayout
-import android.widget.ListView
 import android.widget.Toast
 import com.esri.arcgisruntime.data.*
+import com.esri.arcgisruntime.geometry.Point
 import com.esri.arcgisruntime.mapping.view.Callout
 import com.esri.arcgisruntime.mapping.view.MapView
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.popup.view.*
 import vinhlong.ditagis.com.khaosatdongho.MainActivity
 import vinhlong.ditagis.com.khaosatdongho.R
 import vinhlong.ditagis.com.khaosatdongho.UpdateActivity
@@ -29,7 +29,7 @@ import vinhlong.ditagis.com.khaosatdongho.entities.DApplication
 import vinhlong.ditagis.com.khaosatdongho.libs.FeatureLayerDTG
 import java.util.*
 
-class Popup(private val mMainActivity: MainActivity, private val mMapView: MapView, private val mCallout: Callout?) : AppCompatActivity(), View.OnClickListener {
+class Popup(private val mMainActivity: MainActivity, private val mMapView: MapView, private val mCallout: Callout?) : View.OnClickListener {
     private var featureDHKH: ArcGISFeature? = null
     private var dongHoKHSFT: ServiceFeatureTable? = null
     private var dongHoKHDTG: FeatureLayerDTG? = null
@@ -48,9 +48,6 @@ class Popup(private val mMainActivity: MainActivity, private val mMapView: MapVi
         this.dongHoKHSFT = dongHoKHDTG.featureLayer.featureTable as ServiceFeatureTable
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     fun setmSFTHanhChinh(mSFTHanhChinh: ServiceFeatureTable) {
         QueryHanhChinhAsync(this.mMainActivity, mSFTHanhChinh, object : QueryHanhChinhAsync.AsyncResponse {
@@ -72,10 +69,10 @@ class Popup(private val mMainActivity: MainActivity, private val mMapView: MapVi
         }
     }
 
-    fun refressPopup() {
+    private fun refressPopup() {
         val hiddenFields = this.mMainActivity.resources.getStringArray(R.array.hiddenFields)
         val attributes = featureDHKH!!.attributes
-        val listView = linearLayout!!.findViewById<ListView>(R.id.lstview_thongtinsuco)
+        val listView = linearLayout!!.lstview_thongtinsuco
         val featureViewInfoAdapter = FeatureViewInfoAdapter(this.mMainActivity, ArrayList())
         listView.adapter = featureViewInfoAdapter
         var checkHiddenField: Boolean
@@ -197,15 +194,31 @@ class Popup(private val mMainActivity: MainActivity, private val mMapView: MapVi
         var scale = mMapView.mapScale
         val minScale = dongHoKHDTG!!.featureLayer.minScale
         if (scale > minScale) scale = minScale
-        mMapView.setViewpointGeometryAsync(envelope, 0.0)
-        //        mMapView.setViewpointScaleAsync(scale);
-        mCallout!!.location = envelope.center
-        mCallout.content = linearLayout!!
-        this.runOnUiThread {
-            mCallout.refresh()
-            mCallout.show()
-        }
+
+        showCallout(envelope.center, linearLayout, scale)
         return linearLayout
+    }
+
+    private fun showCallout(point: Point?, view: View?, scale: Double) {
+        mMainActivity.runOnUiThread {
+            val viewpointCenterAsync = mMapView.setViewpointCenterAsync(point, scale)
+            viewpointCenterAsync.addDoneListener {
+                val result = viewpointCenterAsync.get()
+                if (result) {
+                    mCallout!!.location = point
+                    mCallout.content = view
+                    mCallout.refresh()
+                    mCallout.show()
+                } else {
+                    val snackBar = Snackbar.make(mMainActivity.container_main, "Có lỗi xảy ra", 5000)
+                    snackBar.setAction("Thử lại") {
+                        showCallout(point, view, scale)
+                    }
+                    snackBar.show()
+                }
+            }
+
+        }
     }
 
     private fun hoanTatKhaoSat() {

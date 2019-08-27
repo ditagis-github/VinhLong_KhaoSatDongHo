@@ -197,7 +197,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
             }
         }
         if (ActivityCompat.checkSelfPermission(this,
-                        android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return
         }
             locationManager.requestLocationUpdates("gps", 5000, 0f, listener)
@@ -230,8 +230,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
                     override fun processFinish(output: Any) {
 
                         if (output is User) {
-                            val user = output as User
-                            mApplication.user = user
+                            mApplication.user = output
                             handleLoginSuccess()
                         } else {
                             showLogInActivity()
@@ -249,6 +248,11 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
         }
     }
 
+    private fun logOut() {
+        DPreference.instance.deletePreferences()
+        finish()
+
+    }
     private fun setOnClickListener() {
         findViewById<View>(R.id.layout_layer_open_street_map).setOnClickListener(this)
         findViewById<View>(R.id.layout_layer_street_map).setOnClickListener(this)
@@ -280,6 +284,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
 
     @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
     private fun initMapView() {
+        mApplication.progressDialog.changeTitle(this@MainActivity, container_main, "Đang khởi tạo bản đồ...")
         mMapView = findViewById(R.id.mapView)
         mMap = ArcGISMap(Basemap.Type.OPEN_STREET_MAP, LATITUDE, LONGTITUDE, LEVEL_OF_DETAIL)
         mMapView!!.map = mMap
@@ -601,23 +606,26 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
         val id = item.itemId
-        if (id == R.id.nav_thongke) {
-            val intent = Intent(this, CongViecActivity::class.java)
-            this.startActivityForResult(intent, requestCode)
-        } else if (id == R.id.nav_tracuu) {
-        } else if (id == R.id.nav_logOut) {
-            logIn()
+        when (id) {
+            R.id.nav_thongke -> {
+                val intent = Intent(this, CongViecActivity::class.java)
+                this.startActivityForResult(intent, requestCode)
+            }
+            R.id.nav_tracuu -> {
+            }
+            R.id.nav_refresh -> initMapView()
+            R.id.nav_logOut -> logOut()
         }
         val drawer = findViewById<DrawerLayout>(R.id.container_main)
         drawer.closeDrawer(GravityCompat.START)
         return true
     }
 
-    fun requestPermisson(): Boolean {
+    private fun requestPermisson(): Boolean {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CALL_PHONE, Manifest.permission.READ_PHONE_STATE), REQUEST_ID_IMAGE_CAPTURE)
         }
-        return !(Build.VERSION.SDK_INT >= 23 && ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED)
+        return !(Build.VERSION.SDK_INT >= 23 && ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED)
     }
 
     private fun goHome() {}
@@ -848,7 +856,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
                 Constant.PreferenceKey.PASSWORD,
                 mApplication.user?.passWord!!
         )
-        mApplication.progressDialog.changeTitle(this@MainActivity, container_main, "Đang khởi tạo bản đồ...")
+
         setLoginInfos()
         initMapView()
     }
@@ -862,9 +870,9 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
     }
 
     companion object {
-        private val LATITUDE = 10.2500783//10.205155129125103;//;
-        private val LONGTITUDE = 105.9431823//105.94397118543621;//;
-        private val LEVEL_OF_DETAIL = 14
-        private val REQUEST_ID_IMAGE_CAPTURE = 55
+        private const val LATITUDE = 10.2500783//10.205155129125103;//;
+        private const val LONGTITUDE = 105.9431823//105.94397118543621;//;
+        private const val LEVEL_OF_DETAIL = 14
+        private const val REQUEST_ID_IMAGE_CAPTURE = 55
     }
 }

@@ -90,26 +90,6 @@ class MapViewHandler(private val mapView: MapView, private val mActivity: MainAc
 
     }
 
-    fun queryByObjectID(objectID: String) {
-        val queryParameters = QueryParameters()
-        val query = "OBJECTID = $objectID"
-        queryParameters.whereClause = query
-        val feature = dongHoKHSFT!!.queryFeaturesAsync(queryParameters, ServiceFeatureTable.QueryFeatureFields.LOAD_ALL)
-        feature.addDoneListener {
-            try {
-                val result = feature.get()
-                if (result.iterator().hasNext()) {
-                    val item = result.iterator().next()
-                    showPopup(item)
-                }
-            } catch (e: InterruptedException) {
-                e.printStackTrace()
-            } catch (e: ExecutionException) {
-                e.printStackTrace()
-            }
-        }
-
-    }
 
     fun showPopup(selectedFeature: Feature?) {
         if (selectedFeature != null) {

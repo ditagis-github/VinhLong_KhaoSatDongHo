@@ -10,7 +10,7 @@ import vinhlong.ditagis.com.khaosatdongho.entities.DApplication
 class SingleTapMapViewAsync(private val mActivity: MainActivity, private val mapView: MapView, asyncResponse: AsyncResponse) : AsyncTask<android.graphics.Point, ArcGISFeature, Void>() {
     private val dApplication: DApplication = mActivity.application as DApplication
     private val dongHoKHFL: FeatureLayer
-    private var delegate: AsyncResponse? = null
+    private var delegate: AsyncResponse
 
     interface AsyncResponse {
         fun processFinish(feature: ArcGISFeature?)
@@ -32,9 +32,8 @@ class SingleTapMapViewAsync(private val mActivity: MainActivity, private val map
                 if (resultGeoElements.size > 0) {
                     if (resultGeoElements[0] is ArcGISFeature) {
                         val arcGISFeature = resultGeoElements[0] as ArcGISFeature
-                        delegate!!.processFinish(arcGISFeature)
                         publishProgress(arcGISFeature)
-                    }
+                    } else publishProgress()
                 } else {
                     publishProgress()
                 }
@@ -45,5 +44,11 @@ class SingleTapMapViewAsync(private val mActivity: MainActivity, private val map
         return null
     }
 
+    override fun onProgressUpdate(vararg values: ArcGISFeature?) {
+        super.onProgressUpdate(*values)
+        if (values.isNotEmpty() && values[0] != null)
+            delegate.processFinish(values[0])
+        else delegate.processFinish(null)
+    }
 
 }

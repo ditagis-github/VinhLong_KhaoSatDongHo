@@ -29,7 +29,10 @@
                     android:id="@+id/nav_thongke"
                     android:icon="@drawable/ic_menu"
                     android:title="@string/nav_thong_ke" />
-
+                <item
+                    android:id="@+id/nav_refresh"
+                    android:icon="@drawable/ic_refresh"
+                    android:title="Làm mới bản đồ" />
                 <item
                     android:id="@+id/nav_tracuu"
                     android:icon="@drawable/ic_search"
