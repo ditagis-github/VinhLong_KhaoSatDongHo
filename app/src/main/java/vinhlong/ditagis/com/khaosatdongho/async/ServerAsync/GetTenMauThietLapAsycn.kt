@@ -11,7 +11,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 @SuppressLint("StaticFieldLeak")
-class GetTenMauAsycn(private val mActivity: Activity, private val mDelegate: AsyncResponse) : AsyncTask<Void, String, Void>() {
+class GetTenMauThietLapAsycn(private val mActivity: Activity, private val mDelegate: AsyncResponse) : AsyncTask<Void, String, Void>() {
 
     interface AsyncResponse {
         fun processFinish(tenMaus: String?)
@@ -57,5 +57,4 @@ class GetTenMauAsycn(private val mActivity: Activity, private val mDelegate: Asy
 
     }
 
-    override fun onPostExecute(value: Void) {}
 }

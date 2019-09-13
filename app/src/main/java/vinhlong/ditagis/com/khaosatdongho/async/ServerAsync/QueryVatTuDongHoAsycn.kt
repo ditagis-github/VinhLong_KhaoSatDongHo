@@ -99,6 +99,4 @@ class QueryVatTuDongHoAsycn(private val mActivity: Activity, private val mDelega
 
     }
 
-    override fun onPostExecute(value: Void) {}
-
 }

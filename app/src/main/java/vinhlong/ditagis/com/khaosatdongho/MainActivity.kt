@@ -48,14 +48,19 @@ import com.esri.arcgisruntime.mapping.view.DefaultMapViewOnTouchListener
 import com.esri.arcgisruntime.mapping.view.LocationDisplay
 import com.esri.arcgisruntime.mapping.view.MapView
 import com.google.android.gms.common.api.GoogleApiClient
-import ditagis.binhduong.utities.DAlertDialog
-import ditagis.binhduong.utities.DProgressDialog
+import vinhlong.ditagis.com.khaosatdongho.utities.DAlertDialog
+import vinhlong.ditagis.com.khaosatdongho.utities.DProgressDialog
 import kotlinx.android.synthetic.main.activity_main.*
+import org.json.JSONArray
+import org.json.JSONException
 import vinhlong.ditagis.com.khaosatdongho.adapter.DanhSachDongHoKHAdapter
 import vinhlong.ditagis.com.khaosatdongho.async.LoginAsycn
 import vinhlong.ditagis.com.khaosatdongho.async.PreparingAsycn
+import vinhlong.ditagis.com.khaosatdongho.async.ServerAsync.GetDanhSachVatTuAsycn
+import vinhlong.ditagis.com.khaosatdongho.async.ServerAsync.GetTenMauThietLapAsycn
 import vinhlong.ditagis.com.khaosatdongho.async.UpdateAttachmentAsync
 import vinhlong.ditagis.com.khaosatdongho.entities.DApplication
+import vinhlong.ditagis.com.khaosatdongho.entities.VatTu
 import vinhlong.ditagis.com.khaosatdongho.entities.entitiesDB.LayerInfoDTG
 import vinhlong.ditagis.com.khaosatdongho.entities.entitiesDB.User
 import vinhlong.ditagis.com.khaosatdongho.libs.Action
@@ -65,7 +70,6 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
-import java.util.*
 
 class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
 
@@ -97,7 +101,9 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
     private var mLocation: Location? = null
     private lateinit var mApplication: DApplication
     private var selectedFeature: ArcGISFeature? = null
-
+    private var numberLoadedData = 0
+    private var sizeOfData: Int = 0
+    private lateinit var titleDialog: String
     fun setChangingGeometry(changingGeometry: Boolean, feature: ArcGISFeature?) {
         this.isChangingGeometry = changingGeometry
         if (this.isChangingGeometry) {
@@ -114,6 +120,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
         setContentView(R.layout.activity_main)
         try {
             setLicense()
+            titleDialog = getString(R.string.prepare_data)
             mApplication = application as DApplication
             mApplication.progressDialog = DProgressDialog()
             mApplication.alertDialog = DAlertDialog()
@@ -291,9 +298,13 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
         mCallout = mMapView!!.callout
         val preparingAsycn = PreparingAsycn(this@MainActivity, object : PreparingAsycn.AsyncResponse {
             override fun processFinish(layerInfoDTGs: ArrayList<LayerInfoDTG>?) {
-                mApplication.progressDialog.changeTitle(this@MainActivity, container_main, "Đang tải các lớp dữ liệu...")
+                mApplication.progressDialog.changeTitle(this@MainActivity, container_main, this@MainActivity.getString(R.string.prepare_data))
                 mApplication.lstFeatureLayerDTG = layerInfoDTGs
+
+                sizeOfData = mApplication.lstFeatureLayerDTG!!.size + 2 //lấy tên mẫu, danh sách vật tư
                 setFeatureService()
+                getTenMauThietLaps()
+                getDanhSachVatTu()
             }
 
         })
@@ -372,16 +383,20 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
         }
     }
 
+    private fun checkCompletePrepareData() {
+        numberLoadedData -= -1
+        if (numberLoadedData == sizeOfData) mApplication.progressDialog.dismiss()
+        else mApplication.progressDialog.changeTitle(this@MainActivity, container_main, "$titleDialog $numberLoadedData/$sizeOfData")
+    }
     private fun setFeatureService() {
+
         if (mApplication.lstFeatureLayerDTG!!.isEmpty()) return
         popup = Popup(this@MainActivity, mMapView!!, mCallout)
         mMapViewHandler = MapViewHandler(mMapView!!, this, popup!!)
-        var numberLoadedLayer = 0
-        val layerSize = mApplication.lstFeatureLayerDTG!!.size
+
         for (layerInfoDTG in mApplication.lstFeatureLayerDTG!!) {
             if (!layerInfoDTG.isView) {
-                numberLoadedLayer -= -1
-                if (numberLoadedLayer == layerSize) mApplication.progressDialog.dismiss()
+                checkCompletePrepareData()
                 continue
             }
             val url = layerInfoDTG.url
@@ -402,8 +417,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
                             val serviceFeatureTable = ServiceFeatureTable(url_HanhChinh)
                             popup!!.setmSFTHanhChinh(serviceFeatureTable)
                         }
-                        numberLoadedLayer -= -1
-                        if (numberLoadedLayer == layerSize) mApplication.progressDialog.dismiss()
+                        checkCompletePrepareData()
                     }
                     hanhChinhImageLayers!!.loadAsync()
                 } else if (id.toUpperCase() == Constant.IDLayer.CHUYENDE && layerInfoDTG.isView) {
@@ -420,8 +434,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
                                 }
                             }
                         }
-                        numberLoadedLayer -= -1
-                        if (numberLoadedLayer == layerSize) mApplication.progressDialog.dismiss()
+                        checkCompletePrepareData()
                     }
                     taiSanImageLayers!!.loadAsync()
                 } else {
@@ -448,8 +461,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
                                         Toast.LENGTH_SHORT).show()
 //                            setFeatureService()
                             }
-                            numberLoadedLayer -= -1
-                            if (numberLoadedLayer == layerSize) mApplication.progressDialog.dismiss()
+                            checkCompletePrepareData()
                         }
                         mApplication.dongHoKHDTG = featureLayerDTG
                         mMapViewHandler!!.setDongHoKHSFT(serviceFeatureTable)
@@ -458,28 +470,59 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
                     } else if (id == Constant.IDLayer.VATTUDONGHOTBL) {
                         mApplication.vatTuDHDTG = featureLayerDTG
                         mApplication.vatTuKHSFT = serviceFeatureTable
-                        numberLoadedLayer -= -1
-                        if (numberLoadedLayer == layerSize) mApplication.progressDialog.dismiss()
+                        checkCompletePrepareData()
                     } else if (id == Constant.IDLayer.DMVATTUTBL) {
                         featureLayer.addDoneLoadingListener {
                             if (featureLayer.loadStatus == LoadStatus.LOADED) {
                                 mApplication.dmVatTuKHSFT = serviceFeatureTable
                             }
-                            numberLoadedLayer -= -1
-                            if (numberLoadedLayer == layerSize) mApplication.progressDialog.dismiss()
+                            checkCompletePrepareData()
                         }
                     } else {
-                        numberLoadedLayer -= -1
-                        if (numberLoadedLayer == layerSize) mApplication.progressDialog.dismiss()
+                        checkCompletePrepareData()
                     }
 
                     mMap!!.operationalLayers.add(featureLayer)
                 }
             } else {
-                numberLoadedLayer -= -1
-                if (numberLoadedLayer == layerSize) mApplication.progressDialog.dismiss()
+                checkCompletePrepareData()
             }
         }
+    }
+
+    private fun getTenMauThietLaps() {
+        //lấy tên thiết lập mẫu để truy vấn
+        GetTenMauThietLapAsycn(this@MainActivity, object : GetTenMauThietLapAsycn.AsyncResponse {
+            override fun processFinish(tenMaus: String?) {
+                checkCompletePrepareData()
+                mApplication.tenMauThietLaps = ArrayList()
+                val jsonArray: JSONArray
+                try {
+                    jsonArray = JSONArray(tenMaus)
+                    mApplication.tenMauThietLaps.add(Constant.TENMAU.SELECT)
+                    for (i in 0 until jsonArray.length()) {
+                        mApplication.tenMauThietLaps.add(jsonArray.get(i).toString())
+                    }
+                } catch (e: JSONException) {
+                    mApplication.progressDialog.dismiss()
+                    mApplication.alertDialog.show(this@MainActivity, "Có lỗi xảy ra", e.toString())
+                }
+
+            }
+        }
+        ).execute()
+    }
+    private fun getDanhSachVatTu() {
+        //lấy danh sách tất cả vật tư
+        GetDanhSachVatTuAsycn(this@MainActivity, object : GetDanhSachVatTuAsycn.AsyncResponse {
+            override fun processFinish(vatTus: java.util.ArrayList<VatTu>?) {
+                if (vatTus != null) {
+                  mApplication.vatTus = vatTus
+                }
+                checkCompletePrepareData()
+            }
+        }
+        ).execute()
     }
 
     private fun addCheckBox_LayerDHKH(featureLayer: FeatureLayer) {

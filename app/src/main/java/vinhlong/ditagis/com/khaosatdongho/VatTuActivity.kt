@@ -14,18 +14,18 @@ import android.view.Window
 import android.widget.*
 import com.esri.arcgisruntime.data.*
 import kotlinx.android.synthetic.main.activity_vat_tu.*
-import org.json.JSONArray
-import org.json.JSONException
 import vinhlong.ditagis.com.khaosatdongho.adapter.ChiTietVatTuAdapter
 import vinhlong.ditagis.com.khaosatdongho.adapter.VatTuApdapter
 import vinhlong.ditagis.com.khaosatdongho.async.QueryDMVatTuAsync
 import vinhlong.ditagis.com.khaosatdongho.async.RefreshVatTuAsync
-import vinhlong.ditagis.com.khaosatdongho.async.ServerAsync.*
+import vinhlong.ditagis.com.khaosatdongho.async.ServerAsync.AddVatTuKHAsycn
+import vinhlong.ditagis.com.khaosatdongho.async.ServerAsync.DeleteVatTuKHAsycn
+import vinhlong.ditagis.com.khaosatdongho.async.ServerAsync.QueryVatTuDongHoAsycn
+import vinhlong.ditagis.com.khaosatdongho.async.ServerAsync.QueryVatTuTheoMauAsycn
 import vinhlong.ditagis.com.khaosatdongho.entities.DApplication
+import vinhlong.ditagis.com.khaosatdongho.entities.VatTu
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant
 import vinhlong.ditagis.com.khaosatdongho.utities.MySnackBar
-import java.text.DecimalFormat
-import java.text.NumberFormat
 import java.util.*
 import java.util.concurrent.ExecutionException
 
@@ -35,10 +35,8 @@ class VatTuActivity : AppCompatActivity() {
     private var feature: ArcGISFeature? = null
     private var dmVatTuFeatures: ArrayList<Feature>? = null
     private var mAdapter: ArrayAdapter<*>? = null
-    internal lateinit var tenMaus: MutableList<String>
-    internal var danhSachVatTu: ArrayList<GetDanhSachVatTuAsycn.VatTu>? = null
     private lateinit var mApplication: DApplication
-    var formatter: NumberFormat = DecimalFormat("###,###,###")
+    //    var formatter: NumberFormat = DecimalFormat("###,###,###")
     private var mListView: ListView? = null
     private var mSpin_thietlapmau: Spinner? = null
     private var mTxtAdd: TextView? = null
@@ -57,52 +55,16 @@ class VatTuActivity : AppCompatActivity() {
         vatTuApdapter = VatTuApdapter(this@VatTuActivity, ArrayList())
         mListView!!.adapter = vatTuApdapter
         mApplication.progressDialog.show(this@VatTuActivity, container_vat_tu, "Đang lấy danh sách vật tư...")
+
+        //lấy mẫu vật tư đã được cập nhật trước đó
         QueryDMVatTuAsync(this@VatTuActivity, mApplication.dmVatTuKHSFT!!, object : QueryDMVatTuAsync.AsyncResponse {
             override fun processFinish(dmVatTus: ArrayList<Feature>?) {
                 this@VatTuActivity.dmVatTuFeatures = dmVatTus
-                getDanhSachVatTu()
+                showDanhSachVatTu(mApplication.selectedFeature)
             }
         }).execute()
 
 
-    }
-
-    private fun getDanhSachVatTu() {
-        GetDanhSachVatTuAsycn(this@VatTuActivity, object : GetDanhSachVatTuAsycn.AsyncResponse {
-            override fun processFinish(vatTus: ArrayList<GetDanhSachVatTuAsycn.VatTu>?) {
-                if (danhSachVatTu != null) {
-                    this@VatTuActivity.danhSachVatTu = danhSachVatTu
-                    getMauThietLaps()
-                } else {
-                    mApplication.progressDialog.dismiss()
-                }
-            }
-        }
-        ).execute()
-    }
-
-    private fun getMauThietLaps() {
-        tenMaus = ArrayList()
-        GetTenMauAsycn(this@VatTuActivity, object : GetTenMauAsycn.AsyncResponse {
-            override fun processFinish(tenMaus: String?) {
-
-                val jsonArray: JSONArray
-                try {
-                    jsonArray = JSONArray(tenMaus)
-                    this@VatTuActivity.tenMaus.add(Constant.TENMAU.SELECT)
-                    for (i in 0 until jsonArray.length()) {
-                        this@VatTuActivity.tenMaus.add(jsonArray.get(i).toString())
-                    }
-                    showDanhSachVatTu(mApplication.selectedFeature)
-                } catch (e: JSONException) {
-                    mApplication.progressDialog.dismiss()
-                    mApplication.alertDialog.show(this@VatTuActivity, "Có lỗi xảy ra", e.toString())
-                }
-
-
-            }
-        }
-        ).execute()
     }
 
     private fun getVatTu(v: View?, maKhachHang: Long) {
@@ -111,7 +73,7 @@ class VatTuActivity : AppCompatActivity() {
             override fun processFinish(vatTus: ArrayList<VatTuApdapter.VatTu>?) {
                 if (vatTus != null) {
                     for (vatTu in vatTus) {
-                        for (vatTu1 in danhSachVatTu!!) {
+                        for (vatTu1 in mApplication.vatTus) {
                             if (vatTu.maVatTu == vatTu1.maVatTu) {
                                 vatTu.tenVatTu = vatTu1.tenVatTu
                                 vatTu.donViTinh = vatTu1.donViTinh
@@ -134,13 +96,13 @@ class VatTuActivity : AppCompatActivity() {
 
     private fun getVatTuTheoMau(tenThietLapMau: String, idDongHo: Long?) {
         val vatTusAdapter = ArrayList<VatTuApdapter.VatTu>()
-        mApplication.progressDialog.show(this@VatTuActivity, container_vat_tu, "Đang lấy vật tư...")
+        mApplication.progressDialog.show(this@VatTuActivity, container_vat_tu, "Đang lấy danh sách vật tư...")
         QueryVatTuTheoMauAsycn(this@VatTuActivity, object : QueryVatTuTheoMauAsycn.AsyncResponse {
             override fun processFinish(vatTus: ArrayList<QueryVatTuTheoMauAsycn.VatTu>?) {
                 if (vatTus != null) {
-                    for (i in vatTus!!.indices) {
+                    for (i in vatTus.indices) {
                         val vatTuAdapter = VatTuApdapter.VatTu(i + 1)
-                        val vatTu = vatTus!!.get(i)
+                        val vatTu = vatTus[i]
                         val maVatTu = vatTu.maVatTu
                         if (maVatTu != null) {
                             val loaiVatTu = getLoaiVatTu(maVatTu)
@@ -163,9 +125,9 @@ class VatTuActivity : AppCompatActivity() {
         ).execute(tenThietLapMau)
     }
 
-    private fun getLoaiVatTu(maVatTu: String?): GetDanhSachVatTuAsycn.VatTu? {
+    private fun getLoaiVatTu(maVatTu: String?): VatTu? {
         if (maVatTu != null) {
-            for (vatTu in this.danhSachVatTu!!) {
+            for (vatTu in this.mApplication.vatTus) {
                 if (vatTu.maVatTu == maVatTu) {
                     return vatTu
                 }
@@ -184,7 +146,7 @@ class VatTuActivity : AppCompatActivity() {
         if (idDongHo != null) {
 
 
-            mAdapter = ArrayAdapter(this@VatTuActivity, android.R.layout.simple_spinner_dropdown_item, tenMaus)
+            mAdapter = ArrayAdapter(this@VatTuActivity, android.R.layout.simple_spinner_dropdown_item, mApplication.tenMauThietLaps)
             this@VatTuActivity.runOnUiThread { mSpin_thietlapmau!!.adapter = mAdapter }
 
             mSpin_thietlapmau!!.setSelection(0)
@@ -259,17 +221,17 @@ class VatTuActivity : AppCompatActivity() {
 
     private fun showInfosSelectedItem(selectedFeature: Feature) {
         val attributes = selectedFeature.attributes
-        val layout_chitiet_vattudongho = this@VatTuActivity.layoutInflater.inflate(R.layout.layout_title_listview, null)
-        val listview_chitiet_maudanhgia = layout_chitiet_vattudongho.findViewById<ListView>(R.id.vattu_listview)
+        val layoutChitietVattudongho = this@VatTuActivity.layoutInflater.inflate(R.layout.layout_title_listview, null)
+        val listViewChitietMaudanhgia = layoutChitietVattudongho.findViewById<ListView>(R.id.vattu_listview)
         if (attributes[Constant.VatTuFields.DBDongHo] != null) {
-            (layout_chitiet_vattudongho.findViewById<View>(R.id.txtTitle) as TextView).text = attributes[Constant.VatTuFields.DBDongHo].toString()
+            (layoutChitietVattudongho.findViewById<View>(R.id.txtTitle) as TextView).text = attributes[Constant.VatTuFields.DBDongHo].toString()
         } else {
-            (layout_chitiet_vattudongho.findViewById<View>(R.id.txtTitle) as TextView).text = this@VatTuActivity.getString(R.string.title_chitietvattu)
+            (layoutChitietVattudongho.findViewById<View>(R.id.txtTitle) as TextView).text = this@VatTuActivity.getString(R.string.title_chitietvattu)
         }
         val items = ArrayList<ChiTietVatTuAdapter.Item>()
-        val fields = mApplication!!.vatTuKHSFT!!.fields
-        val updateFields = mApplication!!.vatTuDHDTG!!.updateFields
-        val unedit_Fields = this@VatTuActivity.resources.getStringArray(R.array.unedit_VT_Fields)
+        val fields = this.mApplication.vatTuKHSFT!!.fields
+        val updateFields = this.mApplication.vatTuDHDTG!!.updateFields
+        val unEditFields = this@VatTuActivity.resources.getStringArray(R.array.unedit_VT_Fields)
         for (field in fields) {
             val item = ChiTietVatTuAdapter.Item()
             item.alias = field.alias
@@ -296,7 +258,7 @@ class VatTuActivity : AppCompatActivity() {
                             item.value = attributes[field.name].toString()
                     }
             }
-            if (this.mApplication!!.vatTuDHDTG!!.action!!.isEdit) {
+            if (this.mApplication.vatTuDHDTG!!.action!!.isEdit) {
                 if (updateFields!!.size > 0) {
                     if (updateFields[0] == "*" || updateFields[0] == "") {
                         item.isEdit = true
@@ -309,7 +271,7 @@ class VatTuActivity : AppCompatActivity() {
                         }
                     }
                 }
-                for (unedit_Field in unedit_Fields) {
+                for (unedit_Field in unEditFields) {
                     if (unedit_Field.toUpperCase() == item.fieldName!!.toUpperCase()) {
                         item.isEdit = false
                         break
@@ -319,19 +281,19 @@ class VatTuActivity : AppCompatActivity() {
             items.add(item)
         }
         val chiTietVatTuAdapter = ChiTietVatTuAdapter(this@VatTuActivity, items)
-        if (items != null) listview_chitiet_maudanhgia.adapter = chiTietVatTuAdapter
+        if (items != null) listViewChitietMaudanhgia.adapter = chiTietVatTuAdapter
         val builder = AlertDialog.Builder(this@VatTuActivity, android.R.style.Theme_Holo_Light_NoActionBar_Fullscreen)
-        builder.setView(layout_chitiet_vattudongho)
-        if (this.mApplication!!.vatTuDHDTG!!.action!!.isEdit) {
+        builder.setView(layoutChitietVattudongho)
+        if (this.mApplication.vatTuDHDTG!!.action!!.isEdit) {
             builder.setPositiveButton(this@VatTuActivity.getString(R.string.btn_Accept), null)
         }
-        if (this.mApplication!!.vatTuDHDTG!!.action!!.isDelete) {
+        if (this.mApplication.vatTuDHDTG!!.action!!.isDelete) {
             builder.setNegativeButton(this@VatTuActivity.getString(R.string.btn_Delete), null)
         }
         builder.setNeutralButton(this@VatTuActivity.getString(R.string.btn_Esc), null)
-        listview_chitiet_maudanhgia.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
-            if (mApplication!!.vatTuDHDTG!!.action!!.isEdit) {
-                editValueAttribute(parent, view, position, id)
+        listViewChitietMaudanhgia.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
+            if (this.mApplication.vatTuDHDTG!!.action!!.isEdit) {
+                editValueAttribute(parent, position)
             }
         }
         val dialog = builder.create()
@@ -340,7 +302,7 @@ class VatTuActivity : AppCompatActivity() {
         // Chỉnh sửa
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener { v ->
             for (item in items) {
-                val domain = mApplication!!.vatTuKHSFT!!.getField(item.fieldName!!).domain
+                val domain = this.mApplication.vatTuKHSFT!!.getField(item.fieldName!!).domain
                 var codeDomain: Any? = null
                 if (item.fieldName == Constant.VatTuFields.NgayCapNhat) {
                     val currentTime = Calendar.getInstance()
@@ -367,6 +329,8 @@ class VatTuActivity : AppCompatActivity() {
                             selectedFeature.attributes[item.fieldName] = codeDomain.toString()
                         } else if (item.value != null)
                             selectedFeature.attributes[item.fieldName] = item.value
+                        else -> {
+                        }
                     }
                 }
             }
@@ -390,7 +354,7 @@ class VatTuActivity : AppCompatActivity() {
         val attributes = this.feature!!.attributes
         val idDongHo = (attributes[Constant.DongHoKhachHangFields.ID] as Int).toLong()
         mApplication.progressDialog.show(this@VatTuActivity, container_vat_tu, "Đang làm mới danh sách...")
-        RefreshVatTuAsync(this@VatTuActivity, mApplication!!.vatTuKHSFT!!, this.dmVatTuFeatures!!, vatTuApdapter!!, this.mApplication!!.vatTuDHDTG!!.action!!,
+        RefreshVatTuAsync(this@VatTuActivity, this.mApplication.vatTuKHSFT!!, this.dmVatTuFeatures!!, vatTuApdapter!!, this.mApplication.vatTuDHDTG!!.action!!,
                 object : RefreshVatTuAsync.AsyncResponse {
                     override fun processFinish(features: List<Feature>?) {
 
@@ -401,13 +365,13 @@ class VatTuActivity : AppCompatActivity() {
                                 val maVatTu = feature.attributes.get(Constant.VatTuFields.MaVatTu)
                                 val soLuong = feature.attributes.get(Constant.VatTuFields.SoLuong)
                                 if (maVatTu != null && soLuong != null) {
-                                    val loaiVatTu = getLoaiVatTu12(maVatTu!!.toString())
+                                    val loaiVatTu = getLoaiVatTu12(maVatTu.toString())
                                     if (loaiVatTu != null) {
                                         val giaVatTu = loaiVatTu.attributes[Constant.LoaiVatTuFields.GiaVatTu]
                                         if (giaVatTu != null) {
                                             try {
                                                 val giaVT = java.lang.Double.parseDouble(giaVatTu.toString())
-                                                val soLuongVT = Integer.parseInt(soLuong!!.toString())
+                                                val soLuongVT = Integer.parseInt(soLuong.toString())
                                                 sum += soLuongVT * giaVT
                                             } catch (e: Exception) {
                                             }
@@ -458,8 +422,8 @@ class VatTuActivity : AppCompatActivity() {
         }
     }
 
-    private fun getValueDomain(codedValues: List<CodedValue>, code: String): Any? {
-        var value: Any? = null
+    private fun getValueDomain(codedValues: List<CodedValue>, code: String): String? {
+        var value: String? = null
         for (codedValue in codedValues) {
             if (codedValue.code.toString() == code) {
                 value = codedValue.name
@@ -515,35 +479,35 @@ class VatTuActivity : AppCompatActivity() {
     }
 
 
-    private fun addFeature(feature: Feature) {
-        val mapViewResult = mApplication!!.vatTuKHSFT!!.addFeatureAsync(feature)
-        mapViewResult.addDoneListener {
-            val listListenableEditAsync = mApplication!!.vatTuKHSFT!!.applyEditsAsync()
-            listListenableEditAsync.addDoneListener {
-                try {
-                    val featureEditResults = listListenableEditAsync.get()
-                    if (featureEditResults.size > 0) {
-                        Toast.makeText(this@VatTuActivity.applicationContext, this@VatTuActivity.getString(R.string.DATA_SUCCESSFULLY_INSERTED), Toast.LENGTH_SHORT).show()
-                        getRefreshTableVatTuAsync()
-                    } else {
-                        Toast.makeText(this@VatTuActivity.applicationContext, this@VatTuActivity.getString(R.string.FAILED_TO_INSERT_DATA), Toast.LENGTH_SHORT).show()
-                    }
-                } catch (e: InterruptedException) {
-                    e.printStackTrace()
-                } catch (e: ExecutionException) {
-                    e.printStackTrace()
-                }
-
-
-            }
-        }
-    }
+//    private fun addFeature(feature: Feature) {
+//        val mapViewResult = this.mApplication.vatTuKHSFT!!.addFeatureAsync(feature)
+//        mapViewResult.addDoneListener {
+//            val listListenableEditAsync = this.mApplication.vatTuKHSFT!!.applyEditsAsync()
+//            listListenableEditAsync.addDoneListener {
+//                try {
+//                    val featureEditResults = listListenableEditAsync.get()
+//                    if (featureEditResults.size > 0) {
+//                        Toast.makeText(this@VatTuActivity.applicationContext, this@VatTuActivity.getString(R.string.DATA_SUCCESSFULLY_INSERTED), Toast.LENGTH_SHORT).show()
+//                        getRefreshTableVatTuAsync()
+//                    } else {
+//                        Toast.makeText(this@VatTuActivity.applicationContext, this@VatTuActivity.getString(R.string.FAILED_TO_INSERT_DATA), Toast.LENGTH_SHORT).show()
+//                    }
+//                } catch (e: InterruptedException) {
+//                    e.printStackTrace()
+//                } catch (e: ExecutionException) {
+//                    e.printStackTrace()
+//                }
+//
+//
+//            }
+//        }
+//    }
 
 
     private fun deleteFeature(feature: Feature) {
-        val mapViewResult = mApplication!!.vatTuKHSFT!!.deleteFeatureAsync(feature)
+        val mapViewResult = this.mApplication.vatTuKHSFT!!.deleteFeatureAsync(feature)
         mapViewResult.addDoneListener {
-            val listListenableEditAsync = mApplication!!.vatTuKHSFT!!.applyEditsAsync()
+            val listListenableEditAsync = this.mApplication.vatTuKHSFT!!.applyEditsAsync()
             listListenableEditAsync.addDoneListener {
                 try {
                     val featureEditResults = listListenableEditAsync.get()
@@ -565,9 +529,9 @@ class VatTuActivity : AppCompatActivity() {
     }
 
     private fun updateFeature(feature: Feature) {
-        val mapViewResult = mApplication!!.vatTuKHSFT!!.updateFeatureAsync(feature)
+        val mapViewResult = this.mApplication.vatTuKHSFT!!.updateFeatureAsync(feature)
         mapViewResult.addDoneListener {
-            val listListenableEditAsync = mApplication!!.vatTuKHSFT!!.applyEditsAsync()
+            val listListenableEditAsync = this.mApplication.vatTuKHSFT!!.applyEditsAsync()
             listListenableEditAsync.addDoneListener {
                 try {
                     val featureEditResults = listListenableEditAsync.get()
@@ -588,7 +552,7 @@ class VatTuActivity : AppCompatActivity() {
         }
     }
 
-    private fun editValueAttribute(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+    private fun editValueAttribute(parent: AdapterView<*>, position: Int) {
         val item = parent.getItemAtPosition(position) as ChiTietVatTuAdapter.Item
         if (item.isEdit) {
             val calendar = arrayOfNulls<Calendar>(1)
@@ -600,13 +564,13 @@ class VatTuActivity : AppCompatActivity() {
             builder.setView(layout)
             val layoutTextView = layout.findViewById<FrameLayout>(R.id.layout_edit_viewmoreinfo_TextView)
             val textView = layout.findViewById<TextView>(R.id.txt_edit_viewmoreinfo)
-            val img_selectTime = layout.findViewById<ImageView>(R.id.img_selectTime)
+            val imgSelectTime = layout.findViewById<ImageView>(R.id.img_selectTime)
             val layoutEditText = layout.findViewById<LinearLayout>(R.id.layout_edit_viewmoreinfo_Editext)
             val editText = layout.findViewById<EditText>(R.id.etxt_edit_viewmoreinfo)
             val layoutSpin = layout.findViewById<LinearLayout>(R.id.layout_edit_viewmoreinfo_Spinner)
             val spin = layout.findViewById<Spinner>(R.id.spin_edit_viewmoreinfo)
             val autoCompleteTextView = layout.findViewById<AutoCompleteTextView>(R.id.autoCompleteTextView)
-            val field = mApplication!!.vatTuKHSFT!!.getField(item.fieldName!!)
+            val field = this.mApplication.vatTuKHSFT!!.getField(item.fieldName!!)
             val domain = field.domain
             if (field.name == Constant.VatTuFields.MaVatTu) {
                 layout.findViewById<View>(R.id.layout_edit_viewmoreinfo_AutoComplete).visibility = View.VISIBLE
@@ -636,10 +600,10 @@ class VatTuActivity : AppCompatActivity() {
                     Field.Type.DATE -> {
                         layoutTextView.visibility = View.VISIBLE
                         textView.text = item.value
-                        img_selectTime.setOnClickListener { v ->
+                        imgSelectTime.setOnClickListener {
                             val dialogView = View.inflate(this@VatTuActivity, R.layout.date_time_picker, null)
                             val alertDialog = android.app.AlertDialog.Builder(this@VatTuActivity).create()
-                            dialogView.findViewById<View>(R.id.date_time_set).setOnClickListener { view1 ->
+                            dialogView.findViewById<View>(R.id.date_time_set).setOnClickListener {
                                 val datePicker = dialogView.findViewById<DatePicker>(R.id.date_picker)
                                 calendar[0] = GregorianCalendar(datePicker.year, datePicker.month, datePicker.dayOfMonth)
                                 val date = String.format("%02d/%02d/%d", datePicker.dayOfMonth, datePicker.month + 1, datePicker.year)
@@ -666,8 +630,10 @@ class VatTuActivity : AppCompatActivity() {
                         editText.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(8))
                         editText.setText(item.value)
                     }
+                    else -> {
+                    }
                 }
-            builder.setPositiveButton("Cập nhật") { dialog, which ->
+            builder.setPositiveButton("Cập nhật") { _, _ ->
                 if (field.name == Constant.VatTuFields.MaVatTu) {
                     val text = autoCompleteTextView.text
                     if (text != null) {
@@ -700,6 +666,8 @@ class VatTuActivity : AppCompatActivity() {
                             Toast.makeText(this@VatTuActivity, this@VatTuActivity.getString(R.string.INCORRECT_INPUT_FORMAT), Toast.LENGTH_LONG).show()
                         }
 
+                        else -> {
+                        }
                     }
                 }
                 val adapter = parent.adapter as ChiTietVatTuAdapter

@@ -1,4 +1,4 @@
-package ditagis.binhduong.utities
+package vinhlong.ditagis.com.khaosatdongho.utities
 
 import android.app.Activity
 import android.app.Dialog

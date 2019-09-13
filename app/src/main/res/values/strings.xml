@@ -90,7 +90,7 @@
     <string name="validate_login_fail">Sai danh bạ hoặc mật khẩu</string>
     <string name="sql_coloumn_login_status">status</string>
 
-
+    <string name="prepare_data">Đang chuẩn bị dữ liệu</string>
     <!--sql column login begin-->
     <string name="sql_coloumn_login_displayname">DisplayName</string>
     <string name="sql_coloumn_login_username">Username</string>

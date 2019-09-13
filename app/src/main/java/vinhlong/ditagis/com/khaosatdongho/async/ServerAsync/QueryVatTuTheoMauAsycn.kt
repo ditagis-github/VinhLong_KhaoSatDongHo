@@ -21,7 +21,7 @@ class QueryVatTuTheoMauAsycn(private val mActivity: Activity, private val mDeleg
 
     override fun doInBackground(vararg params: String): Void? {
         try {
-            if (params != null && params.size > 0) {
+            if (params != null && params.isNotEmpty()) {
                 val tenThietLapMau = params[0]
                 val urlAPI = String.format(Constant.API_URL.VATTU_THEOMAU, tenThietLapMau)
                 val url = URL(urlAPI)
@@ -92,7 +92,6 @@ class QueryVatTuTheoMauAsycn(private val mActivity: Activity, private val mDeleg
 
     }
 
-    override fun onPostExecute(value: Void) {}
     inner class VatTu {
         var maVatTu: String? = null
         var tenMau: String? = null

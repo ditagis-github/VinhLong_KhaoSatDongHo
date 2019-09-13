@@ -2,12 +2,10 @@ package vinhlong.ditagis.com.khaosatdongho.entities
 
 import android.app.Application
 import android.net.Uri
-
 import com.esri.arcgisruntime.data.ArcGISFeature
 import com.esri.arcgisruntime.data.ServiceFeatureTable
-import ditagis.binhduong.utities.DAlertDialog
-import ditagis.binhduong.utities.DProgressDialog
-
+import vinhlong.ditagis.com.khaosatdongho.utities.DAlertDialog
+import vinhlong.ditagis.com.khaosatdongho.utities.DProgressDialog
 import vinhlong.ditagis.com.khaosatdongho.MainActivity
 import vinhlong.ditagis.com.khaosatdongho.entities.entitiesDB.LayerInfoDTG
 import vinhlong.ditagis.com.khaosatdongho.entities.entitiesDB.User
@@ -29,6 +27,8 @@ class DApplication : Application() {
     var vatTuKHSFT: ServiceFeatureTable? = null
     var dmVatTuKHSFT: ServiceFeatureTable? = null
 
+    lateinit var tenMauThietLaps: MutableList<String>
+    lateinit var vatTus: MutableList<VatTu>
 
     // user
     var user: User? = null

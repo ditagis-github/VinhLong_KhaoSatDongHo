@@ -6,6 +6,7 @@ import android.os.AsyncTask
 import android.util.Log
 import org.json.JSONException
 import org.json.JSONObject
+import vinhlong.ditagis.com.khaosatdongho.entities.VatTu
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -14,7 +15,7 @@ import java.net.URL
 import java.util.*
 
 @SuppressLint("StaticFieldLeak")
-class GetDanhSachVatTuAsycn(private val mActivity: Activity, private val mDelegate: AsyncResponse) : AsyncTask<Void, ArrayList<GetDanhSachVatTuAsycn.VatTu>, Void>() {
+class GetDanhSachVatTuAsycn(private val mActivity: Activity, private val mDelegate: AsyncResponse) : AsyncTask<Void, ArrayList<VatTu>, Void>() {
 
     interface AsyncResponse {
         fun processFinish(vatTus: ArrayList<VatTu>?)
@@ -42,12 +43,14 @@ class GetDanhSachVatTuAsycn(private val mActivity: Activity, private val mDelega
                 publishProgress(vatTus)
             } catch (e: Exception) {
                 Log.e("error", e.toString())
+                publishProgress()
             } finally {
                 conn.disconnect()
-                publishProgress()
+
             }
         } catch (e: Exception) {
             Log.e("ERROR", e.toString())
+            publishProgress()
         }
 
         return null
@@ -105,51 +108,4 @@ class GetDanhSachVatTuAsycn(private val mActivity: Activity, private val mDelega
 
     }
 
-    override fun onPostExecute(value: Void) {}
-
-    class VatTu {
-        var maVatTu: String? = null
-        var tenVatTu: String? = null
-        var donViTinh: String? = null
-        private var vT: String? = null
-        private var nC: String? = null
-        private var mTC: String? = null
-        var maHSDG: String? = null
-
-        constructor() {}
-
-        constructor(maVatTu: String, tenVatTu: String, donViTinh: String, vT: String, nC: String, mTC: String, maHSDG: String) {
-            this.donViTinh = donViTinh
-            this.maVatTu = maVatTu
-            this.tenVatTu = tenVatTu
-            this.vT = vT
-            this.nC = nC
-            this.mTC = mTC
-            this.maHSDG = maHSDG
-        }
-
-        fun getvT(): String? {
-            return vT
-        }
-
-        fun setvT(vT: String) {
-            this.vT = vT
-        }
-
-        fun getnC(): String? {
-            return nC
-        }
-
-        fun setnC(nC: String) {
-            this.nC = nC
-        }
-
-        fun getmTC(): String? {
-            return mTC
-        }
-
-        fun setmTC(mTC: String) {
-            this.mTC = mTC
-        }
-    }
 }

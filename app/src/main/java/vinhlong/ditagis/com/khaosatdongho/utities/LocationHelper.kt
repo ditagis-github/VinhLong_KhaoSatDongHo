@@ -343,18 +343,7 @@ class LocationHelper(private val mContext: Context, delegate: AsyncResponse) : A
         return null
     }
 
-    override fun onProgressUpdate(vararg values: Any) {
-        super.onProgressUpdate(*values)
-    }
 
-    override fun onPreExecute() {
-        super.onPreExecute()
-    }
-
-    override fun onPostExecute(aVoid: Void) {
-        super.onPostExecute(aVoid)
-
-    }
 
     companion object {
 
