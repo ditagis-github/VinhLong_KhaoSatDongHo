@@ -17,7 +17,7 @@ class DApplication : Application() {
     lateinit var alertDialog: DAlertDialog
     var lstFeatureLayerDTG: List<LayerInfoDTG>? = null
     val definitionFeature: String
-        get() = String.format("%s = '%s' and %s = '%s'", Constant.DongHoKhachHangFields.NGUOI_CAP_NHAT,
+        get() = String.format("%s = '%s' and %s = '%s'", Constant.DongHoKhachHangFields.NV_KHAO_SAT,
                 user!!.userName, Constant.DongHoKhachHangFields.TINH_TRANG,
                 Constant.TinhTrangDongHoKhachHang.DANG_KHAO_SAT)
 

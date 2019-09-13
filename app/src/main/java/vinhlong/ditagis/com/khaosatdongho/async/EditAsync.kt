@@ -4,12 +4,10 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.AsyncTask
 import android.util.Log
-import android.view.View
 import android.view.ViewGroup
 import com.esri.arcgisruntime.data.*
 import vinhlong.ditagis.com.khaosatdongho.entities.DApplication
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant
-import vinhlong.ditagis.com.khaosatdongho.utities.MySnackBar
 import java.util.*
 import java.util.concurrent.ExecutionException
 
@@ -82,7 +80,7 @@ class EditAsync(private val mRootView: ViewGroup, private val mActivity: Activit
         }
         val currentTime = Calendar.getInstance()
         mSelectedArcGISFeature!!.attributes[Constant.DongHoKhachHangFields.NGAY_CAP_NHAT] = currentTime
-        mSelectedArcGISFeature!!.attributes[Constant.DongHoKhachHangFields.NGUOI_CAP_NHAT] = this.mApplication.user?.userName
+        mSelectedArcGISFeature!!.attributes[Constant.DongHoKhachHangFields.NV_KHAO_SAT] = this.mApplication.user?.userName
         val voidListenableFuture = mServiceFeatureTable.updateFeatureAsync(mSelectedArcGISFeature!!)
         voidListenableFuture.addDoneListener {
             try {

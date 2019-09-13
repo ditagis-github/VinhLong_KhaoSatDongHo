@@ -3,26 +3,18 @@ package vinhlong.ditagis.com.khaosatdongho.async
 
 import android.app.Activity
 import android.os.AsyncTask
-import android.support.design.widget.TextInputEditText
 import android.support.design.widget.TextInputLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
-import android.widget.ArrayAdapter
-import android.widget.LinearLayout
-import android.widget.Spinner
-import android.widget.TextView
-import android.widget.Toast
-
+import android.widget.*
 import com.esri.arcgisruntime.data.ArcGISFeature
-import com.esri.arcgisruntime.data.CodedValue
 import com.esri.arcgisruntime.data.CodedValueDomain
 import com.esri.arcgisruntime.data.Field
-
-import java.text.NumberFormat
-import java.util.ArrayList
-
+import kotlinx.android.synthetic.main.item_add_feature.view.*
 import vinhlong.ditagis.com.khaosatdongho.R
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant
+import java.text.NumberFormat
+import java.util.*
 
 class LoadingDataFeatureAsync(private val mActivity: Activity, private val mArcGISFeature: ArcGISFeature?, private val mDelegate: AsyncResponse) : AsyncTask<Void, Void, Void>() {
 
@@ -84,6 +76,7 @@ class LoadingDataFeatureAsync(private val mActivity: Activity, private val mArcG
             layoutView.findViewById<View>(R.id.llayout_add_feature_number).visibility = View.GONE
 
             val spinLayout = layoutView.findViewById<TextInputLayout>(R.id.llayout_add_feature_spinner)
+            layoutView.txt_spin_title.text = field.alias
             spinLayout.hint = field.alias
 
             adapter.addAll(values)

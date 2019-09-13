@@ -1,7 +1,7 @@
 package vinhlong.ditagis.com.khaosatdongho.utities
 
 import java.text.SimpleDateFormat
-import java.util.Arrays
+import java.util.*
 
 /**
  * Created by ThanLe on 3/1/2018.
@@ -74,12 +74,13 @@ class Constant private constructor() {
         val GHI_CHU = "GhiChu"
         val GHI_CHU_KS = "GhiChuKS"
         val NGAY_CAP_NHAT = "TGGiaoKS"
-        val NGUOI_CAP_NHAT = "NVKhaoSat"
+        val NV_KHAO_SAT = "NVKhaoSat"
         val SO_DIEN_THOAI = "SoDienThoai"
         val DIA_CHI = "DiaChi"
         val DIA_CHI_LAP_DAT = "DiaChiLapDat"
+        val KHOANG_CACH_DEN_ONG_DV = "KhoangCachDenOngDichVu"
 
-        val UpdateFields = Arrays.asList(TEN_KH, CMND, DIA_CHI_LAP_DAT, SO_DIEN_THOAI, GHI_CHU_KS)
+        val UpdateFields = Arrays.asList(TEN_KH, CMND, SO_DIEN_THOAI, DIA_CHI_LAP_DAT, KHOANG_CACH_DEN_ONG_DV, GHI_CHU_KS)
         val OutFields = Arrays.asList(ID, TEN_KH, CMND, DIA_CHI, DIA_CHI_LAP_DAT, SO_DIEN_THOAI, GHI_CHU_KS)
     }
 

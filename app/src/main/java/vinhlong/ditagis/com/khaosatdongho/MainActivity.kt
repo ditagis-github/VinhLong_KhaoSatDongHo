@@ -48,8 +48,6 @@ import com.esri.arcgisruntime.mapping.view.DefaultMapViewOnTouchListener
 import com.esri.arcgisruntime.mapping.view.LocationDisplay
 import com.esri.arcgisruntime.mapping.view.MapView
 import com.google.android.gms.common.api.GoogleApiClient
-import vinhlong.ditagis.com.khaosatdongho.utities.DAlertDialog
-import vinhlong.ditagis.com.khaosatdongho.utities.DProgressDialog
 import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONArray
 import org.json.JSONException
@@ -104,6 +102,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
     private var numberLoadedData = 0
     private var sizeOfData: Int = 0
     private lateinit var titleDialog: String
+    private var unLoadedLayerName = mutableListOf<String>()
     fun setChangingGeometry(changingGeometry: Boolean, feature: ArcGISFeature?) {
         this.isChangingGeometry = changingGeometry
         if (this.isChangingGeometry) {
@@ -301,6 +300,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
                 mApplication.progressDialog.changeTitle(this@MainActivity, container_main, this@MainActivity.getString(R.string.prepare_data))
                 mApplication.lstFeatureLayerDTG = layerInfoDTGs
 
+                numberLoadedData = 0
                 sizeOfData = mApplication.lstFeatureLayerDTG!!.size + 2 //lấy tên mẫu, danh sách vật tư
                 setFeatureService()
                 getTenMauThietLaps()
@@ -385,7 +385,24 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
 
     private fun checkCompletePrepareData() {
         numberLoadedData -= -1
-        if (numberLoadedData == sizeOfData) mApplication.progressDialog.dismiss()
+        if (numberLoadedData == sizeOfData) {
+            mApplication.progressDialog.dismiss()
+            try {
+                // kiểm tra có lớp nào không tải được hay không
+                if (unLoadedLayerName.isNotEmpty()) {
+                    // hiển thị thông báo
+                    // yêu cầu người dùng tải lại
+                    var message = ""
+                    unLoadedLayerName.forEach {
+                        message += """$it
+"""
+                    }
+                    mApplication.alertDialog.show(this@MainActivity, "Lỗi khi tải các lớp dữ liệu", message)
+                }
+            } catch (e: Exception) {
+                mApplication.alertDialog.show(this@MainActivity, "Có lỗi xảy ra", e.toString())
+            }
+        }
         else mApplication.progressDialog.changeTitle(this@MainActivity, container_main, "$titleDialog $numberLoadedData/$sizeOfData")
     }
     private fun setFeatureService() {
@@ -416,6 +433,8 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
                             val url_HanhChinh = "$url/5"
                             val serviceFeatureTable = ServiceFeatureTable(url_HanhChinh)
                             popup!!.setmSFTHanhChinh(serviceFeatureTable)
+                        } else {
+                            unLoadedLayerName.add(layerInfoDTG.titleLayer!!)
                         }
                         checkCompletePrepareData()
                     }
@@ -433,6 +452,8 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
                                     addCheckBox_SubLayer(sublayer as ArcGISMapImageSublayer, mLinnearDisplayLayerTaiSan!!)
                                 }
                             }
+                        } else {
+                            unLoadedLayerName.add(layerInfoDTG.titleLayer!!)
                         }
                         checkCompletePrepareData()
                     }
@@ -457,9 +478,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
                                 addCheckBox_LayerDHKH(featureLayer)
                                 mMapView!!.setViewpointScaleAsync(featureLayer.minScale)
                             } else {
-                                Toast.makeText(this@MainActivity, "Không tải được lớp đồng hồ khách hàng, đang thử tải lại",
-                                        Toast.LENGTH_SHORT).show()
-//                            setFeatureService()
+                                unLoadedLayerName.add(layerInfoDTG.titleLayer!!)
                             }
                             checkCompletePrepareData()
                         }

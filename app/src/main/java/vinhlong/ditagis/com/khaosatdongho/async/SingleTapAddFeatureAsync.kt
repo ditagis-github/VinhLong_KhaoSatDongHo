@@ -63,7 +63,7 @@ class SingleTapAddFeatureAsync(private val mActivity: MainActivity, private val 
     private fun addFeatureAsync(featureAdd: Feature) {
         val currentTime = Calendar.getInstance()
         featureAdd.attributes[Constant.DongHoKhachHangFields.NGAY_CAP_NHAT] = currentTime
-        featureAdd.attributes[Constant.DongHoKhachHangFields.NGUOI_CAP_NHAT] = this.dApplication.user?.userName
+        featureAdd.attributes[Constant.DongHoKhachHangFields.NV_KHAO_SAT] = this.dApplication.user?.userName
 
         val voidListenableFuture = this.dongHoKHSFT.addFeatureAsync(featureAdd)
         voidListenableFuture.addDoneListener {
