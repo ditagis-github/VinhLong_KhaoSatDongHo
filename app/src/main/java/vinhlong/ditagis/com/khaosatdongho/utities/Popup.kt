@@ -210,11 +210,12 @@ class Popup(private val mMainActivity: MainActivity, private val mMapView: MapVi
                     mCallout.refresh()
                     mCallout.show()
                 } else {
-                    val snackBar = Snackbar.make(mMainActivity.container_main, "Có lỗi xảy ra", 5000)
-                    snackBar.setAction("Thử lại") {
-                        showCallout(point, view, scale)
-                    }
-                    snackBar.show()
+                    showCallout(point, view, scale)
+//                    val snackBar = Snackbar.make(mMainActivity.container_main, "Có lỗi xảy ra", 5000)
+//                    snackBar.setAction("Thử lại") {
+//                        showCallout(point, view, scale)
+//                    }
+//                    snackBar.show()
                 }
             }
 
