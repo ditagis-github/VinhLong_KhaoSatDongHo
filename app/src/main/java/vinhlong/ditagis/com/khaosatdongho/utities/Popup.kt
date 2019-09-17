@@ -3,7 +3,6 @@ package vinhlong.ditagis.com.khaosatdongho.utities
 import android.content.Intent
 import android.net.Uri
 import android.provider.MediaStore
-import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.View
@@ -211,11 +210,6 @@ class Popup(private val mMainActivity: MainActivity, private val mMapView: MapVi
                     mCallout.show()
                 } else {
                     showCallout(point, view, scale)
-//                    val snackBar = Snackbar.make(mMainActivity.container_main, "Có lỗi xảy ra", 5000)
-//                    snackBar.setAction("Thử lại") {
-//                        showCallout(point, view, scale)
-//                    }
-//                    snackBar.show()
                 }
             }
 

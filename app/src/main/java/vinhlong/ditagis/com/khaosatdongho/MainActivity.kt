@@ -862,6 +862,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
                 mMapViewHandler!!.showPopup(mApplication.selectedFeature)
             }
         } catch (e: Exception) {
+            mApplication.alertDialog.show(this@MainActivity, "Có lỗi xảy ra", e.toString())
         }
 
         when (requestCode) {
