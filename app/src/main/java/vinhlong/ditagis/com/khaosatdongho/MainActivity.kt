@@ -92,7 +92,6 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
     private var colors: IntArray? = null
     private var isChangingGeometry = false
     private var mLocationDisplay: LocationDisplay? = null
-    private val requestCode = 2
     internal var reqPermissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
 
     private var mLocationHelper: LocationHelper? = null
@@ -133,7 +132,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
             logIn()
         } catch (e: Exception) {
             mApplication.progressDialog.dismiss()
-            mApplication.alertDialog.show(this@MainActivity, "Có lỗi xảy ra", e.toString())
+            mApplication.alertDialog.show(this@MainActivity, e)
         }
     }
 
@@ -152,7 +151,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
             toggle.syncState()
         } catch (e: Exception) {
             mApplication.progressDialog.dismiss()
-            mApplication.alertDialog.show(this@MainActivity, "Có lỗi xảy ra", e.toString())
+            mApplication.alertDialog.show(this@MainActivity, e)
         }
     }
     private fun setLoginInfos() {
@@ -165,7 +164,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
             namenv.text = displayName
         } catch (e: Exception) {
             mApplication.progressDialog.dismiss()
-            mApplication.alertDialog.show(this@MainActivity, "Có lỗi xảy ra", e.toString())
+            mApplication.alertDialog.show(this@MainActivity, e)
         }
     }
 
@@ -209,7 +208,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
             locationManager.requestLocationUpdates("gps", 5000, 0f, listener)
         } catch (e: Exception) {
             mApplication.progressDialog.dismiss()
-            mApplication.alertDialog.show(this@MainActivity, "Có lỗi xảy ra", e.toString())
+            mApplication.alertDialog.show(this@MainActivity, e)
         }
     }
 
@@ -217,10 +216,10 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
         try {
             mApplication.progressDialog.dismiss()
             val intent = Intent(this, LoginActivity::class.java)
-            startActivityForResult(intent, Constant.REQUEST_LOGIN)
+            startActivityForResult(intent, Constant.REQUEST.ID_LOG_IN)
         } catch (e: Exception) {
             mApplication.progressDialog.dismiss()
-            mApplication.alertDialog.show(this@MainActivity, "Có lỗi xảy ra", e.toString())
+            mApplication.alertDialog.show(this@MainActivity, e)
         }
     }
 
@@ -250,7 +249,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
             }
         } catch (e: Exception) {
             mApplication.progressDialog.dismiss()
-            mApplication.alertDialog.show(this@MainActivity, "Có lỗi xảy ra", e.toString())
+            mApplication.alertDialog.show(this@MainActivity, e)
         }
     }
 
@@ -400,7 +399,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
                     mApplication.alertDialog.show(this@MainActivity, "Lỗi khi tải các lớp dữ liệu", message)
                 }
             } catch (e: Exception) {
-                mApplication.alertDialog.show(this@MainActivity, "Có lỗi xảy ra", e.toString())
+                mApplication.alertDialog.show(this@MainActivity, e)
             }
         }
         else mApplication.progressDialog.changeTitle(this@MainActivity, container_main, "$titleDialog $numberLoadedData/$sizeOfData")
@@ -524,7 +523,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
                     }
                 } catch (e: JSONException) {
                     mApplication.progressDialog.dismiss()
-                    mApplication.alertDialog.show(this@MainActivity, "Có lỗi xảy ra", e.toString())
+                    mApplication.alertDialog.show(this@MainActivity, e)
                 }
 
             }
@@ -614,7 +613,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
 
             if (!(permissionCheck1 && permissionCheck2)) {
                 // If permissions are not already granted, request permission from the user.
-                ActivityCompat.requestPermissions(this@MainActivity, reqPermissions, requestCode)
+                ActivityCompat.requestPermissions(this@MainActivity, reqPermissions, Constant.REQUEST.ID_PERMISSION)
             }
         })
     }
@@ -671,7 +670,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
         when (id) {
             R.id.nav_thongke -> {
                 val intent = Intent(this, CongViecActivity::class.java)
-                this.startActivityForResult(intent, requestCode)
+                this.startActivityForResult(intent, Constant.REQUEST.ID_DANH_SACH_CONG_VIEC)
             }
             R.id.nav_tracuu -> {
             }
@@ -856,51 +855,54 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
         return image
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         try {
-            if (resultCode == Activity.RESULT_OK) {
-                mMapViewHandler!!.showPopup(mApplication.selectedFeature)
-            }
-        } catch (e: Exception) {
-            mApplication.alertDialog.show(this@MainActivity, "Có lỗi xảy ra", e.toString())
-        }
+            when (requestCode) {
+                Constant.REQUEST.ID_UPDATE_ATTACHMENT ->
+                    if (resultCode == Activity.RESULT_OK) {
+                    val uri = mApplication.uri
+                    if (uri != null) {
+                        val bitmap = getBitmap(uri.path)
+                        //                        Bitmap bitmap = getBitmap(uri);
+                        try {
+                            if (bitmap != null) {
 
-        when (requestCode) {
-            Constant.REQUEST.ID_UPDATE_ATTACHMENT -> if (resultCode == Activity.RESULT_OK) {
-                val uri = mApplication.uri
-                if (uri != null) {
-                    val bitmap = getBitmap(uri.path)
-                    //                        Bitmap bitmap = getBitmap(uri);
-                    try {
-                        if (bitmap != null) {
-
-                            mApplication.progressDialog.show(this@MainActivity, container_main, "Đang cập nhật hình ảnh...")
-                            val updateAttachmentAsync = UpdateAttachmentAsync(this, mApplication.selectedFeature!!, getByteArrayFromBitmap(bitmap),
-                                    object : UpdateAttachmentAsync.AsyncResponse {
-                                        override fun processFinish(isSuccess: Boolean?) {
-                                            mApplication.progressDialog.dismiss()
-                                            if (isSuccess!!) {
-                                                mApplication.alertDialog.show(this@MainActivity, "Lưu thành công")
-                                            } else
-                                                mApplication.alertDialog.show(this@MainActivity, "Có lỗi xảy ra")
-                                        }
-                                    })
-                            updateAttachmentAsync.execute()
+                                mApplication.progressDialog.show(this@MainActivity, container_main, "Đang cập nhật hình ảnh...")
+                                val updateAttachmentAsync = UpdateAttachmentAsync(this, mApplication.selectedFeature!!, getByteArrayFromBitmap(bitmap),
+                                        object : UpdateAttachmentAsync.AsyncResponse {
+                                            override fun processFinish(isSuccess: Boolean?) {
+                                                mApplication.progressDialog.dismiss()
+                                                if (isSuccess!!) {
+                                                    mApplication.alertDialog.show(this@MainActivity, "Lưu thành công")
+                                                } else
+                                                    mApplication.alertDialog.show(this@MainActivity, "Có lỗi xảy ra")
+                                            }
+                                        })
+                                updateAttachmentAsync.execute()
+                            }
+                        } catch (ignored: Exception) {
                         }
-                    } catch (ignored: Exception) {
-                    }
 
+                    }
+                    } else if (resultCode == Activity.RESULT_CANCELED) {
+                        MySnackBar.make(mMapView!!, "Hủy chụp ảnh", false)
+                    } else {
+                        MySnackBar.make(mMapView!!, "Lỗi khi chụp ảnh", false)
+                    }
+                Constant.REQUEST.ID_LOG_IN ->
+                    if (Activity.RESULT_OK != resultCode) {
+                        handleLoginFail()
+                    } else {
+                        handleLoginSuccess()
+                    }
+                Constant.REQUEST.ID_DANH_SACH_CONG_VIEC -> {
+                    if (resultCode == Activity.RESULT_OK) {
+                        mMapViewHandler!!.showPopup(mApplication.selectedFeature)
+                    }
                 }
-            } else if (resultCode == Activity.RESULT_CANCELED) {
-                MySnackBar.make(mMapView!!, "Hủy chụp ảnh", false)
-            } else {
-                MySnackBar.make(mMapView!!, "Lỗi khi chụp ảnh", false)
-            }
-            Constant.REQUEST_LOGIN -> if (Activity.RESULT_OK != resultCode) {
-                handleLoginFail()
-            } else {
-                handleLoginSuccess()
-            }
+        }
+        } catch (e: Exception) {
+            mApplication.alertDialog.show(this@MainActivity, e)
         }
     }
 

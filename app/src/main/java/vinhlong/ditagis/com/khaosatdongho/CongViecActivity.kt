@@ -74,8 +74,8 @@ class CongViecActivity : AppCompatActivity() {
         mBottomLayout!!.findViewById<View>(R.id.llayout__handle_item_cong_viec_ban_do).setOnClickListener {
             if (mBottomSheetDialog!!.isShowing)
                 mBottomSheetDialog!!.dismiss()
-            val returnIntent = Intent()
             mApplication!!.selectedFeature = mSelectedFeature as ArcGISFeature?
+            val returnIntent = Intent()
             setResult(Activity.RESULT_OK, returnIntent)
 
 

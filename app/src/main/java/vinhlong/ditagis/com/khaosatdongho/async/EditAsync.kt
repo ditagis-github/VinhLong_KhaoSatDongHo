@@ -121,7 +121,7 @@ class EditAsync(private val mRootView: ViewGroup, private val mActivity: Activit
 
     private fun notifyError() {
         publishProgress()
-        mApplication.alertDialog.show(mActivity, "Có lỗi xả ra")
+        mApplication.alertDialog.show(mActivity, "Có lỗi xảy ra")
     }
 
     private fun getIdFeatureTypes(featureTypes: List<FeatureType>, value: String): Any? {

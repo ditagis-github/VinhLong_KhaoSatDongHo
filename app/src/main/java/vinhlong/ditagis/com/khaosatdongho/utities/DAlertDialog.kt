@@ -27,6 +27,22 @@ class DAlertDialog {
         vibrate(activity, 2000)
     }
 
+    fun show(activity: Activity, e: Exception) {
+        val builder = AlertDialog.Builder(activity, R.style.DDialogBuilder)
+        builder.setTitle("Có lỗi xảy ra")
+                .setPositiveButton("OK") { dialogInterface, _ ->
+
+                    dialogInterface.dismiss()
+                }.setCancelable(false)
+        if (e.message != null)
+            builder.setMessage(e.message)
+        else builder.setMessage(e.toString())
+        mDialog = builder.create()
+        mDialog?.show()
+
+        vibrate(activity, 2000)
+    }
+
     private fun vibrate(activity: Activity, miliSeconds: Long) {
         val v = activity.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

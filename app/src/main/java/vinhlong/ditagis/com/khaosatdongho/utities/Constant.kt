@@ -43,6 +43,9 @@ class Constant private constructor() {
     }
 
     object REQUEST {
+        val ID_DANH_SACH_CONG_VIEC = 2
+        val ID_PERMISSION = 3
+        val ID_LOG_IN = 4
         val ID_UPDATE_ATTACHMENT = 50
         val ID_UPDATE_ATTRIBUTE = 10
         val ID_UPDATE_VAT_TU = 11
@@ -130,7 +133,6 @@ class Constant private constructor() {
         val EMPTY = ""
         val NGAY_CAP_NHAT = "NgayCapNhat"
         val PATH = "vlong_ksatdongho"
-        val REQUEST_LOGIN = 0
         private val SERVER_API = "http://vwa.ditagis.com/api"
         val idDongHoKhachHang = 5
 
