@@ -31,7 +31,7 @@ class UpdateAttachmentAsync(private val mActivity: MainActivity, selectedArcGISF
     override fun doInBackground(vararg params: Void): Void? {
         val attachmentName = String.format(Constant.AttachmentName.UPDATE,
                 mApplication.user?.userName, System.currentTimeMillis())
-        val addResult = mSelectedArcGISFeature!!.addAttachmentAsync(mImage, Bitmap.CompressFormat.PNG.toString(), attachmentName)
+        val addResult = mSelectedArcGISFeature!!.addAttachmentAsync(mImage, Bitmap.CompressFormat.JPEG.toString(), attachmentName)
         addResult.addDoneListener {
             try {
                 val attachment = addResult.get()

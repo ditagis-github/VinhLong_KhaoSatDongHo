@@ -44,7 +44,6 @@ class EditAsync(private val mRootView: ViewGroup, private val mActivity: Activit
                                 mSelectedArcGISFeature!!.attributes[field.name] = null
                             else {
                                 val valueString = value.toString().trim { it <= ' ' }
-
                                 when (field.fieldType) {
                                     Field.Type.TEXT -> mSelectedArcGISFeature!!.attributes[field.name] = valueString
                                     Field.Type.DOUBLE -> {

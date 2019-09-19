@@ -16,14 +16,10 @@ import com.esri.arcgisruntime.mapping.view.Callout
 import com.esri.arcgisruntime.mapping.view.MapView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.popup.view.*
-import vinhlong.ditagis.com.khaosatdongho.MainActivity
-import vinhlong.ditagis.com.khaosatdongho.R
-import vinhlong.ditagis.com.khaosatdongho.UpdateActivity
-import vinhlong.ditagis.com.khaosatdongho.VatTuActivity
+import vinhlong.ditagis.com.khaosatdongho.*
 import vinhlong.ditagis.com.khaosatdongho.adapter.FeatureViewInfoAdapter
 import vinhlong.ditagis.com.khaosatdongho.async.EditAsync
 import vinhlong.ditagis.com.khaosatdongho.async.QueryHanhChinhAsync
-import vinhlong.ditagis.com.khaosatdongho.async.ViewAttachmentAsync
 import vinhlong.ditagis.com.khaosatdongho.entities.DApplication
 import vinhlong.ditagis.com.khaosatdongho.libs.FeatureLayerDTG
 import java.util.*
@@ -34,12 +30,12 @@ class Popup(private val mMainActivity: MainActivity, private val mMapView: MapVi
     private var dongHoKHDTG: FeatureLayerDTG? = null
     private var lstFeatureType: MutableList<String>? = null
     private var linearLayout: LinearLayout? = null
-    private val dApplication: DApplication
+    private val mApplication: DApplication
     private var quanhuyen_features: ArrayList<Feature>? = null
     private var quanhuyen_feature: Feature? = null
 
     init {
-        this.dApplication = mMainActivity.application as DApplication
+        this.mApplication = mMainActivity.application as DApplication
     }
 
     fun setDongHoKHDTG(dongHoKHDTG: FeatureLayerDTG) {
@@ -141,7 +137,7 @@ class Popup(private val mMainActivity: MainActivity, private val mMapView: MapVi
             val imgBtn_ViewMoreInfo = linearLayout!!.findViewById<LinearLayout>(R.id.llayout_ViewMoreInfo)
             imgBtn_ViewMoreInfo.visibility = View.VISIBLE
             imgBtn_ViewMoreInfo.setOnClickListener { v ->
-                dApplication.selectedFeature = this@Popup.featureDHKH
+                mApplication.selectedFeature = this@Popup.featureDHKH
                 val intent = Intent(mMainActivity, UpdateActivity::class.java)
                 mMainActivity.startActivityForResult(intent, Constant.REQUEST.ID_UPDATE_ATTRIBUTE)
 
@@ -151,8 +147,8 @@ class Popup(private val mMainActivity: MainActivity, private val mMapView: MapVi
             val imgBtn_vatTu = linearLayout!!.findViewById<LinearLayout>(R.id.llayout_vattu)
             imgBtn_vatTu.visibility = View.VISIBLE
             linearLayout!!.findViewById<View>(R.id.llayout_vattu).setOnClickListener { v ->
-                //                this.dApplication.getEditingVatTu().showDanhSachVatTu(featureDHKH);
-                dApplication.selectedFeature = this@Popup.featureDHKH
+                //                this.mApplication.getEditingVatTu().showDanhSachVatTu(featureDHKH);
+                mApplication.selectedFeature = this@Popup.featureDHKH
                 val intent = Intent(mMainActivity, VatTuActivity::class.java)
                 mMainActivity.startActivityForResult(intent, Constant.REQUEST.ID_UPDATE_VAT_TU)
             }
@@ -251,15 +247,17 @@ class Popup(private val mMainActivity: MainActivity, private val mMapView: MapVi
             val photo = ImageFile.getFile(mMainActivity)
             val uri = Uri.fromFile(photo)
             cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
-            dApplication.selectedFeature = featureDHKH
-            dApplication.uri = uri
+            mApplication.selectedFeature = featureDHKH
+            mApplication.uri = uri
             mMainActivity.startActivityForResult(cameraIntent, Constant.REQUEST.ID_UPDATE_ATTACHMENT)
         }
     }
 
     private fun viewAttachment(featureDHKH: ArcGISFeature) {
-        val viewAttachmentAsync = ViewAttachmentAsync(mMainActivity,mMainActivity.container_main, featureDHKH)
-        viewAttachmentAsync.execute()
+        mApplication.selectedFeature = featureDHKH
+        val intent = Intent(mMainActivity, ViewAttachmentActivity::class.java)
+        mMainActivity.startActivity(intent)
+
     }
 
     private fun getValueDomain(codedValues: List<CodedValue>, code: String): Any? {
