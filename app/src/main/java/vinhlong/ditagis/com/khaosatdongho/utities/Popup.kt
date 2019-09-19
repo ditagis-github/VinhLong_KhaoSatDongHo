@@ -131,7 +131,7 @@ class Popup(private val mMainActivity: MainActivity, private val mMapView: MapVi
         val inflater = LayoutInflater.from(this.mMainActivity.applicationContext)
         linearLayout = inflater.inflate(R.layout.popup, null) as LinearLayout
         linearLayout!!.findViewById<View>(R.id.imgbtn_close_popup)
-                .setOnClickListener { view -> if (mCallout != null && mCallout.isShowing) mCallout.dismiss() }
+                .setOnClickListener { view -> if (mCallout != null && mCallout.isShowing) dimissCallout() }
         refressPopup()
         if (dongHoKHDTG!!.action!!.isEdit) {
             val imgBtn_ViewMoreInfo = linearLayout!!.findViewById<LinearLayout>(R.id.llayout_ViewMoreInfo)
@@ -222,8 +222,7 @@ class Popup(private val mMainActivity: MainActivity, private val mMapView: MapVi
                 override fun processFinish(isSuccess: Boolean?) {
                     if (isSuccess!!) {
                         Toast.makeText(mMainActivity, "Đã hoàn tất khảo sát", Toast.LENGTH_SHORT).show()
-                        if (this@Popup.mCallout!!.isShowing)
-                            this@Popup.mCallout.dismiss()
+                        dimissCallout()
                     } else
                         Toast.makeText(mMainActivity, "Có lỗi xảy ra", Toast.LENGTH_SHORT).show()
                 }
@@ -237,8 +236,7 @@ class Popup(private val mMainActivity: MainActivity, private val mMapView: MapVi
 
     private fun editLocation(feature: ArcGISFeature) {
         mMainActivity.setChangingGeometry(true, feature)
-        if (mCallout!!.isShowing)
-            mCallout.dismiss()
+        dimissCallout()
     }
 
     fun updateAttachment(featureDHKH: ArcGISFeature) {

@@ -89,23 +89,13 @@ class CongViecActivity : AppCompatActivity() {
 
         layout.removeAllViews()
         mSelectedFeature = feature
-        for (field in feature.featureTable.fields) {
-            if (Constant.DongHoKhachHangFields.OutFields.contains(field.name)) {
-                val value = feature.attributes[field.name]
-                var valueString = ""
-                if (value != null)
-                    valueString = value.toString()
-                layout.addView(getLayoutInfo(field.alias, valueString))
-            }
+        for (fieldName in Constant.DongHoKhachHangFields.OutFields) {
+            val field = feature.featureTable.getField(fieldName)
+            val value = feature.attributes[field.name]
+            var valueString = ""
+            value?.let { valueString = it.toString() }
+            layout.addView(getLayoutInfo(field.alias, valueString))
         }
-
-
-        //        layout.addView(getLayoutInfo("Mã khách hàng", dongHo.getCmnd()));
-        //        layout.addView(getLayoutInfo("Tên khách hàng", dongHo.getTenKhachHang()));
-        //        layout.addView(getLayoutInfo("Số điện thoại", dongHo.getSoDienThoai()));
-        //        layout.addView(getLayoutInfo("Địa chỉ", dongHo.getDiaChi()));
-        //        layout.addView(getLayoutInfo("Ngày giao", dongHo.getThoiGian()));
-
     }
 
     private fun getLayoutInfo(alias: String, value: String?): View {

@@ -71,7 +71,7 @@ import java.io.IOException
 class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
 
     private val mUri: Uri? = null
-    private var popup: Popup? = null
+    private var mPopup: Popup? = null
     private var mMapView: MapView? = null
     private var mMap: ArcGISMap? = null
     private var mCallout: Callout? = null
@@ -406,8 +406,8 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
     private fun setFeatureService() {
 
         if (mApplication.lstFeatureLayerDTG!!.isEmpty()) return
-        popup = Popup(this@MainActivity, mMapView!!, mCallout)
-        mMapViewHandler = MapViewHandler(mMapView!!, this, popup!!)
+        mPopup = Popup(this@MainActivity, mMapView!!, mCallout)
+        mMapViewHandler = MapViewHandler(mMapView!!, this, mPopup!!)
 
         for (layerInfoDTG in mApplication.lstFeatureLayerDTG!!) {
             if (!layerInfoDTG.isView) {
@@ -430,7 +430,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
                             }
                             val url_HanhChinh = "$url/5"
                             val serviceFeatureTable = ServiceFeatureTable(url_HanhChinh)
-                            popup!!.setmSFTHanhChinh(serviceFeatureTable)
+                            mPopup!!.setmSFTHanhChinh(serviceFeatureTable)
                         } else {
                             unLoadedLayerName.add(layerInfoDTG.titleLayer!!)
                         }
@@ -470,7 +470,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
                     if (id == Constant.IDLayer.DHKHLYR) {
                         //                    String userName = mApplication.getUser().getUserName();
                         featureLayer.definitionExpression = mApplication.definitionFeature
-                        popup!!.setDongHoKHDTG(featureLayerDTG)
+                        mPopup!!.setDongHoKHDTG(featureLayerDTG)
                         featureLayer.addDoneLoadingListener {
                             if (featureLayer.loadStatus == LoadStatus.LOADED) {
                                 addCheckBox_LayerDHKH(featureLayer)
@@ -581,7 +581,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
     private fun getFieldsDTG(stringFields: String?): Array<String>? {
         var returnFields: Array<String>? = null
         if (stringFields != null) {
-            if (stringFields === "*") {
+            if (stringFields == "*") {
                 returnFields = arrayOf("*")
             } else {
                 returnFields = stringFields.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
@@ -668,6 +668,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
         val id = item.itemId
         when (id) {
             R.id.nav_thongke -> {
+                mPopup?.dimissCallout()
                 val intent = Intent(this, CongViecActivity::class.java)
                 this.startActivityForResult(intent, Constant.REQUEST.ID_DANH_SACH_CONG_VIEC)
             }

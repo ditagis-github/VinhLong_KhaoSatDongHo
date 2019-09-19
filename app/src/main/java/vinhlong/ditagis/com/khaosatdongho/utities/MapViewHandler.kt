@@ -1,6 +1,7 @@
 package vinhlong.ditagis.com.khaosatdongho.utities
 
 import android.app.Activity
+import android.support.design.widget.Snackbar
 import android.view.MotionEvent
 import android.widget.Toast
 import com.esri.arcgisruntime.data.*
@@ -81,8 +82,10 @@ class MapViewHandler(private val mapView: MapView, private val mActivity: MainAc
                 mApplication.progressDialog.dismiss()
                 if (feature != null) {
                     this@MapViewHandler.popup.showPopup(feature)
-                } else
-                    this@MapViewHandler.popup.dimissCallout()
+                } else {
+//                    this@MapViewHandler.popup.dimissCallout()
+                    Snackbar.make(mActivity.container_main, "Không tìm thấy đối tượng", 2000).show()
+                }
             }
 
 

@@ -1,5 +1,6 @@
 package vinhlong.ditagis.com.khaosatdongho.async
 
+import android.annotation.SuppressLint
 import android.os.AsyncTask
 import com.esri.arcgisruntime.data.ArcGISFeature
 import com.esri.arcgisruntime.layers.FeatureLayer
@@ -22,9 +23,10 @@ class SingleTapMapViewAsync(private val mActivity: MainActivity, private val map
     }
 
 
+    @SuppressLint("WrongThread")
     override fun doInBackground(vararg params: android.graphics.Point): Void? {
         val clickPoint = params[0]
-        val identifyFuture = mapView.identifyLayerAsync(dongHoKHFL, clickPoint, 5.0, false, 1)
+        val identifyFuture = mapView.identifyLayerAsync(dongHoKHFL, clickPoint, 10.0, false, 1)
         identifyFuture.addDoneListener {
             try {
                 val layerResult = identifyFuture.get()

@@ -16,7 +16,7 @@ import java.util.concurrent.ExecutionException
  */
 @SuppressLint("StaticFieldLeak")
 class EditAsync(private val mRootView: ViewGroup, private val mActivity: Activity, private val mServiceFeatureTable: ServiceFeatureTable, selectedArcGISFeature: ArcGISFeature, private val mDelegate: AsyncResponse) : AsyncTask<HashMap<String, Any>, Boolean, Void>() {
-    private var mSelectedArcGISFeature: ArcGISFeature? = null
+    private var mSelectedArcGISFeature: ArcGISFeature = selectedArcGISFeature
     private val mApplication: DApplication
 
     interface AsyncResponse {
@@ -24,7 +24,6 @@ class EditAsync(private val mRootView: ViewGroup, private val mActivity: Activit
     }
 
     init {
-        mSelectedArcGISFeature = selectedArcGISFeature
         this.mApplication = mActivity.application as DApplication
     }
 
@@ -35,45 +34,41 @@ class EditAsync(private val mRootView: ViewGroup, private val mActivity: Activit
     override fun doInBackground(vararg params: HashMap<String, Any>): Void? {
         if (params != null && params.isNotEmpty()) {
             val attributes = params[0]
-            for (alias in attributes.keys) {
-                for (field in mServiceFeatureTable.fields) {
-                    if (field.alias == alias) {
-                        try {
-                            val value = attributes[alias]
-                            if (value == null)
-                                mSelectedArcGISFeature!!.attributes[field.name] = null
-                            else {
-                                val valueString = value.toString().trim { it <= ' ' }
-                                when (field.fieldType) {
-                                    Field.Type.TEXT -> mSelectedArcGISFeature!!.attributes[field.name] = valueString
-                                    Field.Type.DOUBLE -> {
-                                        mSelectedArcGISFeature!!.attributes[field.name] = java.lang.Double.parseDouble(valueString)
-                                        mSelectedArcGISFeature!!.attributes[field.name] = java.lang.Float.parseFloat(valueString)
-                                        mSelectedArcGISFeature!!.attributes[field.name] = Integer.parseInt(valueString)
-                                        mSelectedArcGISFeature!!.attributes[field.name] = java.lang.Short.parseShort(valueString)
-                                    }
-                                    Field.Type.FLOAT -> {
-                                        mSelectedArcGISFeature!!.attributes[field.name] = java.lang.Float.parseFloat(valueString)
-                                        mSelectedArcGISFeature!!.attributes[field.name] = Integer.parseInt(valueString)
-                                        mSelectedArcGISFeature!!.attributes[field.name] = java.lang.Short.parseShort(valueString)
-                                    }
-                                    Field.Type.INTEGER -> {
-                                        mSelectedArcGISFeature!!.attributes[field.name] = Integer.parseInt(valueString)
-                                        mSelectedArcGISFeature!!.attributes[field.name] = java.lang.Short.parseShort(valueString)
-                                    }
-                                    Field.Type.SHORT -> mSelectedArcGISFeature!!.attributes[field.name] = java.lang.Short.parseShort(valueString)
-                                    else -> {
-                                    }
-                                }
+            for (fieldName in attributes.keys) {
+                try {
+                    val value = attributes[fieldName]
+                    if (value == null)
+                        mSelectedArcGISFeature.attributes[fieldName] = null
+                    else {
+                        val valueString = value.toString().trim { it <= ' ' }
+                        val field = mServiceFeatureTable.getField(fieldName)
+                        when (field.fieldType) {
+                            Field.Type.TEXT -> mSelectedArcGISFeature.attributes[fieldName] = valueString
+                            Field.Type.DOUBLE -> {
+                                mSelectedArcGISFeature.attributes[fieldName] = java.lang.Double.parseDouble(valueString)
+                                mSelectedArcGISFeature.attributes[fieldName] = java.lang.Float.parseFloat(valueString)
+                                mSelectedArcGISFeature.attributes[fieldName] = Integer.parseInt(valueString)
+                                mSelectedArcGISFeature.attributes[fieldName] = java.lang.Short.parseShort(valueString)
                             }
-
-                        } catch (e: Exception) {
-                            mSelectedArcGISFeature!!.attributes[field.name] = null
-                            Log.e("Lỗi thêm điểm", e.toString())
+                            Field.Type.FLOAT -> {
+                                mSelectedArcGISFeature.attributes[fieldName] = java.lang.Float.parseFloat(valueString)
+                                mSelectedArcGISFeature.attributes[fieldName] = Integer.parseInt(valueString)
+                                mSelectedArcGISFeature.attributes[fieldName] = java.lang.Short.parseShort(valueString)
+                            }
+                            Field.Type.INTEGER -> {
+                                mSelectedArcGISFeature.attributes[fieldName] = Integer.parseInt(valueString)
+                                mSelectedArcGISFeature.attributes[fieldName] = java.lang.Short.parseShort(valueString)
+                            }
+                            Field.Type.SHORT -> mSelectedArcGISFeature.attributes[fieldName] = java.lang.Short.parseShort(valueString)
+                            else -> {
+                            }
                         }
-
-                        break
                     }
+
+                } catch (e: Exception) {
+                    mSelectedArcGISFeature.attributes[fieldName] = null
+                    Log.e("Lỗi thêm điểm", e.toString())
+
                 }
             }
         }

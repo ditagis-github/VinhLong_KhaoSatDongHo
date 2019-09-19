@@ -56,35 +56,35 @@ class LoadingDataFeatureAsync(private val mActivity: Activity, private val mArcG
         if (mArcGISFeature != null) {
             value = mArcGISFeature.attributes[field.name]
         }
+        val spinLayout = layoutView.findViewById<TextInputLayout>(R.id.llayout_add_feature_spinner)
         if (field.domain != null) {
             val codedValueDomain = field.domain as CodedValueDomain
             val adapter = ArrayAdapter(mActivity, android.R.layout.simple_list_item_1, ArrayList<String>())
-            val spinner = layoutView.findViewById<Spinner>(R.id.spinner_add_spinner_value)
-            spinner.adapter = adapter
+            layoutView.spinner_add_spinner_value.adapter = adapter
             val values = ArrayList<String>()
             values.add(Constant.EMPTY)
             var selectedValue: String? = null
             for (codedValue in codedValueDomain.codedValues) {
                 values.add(codedValue.name)
-                if (value != null && codedValue.code === value)
+                if (value != null && codedValue.code == value)
                     selectedValue = codedValue.name
             }
 
-            layoutView.findViewById<View>(R.id.llayout_add_feature_number_decimal).visibility = View.GONE
-            layoutView.findViewById<View>(R.id.llayout_add_feature_spinner).visibility = View.VISIBLE
-            layoutView.findViewById<View>(R.id.llayout_add_feature_edittext).visibility = View.GONE
-            layoutView.findViewById<View>(R.id.llayout_add_feature_number).visibility = View.GONE
+            layoutView.llayout_add_feature_number_decimal.visibility = View.GONE
+            spinLayout.visibility = View.VISIBLE
+            layoutView.llayout_add_feature_edittext.visibility = View.GONE
+            layoutView.llayout_add_feature_number.visibility = View.GONE
 
-            val spinLayout = layoutView.findViewById<TextInputLayout>(R.id.llayout_add_feature_spinner)
-            layoutView.txt_spin_title.text = field.alias
+
             spinLayout.hint = field.alias
-
+            spinLayout.tag = field.name
+            layoutView.txt_spin_title.setText(field.alias)
             adapter.addAll(values)
             adapter.notifyDataSetChanged()
 
             for (i in values.indices) {
-                if (selectedValue != null && values[i] === selectedValue) {
-                    spinner.setSelection(i)
+                if (selectedValue != null && values[i] == selectedValue) {
+                    layoutView.spinner_add_spinner_value.setSelection(i)
                     break
                 }
             }
@@ -94,20 +94,20 @@ class LoadingDataFeatureAsync(private val mActivity: Activity, private val mArcG
                 Field.Type.UNKNOWN -> {
                 }
                 Field.Type.INTEGER, Field.Type.SHORT -> {
-                    layoutView.findViewById<View>(R.id.llayout_add_feature_number_decimal).visibility = View.GONE
-                    layoutView.findViewById<View>(R.id.llayout_add_feature_spinner).visibility = View.GONE
-                    layoutView.findViewById<View>(R.id.llayout_add_feature_edittext).visibility = View.GONE
-                    layoutView.findViewById<View>(R.id.llayout_add_feature_number).visibility = View.VISIBLE
+                    layoutView.llayout_add_feature_number_decimal.visibility = View.GONE
+                    spinLayout.visibility = View.GONE
+                    layoutView.llayout_add_feature_edittext.visibility = View.GONE
+                    layoutView.llayout_add_feature_number.visibility = View.VISIBLE
 
 
-                    val edit_number_layout = layoutView.findViewById<TextInputLayout>(R.id.llayout_add_feature_number)
-                    edit_number_layout.hint = field.alias
+                    layoutView.llayout_add_feature_number.hint = field.alias
+                    layoutView.llayout_add_feature_number.tag = field.name
                     if (value != null) {
 
                         try {
                             when (field.fieldType) {
-                                Field.Type.INTEGER -> (layoutView.findViewById<View>(R.id.etxt_add_edit_number_value) as TextView).text = nm.format(Integer.parseInt(value.toString()).toLong())
-                                Field.Type.SHORT -> (layoutView.findViewById<View>(R.id.etxt_add_edit_number_value) as TextView).text = nm.format(java.lang.Short.parseShort(value.toString()).toLong())
+                                Field.Type.INTEGER -> layoutView.etxt_add_edit_number_value.setText(nm.format(Integer.parseInt(value.toString()).toLong()))
+                                Field.Type.SHORT -> layoutView.etxt_add_edit_number_value.setText(nm.format(java.lang.Short.parseShort(value.toString()).toLong()))
                                 else -> {
                                 }
                             }
@@ -121,19 +121,19 @@ class LoadingDataFeatureAsync(private val mActivity: Activity, private val mArcG
                 Field.Type.GUID -> {
                 }
                 Field.Type.DOUBLE, Field.Type.FLOAT -> {
-                    layoutView.findViewById<View>(R.id.llayout_add_feature_number_decimal).visibility = View.VISIBLE
-                    layoutView.findViewById<View>(R.id.llayout_add_feature_spinner).visibility = View.GONE
-                    layoutView.findViewById<View>(R.id.llayout_add_feature_edittext).visibility = View.GONE
-                    layoutView.findViewById<View>(R.id.llayout_add_feature_number).visibility = View.GONE
+                    layoutView.llayout_add_feature_number_decimal.visibility = View.VISIBLE
+                    spinLayout.visibility = View.GONE
+                    layoutView.llayout_add_feature_edittext.visibility = View.GONE
+                    layoutView.llayout_add_feature_number.visibility = View.GONE
 
 
-                    val edit_number_decimal_layout = layoutView.findViewById<TextInputLayout>(R.id.llayout_add_feature_number_decimal)
-                    edit_number_decimal_layout.hint = field.alias
+                    layoutView.llayout_add_feature_number_decimal.hint = field.alias
+                    layoutView.llayout_add_feature_number_decimal.tag = field.name
                     if (value != null) {
                         try {
                             when (field.fieldType) {
-                                Field.Type.DOUBLE -> (layoutView.findViewById<View>(R.id.etxt_add_edit_number_decimal_value) as TextView).text = nm.format(java.lang.Double.parseDouble(value.toString()))
-                                Field.Type.FLOAT -> (layoutView.findViewById<View>(R.id.etxt_add_edit_number_decimal_value) as TextView).text = nm.format(java.lang.Float.parseFloat(value.toString()).toDouble())
+                                Field.Type.DOUBLE -> layoutView.etxt_add_edit_number_decimal_value.setText(nm.format(java.lang.Double.parseDouble(value.toString())))
+                                Field.Type.FLOAT -> layoutView.etxt_add_edit_number_decimal_value.setText(nm.format(java.lang.Float.parseFloat(value.toString()).toDouble()))
                                 else -> {
                                 }
                             }
@@ -147,17 +147,17 @@ class LoadingDataFeatureAsync(private val mActivity: Activity, private val mArcG
                 Field.Type.DATE -> {
                 }
                 Field.Type.TEXT -> {
-                    layoutView.findViewById<View>(R.id.llayout_add_feature_number_decimal).visibility = View.GONE
-                    layoutView.findViewById<View>(R.id.llayout_add_feature_spinner).visibility = View.GONE
-                    layoutView.findViewById<View>(R.id.llayout_add_feature_edittext).visibility = View.VISIBLE
-                    layoutView.findViewById<View>(R.id.llayout_add_feature_number).visibility = View.GONE
+                    layoutView.llayout_add_feature_number_decimal.visibility = View.GONE
+                    spinLayout.visibility = View.GONE
+                    layoutView.llayout_add_feature_edittext.visibility = View.VISIBLE
+                    layoutView.llayout_add_feature_number.visibility = View.GONE
 
-                    val textLayout = layoutView.findViewById<TextInputLayout>(R.id.llayout_add_feature_edittext)
-                    textLayout.hint = field.alias
+                    layoutView.llayout_add_feature_edittext.hint = field.alias
+                    layoutView.llayout_add_feature_edittext.tag = field.name
 
                     if (value != null) {
                         try {
-                            (layoutView.findViewById<View>(R.id.edit_add_edittext_value) as TextView).text = value.toString()
+                            layoutView.edit_add_edittext_value.setText( value.toString())
                         } catch (e: Exception) {
                             Toast.makeText(mActivity, "Có lỗi khi load dữ liệu", Toast.LENGTH_SHORT).show()
                         }
@@ -178,10 +178,10 @@ class LoadingDataFeatureAsync(private val mActivity: Activity, private val mArcG
                 Field.Type.XML -> {
                 }
                 else -> {
-                    layoutView.findViewById<View>(R.id.llayout_add_feature_number_decimal).visibility = View.GONE
-                    layoutView.findViewById<View>(R.id.llayout_add_feature_spinner).visibility = View.GONE
-                    layoutView.findViewById<View>(R.id.llayout_add_feature_edittext).visibility = View.GONE
-                    layoutView.findViewById<View>(R.id.llayout_add_feature_number).visibility = View.GONE
+                    layoutView.llayout_add_feature_number_decimal.visibility = View.GONE
+                    spinLayout.visibility = View.GONE
+                    layoutView.llayout_add_feature_edittext.visibility = View.GONE
+                    layoutView.llayout_add_feature_number.visibility = View.GONE
                 }
             }
         }

@@ -4,13 +4,13 @@ import android.app.Application
 import android.net.Uri
 import com.esri.arcgisruntime.data.ArcGISFeature
 import com.esri.arcgisruntime.data.ServiceFeatureTable
-import vinhlong.ditagis.com.khaosatdongho.utities.DAlertDialog
-import vinhlong.ditagis.com.khaosatdongho.utities.DProgressDialog
 import vinhlong.ditagis.com.khaosatdongho.MainActivity
 import vinhlong.ditagis.com.khaosatdongho.entities.entitiesDB.LayerInfoDTG
 import vinhlong.ditagis.com.khaosatdongho.entities.entitiesDB.User
 import vinhlong.ditagis.com.khaosatdongho.libs.FeatureLayerDTG
 import vinhlong.ditagis.com.khaosatdongho.utities.Constant
+import vinhlong.ditagis.com.khaosatdongho.utities.DAlertDialog
+import vinhlong.ditagis.com.khaosatdongho.utities.DProgressDialog
 
 class DApplication : Application() {
     lateinit var progressDialog: DProgressDialog
@@ -23,7 +23,7 @@ class DApplication : Application() {
 
     var dongHoKHDTG: FeatureLayerDTG? = null
     var vatTuDHDTG: FeatureLayerDTG? = null
-    var dongHoKHSFT: ServiceFeatureTable? = null
+    lateinit var dongHoKHSFT: ServiceFeatureTable
     var vatTuKHSFT: ServiceFeatureTable? = null
     var dmVatTuKHSFT: ServiceFeatureTable? = null
 

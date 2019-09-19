@@ -7,6 +7,7 @@ import android.support.design.widget.TextInputEditText
 import android.support.design.widget.TextInputLayout
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.AppCompatSpinner
 import android.view.View
 import android.widget.*
 import com.esri.arcgisruntime.data.ArcGISFeature
@@ -24,50 +25,46 @@ class UpdateActivity : AppCompatActivity() {
 
     private var mmSwipe: SwipeRefreshLayout? = null
     private var mArcGISFeature: ArcGISFeature? = null
-    private var mLLayoutField: LinearLayout? = null
+    private lateinit var mLLayoutField: LinearLayout
 
     private val attributes: HashMap<String, Any>
         get() {
             val attributes = HashMap<String, Any>()
-            if (mLLayoutField == null) return attributes
-            var currentAlias = ""
-            for (i in 0 until mLLayoutField!!.childCount) {
-                val itemAddFeature = mLLayoutField!!.getChildAt(i) as LinearLayout
-                for (j in 0 until itemAddFeature.childCount) {
-                    val typeInputItemAddFeature = itemAddFeature.getChildAt(j) as TextInputLayout
-                    if (typeInputItemAddFeature.visibility == View.VISIBLE) {
-                        currentAlias = typeInputItemAddFeature.hint!!.toString()
-                        val view = (typeInputItemAddFeature.getChildAt(0) as FrameLayout).getChildAt(0)
+            var currentFieldName: String
+            for (i in 0 until mLLayoutField.childCount) {
+                val viewI = mLLayoutField.getChildAt(i) as LinearLayout
+                for (j in 0 until viewI.childCount) {
+                    val viewJ = viewI.getChildAt(j) as TextInputLayout
+                    if (viewJ.visibility == View.VISIBLE
+                            && viewJ.hint != null) {
+                        val fieldName = viewJ.tag.toString()
+                        val field = mApplication.dongHoKHSFT.getField(fieldName)
+                        currentFieldName = fieldName
+                        if (currentFieldName.isEmpty()) continue
+                        for (k in 0 until viewJ.childCount) {
+                            val viewK = viewJ.getChildAt(k)
+                            if (viewK is FrameLayout) {
+                                for (l in 0 until viewK.childCount) {
+                                    val viewL = viewK.getChildAt(l)
+                                    if (viewL is TextInputEditText) {
+                                        if (field.domain != null) {
+                                            val codedValues = (field.domain as CodedValueDomain).codedValues
 
-                        if (view is TextInputEditText && !currentAlias.isEmpty()) {
-                            for (fieldEdittext in mApplication!!.dongHoKHSFT!!.fields) {
-                                if (fieldEdittext.alias == currentAlias) {
-                                    if (fieldEdittext.domain != null) {
-                                        val codedValues = (fieldEdittext.domain as CodedValueDomain).codedValues
+                                            val valueDomain = getCodeDomain(codedValues, viewL.text.toString())
+                                            if (valueDomain != null) attributes[currentFieldName] = valueDomain.toString()
+                                        } else {
+                                            attributes[currentFieldName] = viewL.text.toString()
+                                        }
 
-
-                                        val valueDomain = getCodeDomain(codedValues, view.text.toString())
-                                        if (valueDomain != null)
-                                            attributes[currentAlias] = valueDomain.toString()
-                                    } else {
-                                        attributes[currentAlias] = view.text.toString()
                                     }
-                                    break
                                 }
-                            }
-                        } else if (view is Spinner && !currentAlias.isEmpty()) {
-                            for (fieldSpinner in mApplication!!.dongHoKHSFT!!.fields) {
-                                if (fieldSpinner.alias == currentAlias) {
-                                    if (fieldSpinner.domain != null) {
-                                        val codedValues = (fieldSpinner.domain as CodedValueDomain).codedValues
+                            } else if (viewK is AppCompatSpinner) {
+                                if (field.domain != null) {
+                                    val codedValues = (field.domain as CodedValueDomain).codedValues
+                                    val valueDomain = getCodeDomain(codedValues, viewK.selectedItem.toString())
+                                    if (valueDomain != null) attributes[currentFieldName] = valueDomain.toString()
+                                }
 
-                                        val valueDomain = getCodeDomain(codedValues, view.selectedItem.toString())
-                                        if (valueDomain != null)
-                                            attributes[currentAlias] = valueDomain.toString()
-                                    } else {
-                                    }
-                                    break
-                                }
                             }
                         }
 
