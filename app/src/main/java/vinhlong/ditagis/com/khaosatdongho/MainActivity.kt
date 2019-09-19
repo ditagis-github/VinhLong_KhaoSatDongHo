@@ -67,7 +67,6 @@ import vinhlong.ditagis.com.khaosatdongho.utities.*
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
-import java.io.InputStream
 
 class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
 
@@ -782,70 +781,32 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
     }
 
     private fun getBitmap(path: String?): Bitmap? {
+        val image = File(path!!)
+        val bmOptions = BitmapFactory.Options();
+        var bitmap = BitmapFactory.decodeFile(image.absolutePath, bmOptions);
 
-        val uri = Uri.fromFile(File(path!!))
-        var `in`: InputStream?
-        try {
-            val IMAGE_MAX_SIZE = 120000 // 1.2MP
-            `in` = contentResolver.openInputStream(uri)
-
-            // Decode image size
-            var o = BitmapFactory.Options()
-            o.inJustDecodeBounds = true
-            BitmapFactory.decodeStream(`in`, null, o)
-            assert(`in` != null)
-            `in`!!.close()
-
-
-            var scale = 1
-            while (o.outWidth * o.outHeight * (1 / Math.pow(scale.toDouble(), 2.0)) > IMAGE_MAX_SIZE) {
-                scale++
-            }
-            var bitmap: Bitmap?
-            `in` = contentResolver.openInputStream(uri)
-            if (scale > 1) {
-                scale--
-                // scale to max possible inSampleSize that still yields an image
-                // larger than target
-                o = BitmapFactory.Options()
-                o.inSampleSize = scale
-                bitmap = BitmapFactory.decodeStream(`in`, null, o)
-                // resize to desired dimensions
-                val height = bitmap!!.height
-                val width = bitmap.width
-                val y = Math.sqrt(IMAGE_MAX_SIZE / (width.toDouble() / height))
-                val x = y / height * width
-
-                val scaledBitmap = Bitmap.createScaledBitmap(bitmap, x.toInt(), y.toInt(), true)
-                bitmap.recycle()
-                bitmap = scaledBitmap
-
-                System.gc()
-            } else {
-                bitmap = BitmapFactory.decodeStream(`in`)
-            }
-            assert(`in` != null)
-            `in`!!.close()
-            return bitmap
-        } catch (e: IOException) {
-            Log.e("", e.message, e)
-            return null
+        val maxSize = 2048.toFloat()
+        var width = bitmap.width.toFloat()
+        var height = bitmap.height.toFloat()
+        val bitmapRatio = width / height
+        if (bitmapRatio > 1) {
+            width = maxSize
+            height = (width / bitmapRatio)
+        } else {
+            height = maxSize;
+            width = (height * bitmapRatio)
         }
+        bitmap = Bitmap.createScaledBitmap(bitmap, width.toInt(), height.toInt(), true);
+        return bitmap
 
-    }
-
-    private fun getBitmap(uri: Uri): Bitmap? {
-
-        val imgFile = File(uri.path!!)
-        return if (imgFile.exists()) {
-            BitmapFactory.decodeFile(imgFile.absolutePath)
-        } else null
     }
 
     private fun getByteArrayFromBitmap(bitmap: Bitmap): ByteArray {
         val outputStream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-        val image = outputStream.toByteArray()
+        val image: ByteArray
+        bitmap.compress(Constant.CompressFormat.TYPE_UPDATE, 100, outputStream)
+        image = outputStream.toByteArray()
+
         try {
             outputStream.close()
         } catch (e: IOException) {
@@ -862,12 +823,13 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
                     if (resultCode == Activity.RESULT_OK) {
                     val uri = mApplication.uri
                     if (uri != null) {
+                        mApplication.progressDialog.show(this@MainActivity, container_main, "Đang cập nhật hình ảnh...")
                         val bitmap = getBitmap(uri.path)
                         //                        Bitmap bitmap = getBitmap(uri);
                         try {
                             if (bitmap != null) {
 
-                                mApplication.progressDialog.show(this@MainActivity, container_main, "Đang cập nhật hình ảnh...")
+
                                 val updateAttachmentAsync = UpdateAttachmentAsync(this, mApplication.selectedFeature!!, getByteArrayFromBitmap(bitmap),
                                         object : UpdateAttachmentAsync.AsyncResponse {
                                             override fun processFinish(isSuccess: Boolean?) {
@@ -880,7 +842,9 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
                                         })
                                 updateAttachmentAsync.execute()
                             }
-                        } catch (ignored: Exception) {
+                        } catch (e: Exception) {
+                            mApplication.progressDialog.dismiss()
+                            mApplication.alertDialog.show(this@MainActivity, e)
                         }
 
                     }

@@ -1,5 +1,6 @@
 package vinhlong.ditagis.com.khaosatdongho.utities
 
+import android.graphics.Bitmap
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -127,6 +128,13 @@ class Constant private constructor() {
 
     }
 
+    object CompressFormat {
+        val JPEG = Bitmap.CompressFormat.JPEG
+        val PNG = Bitmap.CompressFormat.PNG
+
+        val TYPE_UPDATE = JPEG
+
+    }
     companion object {
         val DATE_FORMAT = SimpleDateFormat("dd/MM/yyyy")
         val DIACHI = "DiaChi"

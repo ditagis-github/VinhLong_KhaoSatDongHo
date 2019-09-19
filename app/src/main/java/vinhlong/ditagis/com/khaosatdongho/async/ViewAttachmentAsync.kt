@@ -12,6 +12,7 @@ import com.esri.arcgisruntime.data.ArcGISFeature
 import org.apache.commons.io.IOUtils
 import vinhlong.ditagis.com.khaosatdongho.adapter.FeatureViewMoreInfoAttachmentsAdapter
 import vinhlong.ditagis.com.khaosatdongho.entities.DApplication
+import vinhlong.ditagis.com.khaosatdongho.utities.Constant
 import java.io.IOException
 import java.util.concurrent.ExecutionException
 
@@ -25,7 +26,6 @@ class ViewAttachmentAsync(private val mActivity: Activity, private val mRootView
     private var builder: AlertDialog.Builder? = null
     private var layout: View? = null
     private val mApplication: DApplication = mActivity.application as DApplication
-    private val mAttachments = arrayListOf<FeatureViewMoreInfoAttachmentsAdapter.Item>()
     private var mSize = 0
     init {
         mSelectedArcGISFeature = selectedArcGISFeature
@@ -47,15 +47,15 @@ class ViewAttachmentAsync(private val mActivity: Activity, private val mRootView
         attachmentResults.addDoneListener {
             try {
 
-                mSize = mAttachments.size
                 val attachments = attachmentResults.get()
+                mSize = attachments.size
                 // if selected feature has attachments, display them in a list fashion
                 if (!attachments.isEmpty()) {
                     //
                     for (attachment in attachments) {
                         if (attachment.contentType.contains(
-                                        Bitmap.CompressFormat.JPEG.toString().toLowerCase())
-                                || attachment.contentType.contains(Bitmap.CompressFormat.PNG.toString().toLowerCase())) {
+                                        Constant.CompressFormat.JPEG.toString().toLowerCase())
+                                || attachment.contentType.contains(Constant.CompressFormat.PNG.toString().toLowerCase())) {
                             val item = FeatureViewMoreInfoAttachmentsAdapter.Item()
                             item.name = attachment.name
                             val inputStreamListenableFuture = attachment.fetchDataAsync()
@@ -63,10 +63,6 @@ class ViewAttachmentAsync(private val mActivity: Activity, private val mRootView
                                 try {
                                     val inputStream = inputStreamListenableFuture.get()
                                     item.img = IOUtils.toByteArray(inputStream)
-                                    mAttachments.add(item)
-                                    //Kiểm tra nếu adapter có phần tử và attachment là phần tử cuối cùng thì show dialog
-
-                                    mSize--
                                     publishProgress(item)
 
 
@@ -80,7 +76,7 @@ class ViewAttachmentAsync(private val mActivity: Activity, private val mRootView
                             }
 
                         } else {
-
+                            publishProgress()
                         }
                     }
 
@@ -100,6 +96,7 @@ class ViewAttachmentAsync(private val mActivity: Activity, private val mRootView
 
     override fun onProgressUpdate(vararg values: FeatureViewMoreInfoAttachmentsAdapter.Item) {
         super.onProgressUpdate(*values)
+        mSize--
         if (mSize == 0) mApplication.progressDialog.dismiss()
         if (values.isNotEmpty()) mDelegate.processFinish(values[0])
 
