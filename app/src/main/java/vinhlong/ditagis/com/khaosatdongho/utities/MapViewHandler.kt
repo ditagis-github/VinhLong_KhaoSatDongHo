@@ -94,13 +94,6 @@ class MapViewHandler(private val mapView: MapView, private val mActivity: MainAc
     }
 
 
-    fun showPopup(selectedFeature: Feature?) {
-        if (selectedFeature != null) {
-            popup.showPopup(selectedFeature as ArcGISFeature)
-        } else {
-            mApplication.alertDialog.show(mActivity, "Thông báo", "Không tìm thấy đồng hồ!")
-        }
-    }
 
     fun querySearch(searchStr: String, adapter: DanhSachDongHoKHAdapter) {
         adapter.clear()

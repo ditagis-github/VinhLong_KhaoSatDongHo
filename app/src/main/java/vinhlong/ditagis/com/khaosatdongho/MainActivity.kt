@@ -279,7 +279,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
         this.mListViewSearch!!.adapter = danhSachDongHoKHAdapter
         this.mListViewSearch!!.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
             val feature = parent.getItemAtPosition(position) as Feature
-            mMapViewHandler!!.showPopup(feature)
+            mPopup!!.showPopup(feature)
             danhSachDongHoKHAdapter!!.clear()
             danhSachDongHoKHAdapter!!.notifyDataSetChanged()
         }
@@ -862,7 +862,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, N
                     }
                 Constant.REQUEST.ID_DANH_SACH_CONG_VIEC -> {
                     if (resultCode == Activity.RESULT_OK) {
-                        mMapViewHandler!!.showPopup(mApplication.selectedFeature)
+                        mPopup!!.showPopup(mApplication.selectedFeature)
                     }
                 }
         }

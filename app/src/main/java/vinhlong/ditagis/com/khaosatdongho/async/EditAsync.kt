@@ -46,18 +46,18 @@ class EditAsync(private val mRootView: ViewGroup, private val mActivity: Activit
                             Field.Type.TEXT -> mSelectedArcGISFeature.attributes[fieldName] = valueString
                             Field.Type.DOUBLE -> {
                                 mSelectedArcGISFeature.attributes[fieldName] = java.lang.Double.parseDouble(valueString)
-                                mSelectedArcGISFeature.attributes[fieldName] = java.lang.Float.parseFloat(valueString)
-                                mSelectedArcGISFeature.attributes[fieldName] = Integer.parseInt(valueString)
-                                mSelectedArcGISFeature.attributes[fieldName] = java.lang.Short.parseShort(valueString)
+//                                mSelectedArcGISFeature.attributes[fieldName] = java.lang.Float.parseFloat(valueString)
+//                                mSelectedArcGISFeature.attributes[fieldName] = Integer.parseInt(valueString)
+//                                mSelectedArcGISFeature.attributes[fieldName] = java.lang.Short.parseShort(valueString)
                             }
                             Field.Type.FLOAT -> {
                                 mSelectedArcGISFeature.attributes[fieldName] = java.lang.Float.parseFloat(valueString)
-                                mSelectedArcGISFeature.attributes[fieldName] = Integer.parseInt(valueString)
-                                mSelectedArcGISFeature.attributes[fieldName] = java.lang.Short.parseShort(valueString)
+//                                mSelectedArcGISFeature.attributes[fieldName] = Integer.parseInt(valueString)
+//                                mSelectedArcGISFeature.attributes[fieldName] = java.lang.Short.parseShort(valueString)
                             }
                             Field.Type.INTEGER -> {
                                 mSelectedArcGISFeature.attributes[fieldName] = Integer.parseInt(valueString)
-                                mSelectedArcGISFeature.attributes[fieldName] = java.lang.Short.parseShort(valueString)
+//                                mSelectedArcGISFeature.attributes[fieldName] = java.lang.Short.parseShort(valueString)
                             }
                             Field.Type.SHORT -> mSelectedArcGISFeature.attributes[fieldName] = java.lang.Short.parseShort(valueString)
                             else -> {
@@ -144,7 +144,7 @@ class EditAsync(private val mRootView: ViewGroup, private val mActivity: Activit
      override fun onProgressUpdate(vararg values: Boolean?) {
         super.onProgressUpdate(*values)
          mApplication.progressDialog.dismiss()
-        if (values != null && values[0]!!) {
+         if (values.isNotEmpty() && values[0]!!) {
             mDelegate.processFinish(true)
         } else {
             notifyError()

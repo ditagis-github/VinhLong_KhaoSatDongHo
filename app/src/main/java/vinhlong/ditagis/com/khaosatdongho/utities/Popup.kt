@@ -118,10 +118,15 @@ class Popup(private val mMainActivity: MainActivity, private val mMapView: MapVi
         }
     }
 
-    fun showPopup(featureDHKH: ArcGISFeature): LinearLayout? {
+    fun showPopup(featureDHKH: Feature?) {
 
+        if (featureDHKH == null) {
+            mApplication.alertDialog.show(mMainActivity, "Thông báo", "Không tìm thấy đồng hồ!")
+            return
+        }
+        mApplication.progressDialog.show(mMainActivity, mMainActivity.container_main, "Đang hiển thị thông tin")
         dimissCallout()
-        this.featureDHKH = featureDHKH
+        this.featureDHKH = featureDHKH as ArcGISFeature?
         val featureLayer = dongHoKHDTG!!.featureLayer
         featureLayer.selectFeature(featureDHKH)
         lstFeatureType = ArrayList()
@@ -191,7 +196,6 @@ class Popup(private val mMainActivity: MainActivity, private val mMapView: MapVi
         if (scale > minScale) scale = minScale
 
         showCallout(envelope.center, linearLayout, scale)
-        return linearLayout
     }
 
     private fun showCallout(point: Point?, view: View?, scale: Double) {
@@ -204,6 +208,7 @@ class Popup(private val mMainActivity: MainActivity, private val mMapView: MapVi
                     mCallout.content = view
                     mCallout.refresh()
                     mCallout.show()
+                    mApplication.progressDialog.dismiss()
                 } else {
                     showCallout(point, view, scale)
                 }
